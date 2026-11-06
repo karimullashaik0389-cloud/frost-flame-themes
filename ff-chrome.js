@@ -133,6 +133,12 @@
   }
 
   function cartCount() {
+    var link = document.querySelector('[data-testid="header-cart-link"]');
+    if (link) {
+      var aria = link.getAttribute('aria-label') || '';
+      var m = aria.match(/(\d+)/);
+      if (m) return parseInt(m[1], 10) || 0;
+    }
     var badge = document.querySelector('[data-testid="cart-count-badge"]');
     if (badge) {
       var n = parseInt(String(badge.textContent || '').replace(/[^\d]/g, ''), 10);
@@ -170,16 +176,14 @@
   }
 
   function shouldTuck() {
-    if (forceShow() && !pathIsCheckout() && !document.querySelector('[data-testid="order-sent-confirmation"]')) {
-      // allow restore on menu pages even with items; still tuck hard on cart/order confirmation
-    }
-    if (pathIsCheckout()) return true;
-    if (document.querySelector('[data-testid="order-sent-confirmation"]')) return true;
-    if (orderFocusVisible() && pathIsCheckout()) return true;
-    if (stickyCartVisible() && cartCount() > 0 && !forceShow()) return true;
-    if (cartCount() > 0 && pathIsCheckout()) return true;
-    // items in cart on menu: soft-tuck unless user forced show
-    if (cartCount() > 0 && !forceShow()) return true;
+    var forced = forceShow();
+    var onCart = pathIsCheckout();
+    var ordered = !!document.querySelector('[data-testid="order-sent-confirmation"]');
+    if (onCart || ordered) return true; // hard tuck — bill/order focus
+    if (forced) return false; // user restored via handle on menu
+    if (stickyCartVisible()) return true;
+    if (cartCount() > 0) return true;
+    if (orderFocusVisible() && onCart) return true;
     return false;
   }
 
@@ -199,10 +203,12 @@
     d.setAttribute('aria-hidden', tucked ? 'true' : 'false');
     if (tucked) {
       h.hidden = false;
+      h.removeAttribute('hidden');
       h.classList.add('is-on');
       if (!fromHandle) closePlayPanels();
     } else {
       h.hidden = true;
+      h.setAttribute('hidden', '');
       h.classList.remove('is-on');
     }
     document.documentElement.classList.toggle('ff-fabs-tucked', tucked);
@@ -229,8 +235,8 @@
     }
     d.style.display = 'flex';
 
-    // Clear force-show when leaving cart after order? keep until cart empty
-    if (cartCount() === 0 && !pathIsCheckout()) {
+    // Clear force-show only when cart is truly idle (no sticky bar, no items, not on cart/order)
+    if (cartCount() === 0 && !pathIsCheckout() && !stickyCartVisible() && !document.querySelector('[data-testid="order-sent-confirmation"]')) {
       try { sessionStorage.removeItem(STORAGE_FORCE); } catch (e) {}
     }
 
