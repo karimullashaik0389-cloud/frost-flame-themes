@@ -1,0 +1,47 @@
+/* Additive local layer: no selectors restyle the existing React content. */
+#ff-play-pill{position:fixed;left:12px;bottom:160px;z-index:99965;min-height:44px;padding:10px 13px;border:1px solid #6ccff6;border-radius:999px;background:#101922;color:#e8f6fc;font:600 12px Inter,system-ui,sans-serif;box-shadow:0 5px 20px #0007;cursor:pointer}
+#ff-play-pill[hidden],#ff-play-modal[hidden],#ff-play-nudge[hidden]{display:none!important}
+#ff-play-modal{position:fixed;inset:0;z-index:100010;background:#080b10ed;backdrop-filter:blur(8px);display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box;color:#e8f6fc;font:14px/1.6 Inter,system-ui,sans-serif}
+#ff-play-sheet{background:#111820;border:1px solid #33424f;border-radius:22px;width:min(680px,100%);max-height:92dvh;overflow:auto;padding:18px;box-sizing:border-box;overscroll-behavior:contain}
+#ff-play-modal h2{font:600 27px/1.2 'Cormorant Garamond',Georgia,serif;margin:12px 0}
+#ff-play-modal h3{font-size:18px;margin:12px 0}
+#ff-play-modal p{margin:12px 0}
+#ff-play-modal .fp-muted{color:#b4c3ce;font-size:13px}
+#ff-play-modal .fp-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#ff-play-modal button,#ff-play-modal select{min-height:44px;border:1px solid #465968;border-radius:12px;background:#1c2935;color:#e8f6fc;padding:10px 13px;font:inherit;cursor:pointer}
+#ff-play-modal button:focus-visible,#ff-play-pill:focus-visible{outline:3px solid #6ccff6;outline-offset:2px}
+#ff-play-modal button:disabled{opacity:.7;cursor:default}
+#ff-play-modal button[aria-selected=true]{border-color:#ff9762;background:#35261d}
+#ff-play-modal .fp-list{display:grid;gap:10px;margin:14px 0}
+#ff-play-modal .fp-card{text-align:left;width:100%;padding:14px}
+#ff-play-modal .fp-card strong{display:block;font-size:15px}
+#ff-play-modal .fp-card span{display:block;color:#b4c3ce;font-size:12px;margin-top:4px}
+#ff-play-modal .fp-answer,#ff-play-modal .fp-fact{padding:13px;border-left:3px solid #6ccff6;background:#182634;border-radius:8px;margin:14px 0}
+#ff-play-modal .fp-story{font-size:16px;line-height:1.9}
+#ff-play-modal .fp-story p{margin:18px 0}
+#ff-play-modal .fp-flip{min-height:220px;border:1px solid #e6a7b2;border-radius:20px;background:linear-gradient(135deg,#3a1d2a,#192939);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font:600 22px/1.5 'Cormorant Garamond',Georgia,serif;margin:18px 0;animation:fp-flip .45s ease}
+#ff-play-modal .fp-good{border-color:#80dda4;background:#123326}
+#ff-play-modal .fp-wrong{border-color:#ffa599;background:#3d2225}
+#ff-play-nudge{position:fixed;z-index:99966;left:12px;bottom:215px;max-width:270px;background:#152635;color:#e8f6fc;border:1px solid #6ccff6;padding:14px;border-radius:16px;font:13px/1.5 Inter,system-ui,sans-serif;box-shadow:0 8px 28px #0008}
+#ff-play-nudge button{background:#233949;color:white;border:1px solid #668398;border-radius:8px;min-height:44px;padding:8px 12px;margin:8px 6px 0 0;cursor:pointer}
+@keyframes fp-flip{from{transform:rotateY(70deg);opacity:.3}to{transform:rotateY(0);opacity:1}}
+@media(prefers-reduced-motion:reduce){#ff-play-modal .fp-flip{animation:none}}
+#ff-play-modal .fx-shelf{display:grid;gap:10px;margin:14px 0}
+#ff-play-modal .fx-book{background:linear-gradient(135deg,#293d53,#332334);text-align:left;min-height:90px;box-shadow:inset 5px 0 #e8bd73;padding-left:18px}
+#ff-play-modal .fx-page{min-height:210px;padding:20px;border-radius:14px;background:#f5ead6;color:#332b22;font:19px/1.8 Georgia,serif;margin:16px 0;animation:fp-flip .3s ease}
+#ff-play-modal .fx-tubes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:22px 0}
+#ff-play-modal .fx-tube{display:flex;flex-direction:column-reverse;justify-content:flex-start;align-items:center;gap:5px;width:48px;height:142px;padding:10px 3px 5px;border-radius:8px 8px 25px 25px;border:2px solid #8199af;background:#07121b}
+#ff-play-modal .fx-tube[aria-pressed=true]{border-color:#ffd27a;transform:translateY(-8px)}
+#ff-play-modal .fx-scoop{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#07121b;font:bold 16px system-ui;box-shadow:inset -4px -4px #0003}
+#ff-play-modal .fx-live{min-height:48px;color:#c5e8ff;padding:8px 0}
+#ff-play-modal canvas{display:block;width:100%;max-width:300px;aspect-ratio:1;background:#07121b;border:1px solid #506a7f;border-radius:12px;margin:12px auto;touch-action:none}
+#ff-play-modal .fx-pad{display:grid;grid-template-columns:repeat(3,56px);gap:6px;justify-content:center;margin:12px 0}
+#ff-play-modal .fx-pad button{font-size:20px;min-height:48px}
+@media(prefers-reduced-motion:reduce){#ff-play-modal .fx-page{animation:none}}
+/* Focused mobile play/reading view: existing Corner/Close controls stay visible. */
+#ff-play-sheet[data-ff-extra=snake]>h2,#ff-play-sheet[data-ff-extra=snake]>.fp-muted,#ff-play-sheet[data-ff-extra=snake]>[role=tablist],
+#ff-play-sheet[data-ff-extra=scoop]>h2,#ff-play-sheet[data-ff-extra=scoop]>.fp-muted,#ff-play-sheet[data-ff-extra=scoop]>[role=tablist],
+#ff-play-sheet[data-ff-reader=true]>h2,#ff-play-sheet[data-ff-reader=true]>.fp-muted,#ff-play-sheet[data-ff-reader=true]>[role=tablist]{display:none}
+#ff-play-sheet[data-ff-extra=snake] canvas{max-width:240px}
+#ff-play-sheet[data-ff-extra=snake] .fx-live{min-height:28px}
+#ff-play-sheet[data-ff-extra=snake] .fx-pad{margin:8px 0}

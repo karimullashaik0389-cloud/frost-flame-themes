@@ -1,0 +1,248 @@
+/* Frost & Flame — seven dining-mood themes.
+   Only active when body has .ff-theme-* (set by entry tree).
+   Without a theme class the host Emergent UI is untouched. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Cinzel:wght@600;700&family=Fredoka:wght@500;600;700&family=Orbitron:wght@600;700&family=Pacifico&family=Special+Elite&display=swap');
+
+/* —— Soft page wash + accent (does not rewrite React layout) —— */
+body.ff-theme-solo_m,
+body.ff-theme-solo_f,
+body.ff-theme-friends,
+body.ff-theme-couple,
+body.ff-theme-gang,
+body.ff-theme-family,
+body.ff-theme-family_kids{
+  background-color: var(--ff-bg, #0B0D10);
+}
+
+/* Ambient motif behind the React root — pointer-events none, no layout shift */
+body[class*="ff-theme-"]::before{
+  content:"";
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background: var(--ff-grad,
+    radial-gradient(600px 380px at 20% 0%, rgba(255,106,26,.18), transparent 55%),
+    linear-gradient(180deg, rgba(11,13,16,.2), rgba(11,13,16,.55)));
+  opacity:.9;
+}
+body[class*="ff-theme-"] #root{ position:relative; z-index:1; }
+
+/* Theme-specific washes */
+body.ff-theme-solo_m::before{
+  background:
+    radial-gradient(600px 380px at 10% 0%, rgba(255,106,0,.38), transparent 55%),
+    radial-gradient(500px 320px at 90% 10%, rgba(255,229,102,.18), transparent 50%),
+    linear-gradient(180deg, rgba(18,18,18,.35), rgba(18,18,18,.72));
+}
+body.ff-theme-solo_f::before{
+  background:
+    radial-gradient(560px 360px at 80% 0%, rgba(232,145,176,.38), transparent 55%),
+    radial-gradient(480px 300px at 10% 20%, rgba(196,161,224,.22), transparent 50%),
+    linear-gradient(180deg, rgba(42,24,36,.35), rgba(42,24,36,.72));
+}
+body.ff-theme-friends::before{
+  background:
+    radial-gradient(560px 360px at 50% 0%, rgba(255,229,102,.3), transparent 55%),
+    radial-gradient(480px 300px at 0% 40%, rgba(46,196,182,.24), transparent 50%),
+    linear-gradient(180deg, rgba(15,42,46,.3), rgba(15,42,46,.72));
+}
+body.ff-theme-couple::before{
+  background:
+    radial-gradient(560px 380px at 50% 0%, rgba(196,30,58,.34), transparent 55%),
+    radial-gradient(420px 280px at 90% 30%, rgba(244,160,176,.22), transparent 50%),
+    linear-gradient(180deg, rgba(26,8,12,.35), rgba(26,8,12,.75));
+}
+body.ff-theme-gang::before{
+  background:
+    radial-gradient(520px 340px at 20% 0%, rgba(45,226,197,.26), transparent 55%),
+    radial-gradient(480px 300px at 90% 10%, rgba(255,179,71,.2), transparent 50%),
+    radial-gradient(300px 200px at 70% 70%, rgba(57,255,20,.08), transparent 50%),
+    linear-gradient(180deg, rgba(6,11,24,.4), rgba(6,11,24,.8));
+}
+body.ff-theme-family::before{
+  background:
+    radial-gradient(560px 360px at 50% 0%, rgba(232,160,32,.32), transparent 55%),
+    radial-gradient(420px 280px at 10% 40%, rgba(45,106,79,.26), transparent 50%),
+    linear-gradient(180deg, rgba(26,18,8,.35), rgba(26,18,8,.75));
+}
+body.ff-theme-family_kids::before{
+  background:
+    radial-gradient(560px 360px at 20% 0%, rgba(90,214,125,.3), transparent 55%),
+    radial-gradient(480px 300px at 90% 10%, rgba(255,138,101,.24), transparent 50%),
+    radial-gradient(400px 260px at 50% 80%, rgba(125,211,252,.2), transparent 50%),
+    linear-gradient(180deg, rgba(12,39,68,.35), rgba(12,39,68,.75));
+}
+
+/* —— Greeting chip (theme applied) —— */
+#ff-theme-greet{
+  position:fixed; left:50%; bottom:max(88px, env(safe-area-inset-bottom));
+  transform:translateX(-50%); z-index:99960;
+  width:min(360px, calc(100vw - 24px));
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:12px 16px; border-radius:18px;
+  background:var(--ff-grad, rgba(16,20,26,.94));
+  border:1px solid var(--ff-line, #262a31);
+  color:var(--ff-ink, #e8f6fc);
+  box-shadow:0 12px 36px rgba(0,0,0,.45);
+  text-align:center; cursor:pointer;
+  transition:opacity .4s ease, transform .4s ease;
+}
+#ff-theme-greet[hidden]{display:none !important}
+#ff-theme-greet.is-dim{opacity:.28; transform:translateX(-50%) translateY(12px)}
+#ff-theme-greet .ff-tg-emoji{font-size:22px; line-height:1}
+#ff-theme-greet .ff-tg-title{
+  font-family:var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size:17px; font-weight:700; line-height:1.2;
+}
+#ff-theme-greet .ff-tg-sub{font-size:12px; color:var(--ff-muted, #aab5c0); line-height:1.35}
+
+/* —— Particles —— */
+.ff-theme-particles{position:fixed; inset:0; pointer-events:none; z-index:99950; overflow:hidden}
+.ff-theme-particle{
+  position:absolute; top:-24px;
+  animation:ffThemeFall linear forwards;
+}
+@keyframes ffThemeFall{
+  to{transform:translateY(110vh) rotate(360deg); opacity:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .ff-theme-particle, #ff-theme-greet{animation:none !important}
+  .ff-theme-particles{display:none}
+}
+
+/* —— Restyle our overlays only (tree / float / play / change chip) —— */
+body[class*="ff-theme-"] #ff-tree-root{
+  background:color-mix(in srgb, var(--ff-bg, #080a0e) 88%, transparent);
+  color:var(--ff-ink, #e8f6fc);
+  font-family:var(--ff-body, Inter, system-ui, sans-serif);
+}
+body[class*="ff-theme-"] #ff-tree-root .ff-tree-title{
+  font-family:var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-tree-root .ff-tree-sub{color:var(--ff-muted, #aab5c0)}
+body[class*="ff-theme-"] #ff-tree-root .ff-tree-btn{
+  background:var(--ff-card, #15191e);
+  border-color:var(--ff-line, #262a31);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-tree-root .ff-tree-btn:hover,
+body[class*="ff-theme-"] #ff-tree-root .ff-tree-btn:focus-visible{
+  border-color:var(--ff-accent, #ff6a1a);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--ff-accent, #ff6a1a) 35%, transparent);
+}
+body[class*="ff-theme-"] #ff-tree-change{
+  border-color:var(--ff-line, #262a31);
+  background:color-mix(in srgb, var(--ff-bg, #0B0D10) 92%, transparent);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-tree-change .dot{filter:none}
+
+body[class*="ff-theme-"] #ff-float-root{
+  background:
+    radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--ff-accent, #6ccff6) 22%, transparent), transparent 55%),
+    radial-gradient(ellipse at 80% 80%, color-mix(in srgb, var(--ff-accent2, #ff6a1a) 16%, transparent), transparent 50%),
+    color-mix(in srgb, var(--ff-bg, #080a0e) 94%, transparent);
+}
+body[class*="ff-theme-"] #ff-float-root .ff-float-head h2{
+  font-family:var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-float-root .ff-float-head p{color:var(--ff-muted, #aab5c0)}
+body[class*="ff-theme-"] #ff-float-root .ff-bubble{
+  border-color:color-mix(in srgb, var(--ff-accent, #e8f6fc) 35%, transparent);
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.16), color-mix(in srgb, var(--ff-card, #15191e) 92%, transparent) 60%);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-float-root .ff-bubble.is-paused{
+  border-color:var(--ff-accent, #ff6a1a);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--ff-accent, #ff6a1a) 35%, transparent), 0 12px 30px rgba(0,0,0,.5);
+}
+body[class*="ff-theme-"] #ff-float-toggle{
+  border-color:var(--ff-line, #33424f);
+  background:var(--ff-card, #101922);
+  color:var(--ff-ink, #e8f6fc);
+}
+
+/* Play / books / games skins */
+body[class*="ff-theme-"] #ff-play-pill{
+  border-color:var(--ff-accent, #6ccff6);
+  background:var(--ff-card, #101922);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-play-modal{
+  background:color-mix(in srgb, var(--ff-bg, #080b10) 92%, transparent);
+  color:var(--ff-ink, #e8f6fc);
+  font-family:var(--ff-body, Inter, system-ui, sans-serif);
+}
+body[class*="ff-theme-"] #ff-play-sheet{
+  background:var(--ff-card, #111820);
+  border-color:var(--ff-line, #33424f);
+}
+body[class*="ff-theme-"] #ff-play-modal h2,
+body[class*="ff-theme-"] #ff-play-modal h3{
+  font-family:var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-play-modal .fp-muted{color:var(--ff-muted, #b4c3ce)}
+body[class*="ff-theme-"] #ff-play-modal button,
+body[class*="ff-theme-"] #ff-play-modal select{
+  border-color:var(--ff-line, #465968);
+  background:color-mix(in srgb, var(--ff-bg, #1c2935) 80%, #000);
+  color:var(--ff-ink, #e8f6fc);
+}
+body[class*="ff-theme-"] #ff-play-modal button[aria-selected=true]{
+  border-color:var(--ff-accent, #ff9762);
+  background:color-mix(in srgb, var(--ff-accent, #ff9762) 18%, var(--ff-card, #35261d));
+}
+body[class*="ff-theme-"] #ff-play-modal button:focus-visible,
+body[class*="ff-theme-"] #ff-play-pill:focus-visible{
+  outline-color:var(--ff-accent, #6ccff6);
+}
+body[class*="ff-theme-"] #ff-play-modal .fp-answer,
+body[class*="ff-theme-"] #ff-play-modal .fp-fact{
+  border-left-color:var(--ff-accent, #6ccff6);
+  background:color-mix(in srgb, var(--ff-accent, #6ccff6) 10%, var(--ff-card, #182634));
+}
+body[class*="ff-theme-"] #ff-play-modal .fp-flip{
+  border-color:var(--ff-accent2, #e6a7b2);
+  background:var(--ff-grad, linear-gradient(135deg,#3a1d2a,#192939));
+  font-family:var(--ff-display, "Cormorant Garamond", Georgia, serif);
+}
+body[class*="ff-theme-"] #ff-play-nudge{
+  background:var(--ff-card, #152635);
+  color:var(--ff-ink, #e8f6fc);
+  border-color:var(--ff-accent, #6ccff6);
+}
+body[class*="ff-theme-"] #ff-play-modal .fx-book{
+  background:var(--ff-grad, linear-gradient(135deg,#293d53,#332334));
+  box-shadow:inset 5px 0 var(--ff-accent2, #e8bd73);
+}
+body[class*="ff-theme-"] #ff-play-modal .fx-page{
+  background:color-mix(in srgb, var(--ff-ink, #f5ead6) 92%, #f5ead6);
+  color:#332b22;
+}
+body[class*="ff-theme-"] #ff-play-modal .fx-tube{
+  border-color:var(--ff-line, #8199af);
+  background:var(--ff-bg, #07121b);
+}
+body[class*="ff-theme-"] #ff-play-modal .fx-tube[aria-pressed=true]{
+  border-color:var(--ff-accent, #ffd27a);
+}
+body[class*="ff-theme-"] #ff-play-modal canvas{
+  background:var(--ff-bg, #07121b);
+  border-color:var(--ff-line, #506a7f);
+}
+
+/* Gang neon accent on change chip */
+body.ff-theme-gang #ff-tree-change{
+  border-color:var(--ff-accent, #2de2c5);
+  box-shadow:0 0 16px color-mix(in srgb, var(--ff-accent, #2de2c5) 35%, transparent);
+}
+body.ff-theme-couple #ff-theme-greet{
+  border-color:color-mix(in srgb, var(--ff-accent, #c41e3a) 55%, transparent);
+}
+body.ff-theme-family_kids #ff-play-pill{
+  border-color:var(--ff-accent, #5ad67d);
+}
+
+/* meta theme-color hint via JS optional — CSS alone can't set meta */
