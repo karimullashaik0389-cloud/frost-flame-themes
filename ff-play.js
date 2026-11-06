@@ -13,7 +13,9 @@ function node(tag,text,cls){let e=document.createElement(tag);if(text!==undefine
 function button(text,fn,parent=body){const b=node('button',text);b.type='button';b.onclick=fn;parent.append(b);return b;}
 function para(text,cls){const p=node('p',text,cls);body.append(p);return p;}
 function reset(title){window.FFExtras?.stop();delete body.dataset.ffExtra;delete body.dataset.ffReader;body.replaceChildren();const r=node('div',undefined,'fp-row');body.append(r);button('← Corner',()=>{tab='puzzles';home();},r);button('Close ×',close,r).setAttribute('aria-label','Close Games & Stories');body.append(node('h2',title));document.getElementById('ff-play-sheet').scrollTop=0;}
-function open(){if(theme()==='couple')tab='couples';else if(theme()==='family_kids')tab='snake';previousFocus=document.activeElement;oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';modal.hidden=false;nudge.hidden=true;home();modal.querySelector('button').focus();}
+function open(startTab){if(startTab){tab=startTab;}else if(theme()==='couple')tab='couples';else if(theme()==='family_kids')tab='snake';else tab=tab||'puzzles';previousFocus=document.activeElement;oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';modal.hidden=false;nudge.hidden=true;home();const focusBtn=modal.querySelector('button');if(focusBtn)focusBtn.focus();}
+function openGames(){open(theme()==='family_kids'?'snake':'puzzles');}
+function openStories(){open('books');}
 function close(){window.FFExtras?.stop();modal.hidden=true;document.body.style.overflow=oldOverflow;if(previousFocus&&previousFocus.isConnected)previousFocus.focus();}
 function home(){reset('Games & Stories');para('A little company while you wait. Play gently, take your time, stop whenever food arrives.','fp-muted');
 const tabs=node('div',undefined,'fp-row');tabs.setAttribute('role','tablist');body.append(tabs);
@@ -45,16 +47,22 @@ shuffle(q.options.map((text,i)=>({text,i}))).forEach(o=>{const b=button(o.text,(
 function drawCard(kind){cardType=kind;reset('Couples · Truth or Dare');para('Take turns. Ask first, keep it kind, skip without explaining.','fp-muted');const row=node('div',undefined,'fp-row');body.append(row);button('♡ Truth',()=>drawCard('truth'),row);button('✧ Dare',()=>drawCard('dare'),row);
 const pack=kind==='truth'?D.truths:D.dares;if(!cardIndices[kind].length)cardIndices[kind]=shuffle(pack.map((_,i)=>i));const idx=cardIndices[kind].pop();cardNumber++;
 para((kind==='truth'?'TRUTH':'DARE')+' · card '+cardNumber,'fp-muted');const card=node('div',pack[idx],'fp-flip');card.setAttribute('data-card-kind',kind);body.append(card);button('Flip another '+kind,()=>drawCard(kind));button('Skip — no pressure',()=>drawCard(kind));para('Food sharing is always optional: check allergies and comfort first. A compliment is a fine alternative.','fp-muted');}
-function position(){if(!pill)return;let bottom=160;const rect=()=>({left:12,right:168,top:innerHeight-bottom-44,bottom:innerHeight-bottom});const reserved=[...document.querySelectorAll('[data-testid="frosty-fab"],#ff-float-toggle,[data-testid*="cart-strip"],[data-testid*="sticky-cart"]')];for(let tries=0;tries<5;tries++){const r=rect();const hit=reserved.some(el=>{if(!el.getClientRects().length)return false;const a=el.getBoundingClientRect();return r.left<a.right+8&&r.right>a.left-8&&r.top<a.bottom+8&&r.bottom>a.top-8;});if(!hit)break;bottom+=56;}pill.style.bottom=bottom+'px';nudge.style.bottom=(bottom+55)+'px';}
+function position(){/* FABs live in #ff-fab-dock (ff-chrome.js); nudge sits above dock via CSS */}
 function entryOpen(){return ['ff-tree-root','ff-float-root'].some(id=>{const el=document.getElementById(id);return el&&!el.hidden;});}
-function boot(){pill=node('button','🎲 Games & Stories');pill.id='ff-play-pill';pill.type='button';pill.onclick=open;document.body.append(pill);
-modal=node('div');modal.id='ff-play-modal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Games and Stories');body=node('section');body.id='ff-play-sheet';modal.append(body);document.body.append(modal);
-nudge=node('aside');nudge.id='ff-play-nudge';nudge.hidden=true;nudge.setAttribute('aria-label','Optional waiting-time activity');nudge.append(node('div','Still waiting? A tiny puzzle or story can keep you company.'));button('Have a look',open,nudge);button('Not now',()=>nudge.hidden=true,nudge);document.body.append(nudge);
-document.addEventListener('keydown',e=>{if(modal.hidden)return;if(e.key==='Escape'){close();return;}if(e.key==='Tab'){const focus=[...modal.querySelectorAll('button:not(:disabled),select')];const a=focus[0],z=focus[focus.length-1];if(!modal.contains(document.activeElement)){e.preventDefault();a.focus();return;}if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}});
-window.addEventListener('resize',position);position();
-let shown=sessionStorage.getItem('ff_play_nudged')==='1';let arrival=Number(sessionStorage.getItem('ff_play_arrival'))||Date.now();sessionStorage.setItem('ff_play_arrival',String(arrival));const delay=new URLSearchParams(location.search).get('fast')==='1'?8000:300000;
-const watch=setInterval(()=>{position();if(!shown&&Date.now()-arrival>=delay&&!entryOpen()&&modal.hidden&&!/^\/(login|signup|admin)/.test(location.pathname)){shown=true;sessionStorage.setItem('ff_play_nudged','1');nudge.hidden=false;}},1000);
-window.FFPlay={open,close,home,showPuzzle,showStory,setupQuiz,startQuiz,drawCard,data:D,position,getQuiz:()=>quiz};
+function boot(){
+  // Legacy pill kept hidden for compatibility; real entry is #ff-fab-games / #ff-fab-stories
+  pill=node('button','Games');pill.id='ff-play-pill';pill.type='button';pill.hidden=true;pill.onclick=()=>openGames();document.body.append(pill);
+  modal=node('div');modal.id='ff-play-modal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Games and Stories');
+  body=node('section');body.id='ff-play-sheet';modal.append(body);document.body.append(modal);
+  nudge=node('aside');nudge.id='ff-play-nudge';nudge.hidden=true;nudge.setAttribute('aria-label','Optional waiting-time activity');
+  nudge.append(node('div','Still waiting? A tiny puzzle or story can keep you company.'));
+  button('Games',()=>{nudge.hidden=true;openGames();},nudge);
+  button('Stories',()=>{nudge.hidden=true;openStories();},nudge);
+  button('Not now',()=>nudge.hidden=true,nudge);document.body.append(nudge);
+  document.addEventListener('keydown',e=>{if(modal.hidden)return;if(e.key==='Escape'){close();return;}if(e.key==='Tab'){const focus=[...modal.querySelectorAll('button:not(:disabled),select')];const a=focus[0],z=focus[focus.length-1];if(!modal.contains(document.activeElement)){e.preventDefault();a.focus();return;}if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}});
+  let shown=sessionStorage.getItem('ff_play_nudged')==='1';let arrival=Number(sessionStorage.getItem('ff_play_arrival'))||Date.now();sessionStorage.setItem('ff_play_arrival',String(arrival));const delay=new URLSearchParams(location.search).get('fast')==='1'?8000:300000;
+  setInterval(()=>{if(!shown&&Date.now()-arrival>=delay&&!entryOpen()&&modal.hidden&&!/^\/(login|signup|admin)/.test(location.pathname)){shown=true;sessionStorage.setItem('ff_play_nudged','1');nudge.hidden=false;}},1000);
+  window.FFPlay={open,openGames,openStories,close,home,showPuzzle,showStory,setupQuiz,startQuiz,drawCard,data:D,position,getQuiz:()=>quiz};
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

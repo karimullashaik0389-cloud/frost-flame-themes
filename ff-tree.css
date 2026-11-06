@@ -49,8 +49,8 @@
 }
 #ff-tree-root .ff-tree-back:hover{color:#e8f6fc}
 #ff-tree-change{
-  position:fixed; top:max(10px, env(safe-area-inset-top)); left:50%;
-  transform:translateX(-50%); z-index:99980;
+  position:fixed; top:calc(64px + max(8px, env(safe-area-inset-top))); left:max(12px, env(safe-area-inset-left));
+  transform:none; z-index:45;
   display:none; align-items:center; gap:6px;
   min-height:32px; padding:6px 12px; border-radius:999px;
   border:1px solid #262a31; background:rgba(11,13,16,.92);

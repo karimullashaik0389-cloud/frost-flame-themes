@@ -74,6 +74,7 @@
   addLink('stylesheet', '/ff-tree.css');
   addLink('stylesheet', '/ff-play.css');
   addLink('stylesheet', '/ff-themes.css');
+  addLink('stylesheet', '/ff-chrome.css');
 
   window.addEventListener('error', function (e) {
     e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
@@ -83,7 +84,7 @@
   addScript('/static/js/main.ceed9485.js', true);
 
   document.addEventListener('DOMContentLoaded', function () {
-    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js'].forEach(function (p) {
+    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-chrome.js'].forEach(function (p) {
       var s = document.createElement('script');
       s.src = abs(p);
       s.async = false; /* preserve order for dynamic scripts */
