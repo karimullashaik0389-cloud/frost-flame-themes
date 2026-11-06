@@ -73,6 +73,8 @@
 /* Ask Frosty — ROUND icy blue + snowflake/chat */
 #ff-fab-dock .ff-fab-frosty,
 button.ff-fab-frosty,
+#ff-fab-frosty-fallback,
+[data-testid="ff-fab-frosty-fallback"],
 [data-testid="frosty-fab"].ff-fab-restyle,
 body [data-testid="frosty-fab"]{
   width: 58px !important;
@@ -101,7 +103,9 @@ body [data-testid="frosty-fab"] > span[aria-hidden="true"]:not([style*="duo"]){
   /* keep duo ring if present but shrink content */
 }
 body [data-testid="frosty-fab"] [data-testid="frosty-fab-label"],
-body [data-testid="frosty-fab"] .font-semibold{
+body [data-testid="frosty-fab"] .font-semibold,
+#ff-fab-frosty-fallback .ff-fab-lbl,
+.ff-fab-frosty .ff-fab-lbl{
   font-size: 8px !important;
   font-weight: 800 !important;
   letter-spacing: -.01em;
