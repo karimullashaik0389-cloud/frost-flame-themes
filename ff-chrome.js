@@ -107,7 +107,14 @@
 
   function adoptFrosty() {
     var fab = document.querySelector('[data-testid="frosty-fab"]');
-    if (!fab) return false;
+    if (!fab) {
+      // Preview fallback when React FAB never mounts (e.g. auth/API on GH Pages)
+      ensureFallbackFrosty();
+      return !!document.getElementById('ff-fab-frosty-fallback');
+    }
+    // Prefer real FAB; remove fallback if React one appeared
+    var fb = document.getElementById('ff-fab-frosty-fallback');
+    if (fb) fb.remove();
     restyleFrosty(fab);
     var d = ensureDock();
     if (fab.parentElement !== d) {
@@ -118,6 +125,21 @@
       d.appendChild(fab);
     }
     return true;
+  }
+
+  function openFrostyPanel() {
+    try { window.dispatchEvent(new Event('ff:frosty')); } catch (e) {}
+    var openBtn = document.querySelector('[data-testid="frosty-open-btn"]');
+    if (openBtn) { try { openBtn.click(); } catch (e) {} }
+  }
+
+  function ensureFallbackFrosty() {
+    if (document.querySelector('[data-testid="frosty-fab"]')) return;
+    if (document.getElementById('ff-fab-frosty-fallback')) return;
+    var d = ensureDock();
+    var b = makeFab('ff-fab-frosty-fallback', 'ff-fab-frosty', '❄️', 'Ask Frosty', openFrostyPanel, 'ff-fab-frosty-fallback');
+    // Match round icy styling class already in CSS for .ff-fab-frosty
+    d.appendChild(b);
   }
 
   function guardHeaderLogin() {
