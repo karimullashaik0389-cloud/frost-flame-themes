@@ -24,6 +24,98 @@
     }
   };
 
+
+  /* Prefix root-absolute asset URLs with GH Pages base (img/logo, dishes, media). */
+  function needsBase(url) {
+    if (!BASE || typeof url !== 'string' || !url) return false;
+    if (url.charAt(0) !== '/') return false;
+    if (url.indexOf(BASE) === 0) return false;
+    if (url.indexOf('//') === 0) return false;
+    // leave pure API to toLocalApi; still safe to prefix /api for img unlikely
+    return true;
+  }
+  function withBase(url) { return needsBase(url) ? (BASE + url) : url; }
+  window.__FF_WITH_BASE__ = withBase;
+
+  function rewriteSrcset(value) {
+    if (typeof value !== 'string' || !value) return value;
+    return value.split(',').map(function (part) {
+      var bits = part.trim().split(/\s+/);
+      if (bits[0]) bits[0] = withBase(bits[0]);
+      return bits.join(' ');
+    }).join(', ');
+  }
+
+  var _setAttr = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) {
+    var n = String(name || '').toLowerCase();
+    if ((n === 'src' || n === 'poster' || n === 'data-src') && typeof value === 'string') value = withBase(value);
+    if (n === 'srcset' || n === 'data-srcset') value = rewriteSrcset(value);
+    return _setAttr.call(this, name, value);
+  };
+
+  function patchSrcProp(Ctor, prop) {
+    try {
+      var desc = Object.getOwnPropertyDescriptor(Ctor.prototype, prop);
+      if (!desc || !desc.set) return;
+      Object.defineProperty(Ctor.prototype, prop, {
+        configurable: true,
+        enumerable: desc.enumerable,
+        get: desc.get ? function () { return desc.get.call(this); } : undefined,
+        set: function (v) { desc.set.call(this, prop === 'srcset' ? rewriteSrcset(v) : withBase(v)); }
+      });
+    } catch (e) {}
+  }
+  patchSrcProp(HTMLImageElement, 'src');
+  if (typeof HTMLSourceElement !== 'undefined') {
+    patchSrcProp(HTMLSourceElement, 'src');
+    patchSrcProp(HTMLSourceElement, 'srcset');
+  }
+  if (typeof HTMLVideoElement !== 'undefined') {
+    patchSrcProp(HTMLVideoElement, 'src');
+    patchSrcProp(HTMLVideoElement, 'poster');
+  }
+  if (typeof HTMLAudioElement !== 'undefined') patchSrcProp(HTMLAudioElement, 'src');
+  if (typeof HTMLImageElement !== 'undefined') patchSrcProp(HTMLImageElement, 'srcset');
+
+  function fixMediaEl(el) {
+    if (!el || el.nodeType !== 1) return;
+    ['src', 'poster', 'data-src'].forEach(function (attr) {
+      if (!el.getAttribute) return;
+      var v = el.getAttribute(attr);
+      if (!v) return;
+      var nv = withBase(v);
+      if (nv !== v) _setAttr.call(el, attr, nv);
+    });
+    var ss = el.getAttribute && el.getAttribute('srcset');
+    if (ss) {
+      var nss = rewriteSrcset(ss);
+      if (nss !== ss) _setAttr.call(el, 'srcset', nss);
+    }
+  }
+  function scanMedia(root) {
+    try {
+      (root.querySelectorAll ? root.querySelectorAll('img,source,video,audio,image,use') : []).forEach(fixMediaEl);
+      if (root.tagName) fixMediaEl(root);
+    } catch (e) {}
+  }
+  function bootMediaFix() {
+    scanMedia(document);
+    try {
+      var mo = new MutationObserver(function (muts) {
+        muts.forEach(function (m) {
+          if (m.type === 'attributes') fixMediaEl(m.target);
+          m.addedNodes && m.addedNodes.forEach(function (n) {
+            if (n.nodeType === 1) scanMedia(n);
+          });
+        });
+      });
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'poster', 'data-src'] });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootMediaFix);
+  else bootMediaFix();
+
   var LIVE_API = 'https://hackney-stone.emergent.host/api';
 
   function toLocalApi(url) {

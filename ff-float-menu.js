@@ -74,7 +74,8 @@
         'aria-label': item.label
       });
       if (item.img) {
-        b.innerHTML = '<img class="ic" alt="" src="' + item.img + '"/><span class="lb">' + item.label + '</span>';
+        var imgSrc = (window.__FF_ABS__ ? window.__FF_ABS__(item.img) : item.img);
+        b.innerHTML = '<img class="ic" alt="" src="' + imgSrc + '"/><span class="lb">' + item.label + '</span>';
       } else {
         b.innerHTML = '<span class="ic emoji">' + item.emoji + '</span><span class="lb">' + item.label + '</span>';
       }
