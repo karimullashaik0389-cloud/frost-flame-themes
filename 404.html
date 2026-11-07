@@ -16,17 +16,39 @@
   window.__FF_ABS__ = abs;
   window.__FF_NAV__ = function (p) {
     try {
-      var target = abs(p);
-      if (location.pathname + location.search + location.hash === target) return;
-      location.assign(target);
+      if (!p) return;
+      var path = (p.charAt(0) === '/') ? p : ('/' + p);
+      var base = BASE || '';
+      var cur = location.pathname || '/';
+      if (base && cur.indexOf(base) === 0) cur = cur.slice(base.length) || '/';
+      var wantPath = path.split('?')[0] || '/';
+      var wantSearch = path.indexOf('?') >= 0 ? path.slice(path.indexOf('?')) : '';
+      // Soft SPA navigation — React Router hears popstate; avoids full reload + SW hangs
+      if (typeof history !== 'undefined' && history.pushState) {
+        history.pushState(null, '', path);
+        try { window.dispatchEvent(new PopStateEvent('popstate', { state: null })); } catch (e1) {
+          try { window.dispatchEvent(new Event('popstate')); } catch (e2) {}
+        }
+        // Nudge overlays
+        try { window.dispatchEvent(new Event('ff:route')); } catch (e3) {}
+        return;
+      }
+      location.assign(abs(path));
     } catch (e) {
-      location.href = abs(p);
+      try { location.href = abs(p); } catch (e4) {}
     }
   };
 
 
 
   /* Fix service worker registration: bundle uses /sw.js → project base. */
+  if ('serviceWorker' in navigator) {
+    try {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { try { r.update(); } catch (e) {} });
+      });
+    } catch (e) {}
+  }
   if (BASE && 'serviceWorker' in navigator) {
     try {
       var _reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
@@ -282,27 +304,34 @@
       if (mockKey && (method !== 'GET' && method !== 'HEAD' || mockKey === '/assist')) {
         var xhr = this;
         var payload = mocks[mockKey] ? mocks[mockKey]() : JSON.stringify({ ok: false, detail: 'Not available on preview.' });
-        var status = (mockKey === '/assist' || mockKey === '/auth/logout' || mockKey === '/matchmaker') ? 200 : 503;
-        setTimeout(function () {
-          try {
-            Object.defineProperty(xhr, 'status', { configurable: true, get: function () { return status; } });
-            Object.defineProperty(xhr, 'readyState', { configurable: true, get: function () { return 4; } });
-            Object.defineProperty(xhr, 'responseText', { configurable: true, get: function () { return payload; } });
-            Object.defineProperty(xhr, 'response', { configurable: true, get: function () { return payload; } });
-            Object.defineProperty(xhr, 'responseURL', { configurable: true, get: function () { return xhr.__ff_local || ''; } });
-          } catch (e) {}
-          try {
-            if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange();
-          } catch (e) {}
-          try {
-            if (typeof xhr.onload === 'function') xhr.onload();
-          } catch (e) {}
-          try {
-            xhr.dispatchEvent(new Event('readystatechange'));
-            xhr.dispatchEvent(new Event('load'));
-            xhr.dispatchEvent(new Event('loadend'));
-          } catch (e) {}
-        }, 30);
+        var status = (mockKey === '/assist' || mockKey === '/auth/logout' || mockKey === '/matchmaker') ? 200 : 200;
+        // Always 200 JSON so UI never spins on preview mocks
+        if (mockKey === '/orders' || mockKey === '/waitlist') {
+          payload = JSON.stringify({ ok: true, id: 'preview', detail: 'Saved on this preview only.' });
+          status = 200;
+        }
+        var rs = 1;
+        try {
+          Object.defineProperty(xhr, 'status', { configurable: true, get: function () { return rs >= 2 ? status : 0; } });
+          Object.defineProperty(xhr, 'statusText', { configurable: true, get: function () { return 'OK'; } });
+          Object.defineProperty(xhr, 'readyState', { configurable: true, get: function () { return rs; } });
+          Object.defineProperty(xhr, 'responseText', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
+          Object.defineProperty(xhr, 'response', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
+          Object.defineProperty(xhr, 'responseURL', { configurable: true, get: function () { return xhr.__ff_local || ''; } });
+          xhr.getAllResponseHeaders = function () { return 'content-type: application/json\r\n'; };
+          xhr.getResponseHeader = function (h) { return String(h).toLowerCase() === 'content-type' ? 'application/json' : null; };
+        } catch (e) {}
+        function tick(next) {
+          rs = next;
+          try { if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange(); } catch (e) {}
+          try { xhr.dispatchEvent(new Event('readystatechange')); } catch (e) {}
+          if (next === 4) {
+            try { if (typeof xhr.onload === 'function') xhr.onload(); } catch (e) {}
+            try { xhr.dispatchEvent(new Event('load')); } catch (e) {}
+            try { xhr.dispatchEvent(new Event('loadend')); } catch (e) {}
+          }
+        }
+        setTimeout(function () { tick(2); setTimeout(function () { tick(3); setTimeout(function () { tick(4); }, 0); }, 0); }, 0);
         return;
       }
       return XS.call(this, body);

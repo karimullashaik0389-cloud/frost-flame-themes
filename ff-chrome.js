@@ -342,6 +342,7 @@
       setTimeout(tick, 50);
     });
     window.addEventListener('ff:theme', tick);
+    window.addEventListener('ff:route', function () { setTimeout(tick, 50); });
     window.addEventListener('popstate', function () { setTimeout(tick, 50); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && sheetOpen) closeSheet();
