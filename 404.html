@@ -21,29 +21,11 @@
       var target = abs(path);
       var curFull = location.pathname + location.search + location.hash;
       if (curFull === target) return;
-      // Prefer soft SPA nav (React Router listens via patched history)
-      if (typeof history !== 'undefined' && history.pushState) {
-        history.pushState(null, '', path);
-        try { window.dispatchEvent(new PopStateEvent('popstate', { state: null })); } catch (e1) {
-          try { window.dispatchEvent(new Event('popstate')); } catch (e2) {}
-        }
-        try { window.dispatchEvent(new Event('ff:route')); } catch (e3) {}
-        // If React did not paint the route within 500ms, hard-navigate (SW is pass-through now)
-        setTimeout(function () {
-          try {
-            var root = document.getElementById('root');
-            var painted = root && root.childElementCount > 0 && (root.innerText || '').trim().length > 0;
-            var pathNow = location.pathname + location.search + location.hash;
-            if (pathNow === target && !painted) {
-              location.assign(target);
-            }
-          } catch (e4) {}
-        }, 500);
-        return;
-      }
+      // Full navigation is reliable on GH Pages. Soft pushState left blank #root
+      // (infinite spinner) on several routes; SW is pass-through so assign is safe.
       location.assign(target);
     } catch (e) {
-      try { location.href = abs(p); } catch (e5) {}
+      try { location.href = abs(p); } catch (e2) {}
     }
   };
 
