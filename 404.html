@@ -25,6 +25,57 @@
   };
 
 
+
+  /* Fix service worker registration: bundle uses /sw.js → project base. */
+  if (BASE && 'serviceWorker' in navigator) {
+    try {
+      var _reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
+      navigator.serviceWorker.register = function (url, opts) {
+        try {
+          if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0) {
+            url = BASE + url;
+          }
+          opts = opts || {};
+          if (!opts.scope) opts.scope = BASE + '/';
+        } catch (e) {}
+        return _reg(url, opts);
+      };
+    } catch (e) {}
+  }
+
+  /* Catch in-app <a href="/…"> that skip React Router basename (PWA / deep links). */
+  document.addEventListener('click', function (ev) {
+    if (!BASE) return;
+    if (ev.defaultPrevented) return;
+    if (ev.button !== 0) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+    var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
+    if (!a) return;
+    if (a.target && a.target !== '' && a.target !== '_self') return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) !== '/') return;
+    if (href.indexOf('//') === 0) return;
+    if (href.indexOf(BASE) === 0) return;
+    // leave pure hash
+    if (href.charAt(0) === '#') return;
+    ev.preventDefault();
+    if (window.__FF_NAV__) window.__FF_NAV__(href);
+    else location.assign(BASE + href);
+  }, true);
+
+  /* Guard location.assign/replace for root-absolute app paths. */
+  try {
+    ['assign', 'replace'].forEach(function (fn) {
+      var orig = Location.prototype[fn];
+      Location.prototype[fn] = function (url) {
+        if (BASE && typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('//') !== 0) {
+          url = BASE + url;
+        }
+        return orig.call(this, url);
+      };
+    });
+  } catch (e) {}
+
   /* Prefix root-absolute asset URLs with GH Pages base (img/logo, dishes, media). */
   function needsBase(url) {
     if (!BASE || typeof url !== 'string' || !url) return false;
