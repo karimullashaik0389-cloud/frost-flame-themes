@@ -71,7 +71,13 @@
   }
 
   function openSheet() {
-    if (tucked || entryOpen()) return;
+    if (entryOpen()) return;
+    // If tucked because cart has items / sticky bar, still allow opening from the More button
+    // (handle remains the quiet "peek" control; tapping More means the user wants the sheet).
+    if (tucked) {
+      try { sessionStorage.setItem(STORAGE_FORCE, '1'); } catch (e) {}
+      setTucked(false, true);
+    }
     ensureSheet();
     sheetOpen = true;
     sheet.hidden = false;

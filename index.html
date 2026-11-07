@@ -18,24 +18,32 @@
     try {
       if (!p) return;
       var path = (p.charAt(0) === '/') ? p : ('/' + p);
-      var base = BASE || '';
-      var cur = location.pathname || '/';
-      if (base && cur.indexOf(base) === 0) cur = cur.slice(base.length) || '/';
-      var wantPath = path.split('?')[0] || '/';
-      var wantSearch = path.indexOf('?') >= 0 ? path.slice(path.indexOf('?')) : '';
-      // Soft SPA navigation — React Router hears popstate; avoids full reload + SW hangs
+      var target = abs(path);
+      var curFull = location.pathname + location.search + location.hash;
+      if (curFull === target) return;
+      // Prefer soft SPA nav (React Router listens via patched history)
       if (typeof history !== 'undefined' && history.pushState) {
         history.pushState(null, '', path);
         try { window.dispatchEvent(new PopStateEvent('popstate', { state: null })); } catch (e1) {
           try { window.dispatchEvent(new Event('popstate')); } catch (e2) {}
         }
-        // Nudge overlays
         try { window.dispatchEvent(new Event('ff:route')); } catch (e3) {}
+        // If React did not paint the route within 500ms, hard-navigate (SW is pass-through now)
+        setTimeout(function () {
+          try {
+            var root = document.getElementById('root');
+            var painted = root && root.childElementCount > 0 && (root.innerText || '').trim().length > 0;
+            var pathNow = location.pathname + location.search + location.hash;
+            if (pathNow === target && !painted) {
+              location.assign(target);
+            }
+          } catch (e4) {}
+        }, 500);
         return;
       }
-      location.assign(abs(path));
+      location.assign(target);
     } catch (e) {
-      try { location.href = abs(p); } catch (e4) {}
+      try { location.href = abs(p); } catch (e5) {}
     }
   };
 
