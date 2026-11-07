@@ -6,11 +6,11 @@
   var ITEMS = [
     { id: 'all', label: 'All menu', href: '/menu', tone: 'mix', emoji: '🍽️', img: null },
     { id: 'frost', label: 'Frost', href: '/menu/frost', tone: 'frost', emoji: '❄️', img: '/img/stone.webp' },
-    { id: 'flame', label: 'Flame', href: '/menu/flame', tone: 'flame', emoji: '🔥', img: '/img/pulao.webp' },
+    { id: 'flame', label: 'Flame', href: '/menu/flame', tone: 'flame', emoji: '🔥', img: '/img/mutton_pulav.webp' },
     { id: 'mix', label: 'Mix', href: '/mix', tone: 'mix', emoji: '⚡', img: null },
     { id: 'build', label: 'Build yours', href: '/build', tone: 'frost', emoji: '🍦', img: '/img/scoops.webp' },
     { id: 'stone', label: 'Stone ice cream', href: '/menu/frost', tone: 'frost', emoji: '🧊', img: '/img/stone.webp', hash: '' },
-    { id: 'pulao', label: 'Pulao', href: '/menu/flame', tone: 'flame', emoji: '🍛', img: '/img/pulao.webp' },
+    { id: 'pulao', label: 'Pulao', href: '/menu/flame', tone: 'flame', emoji: '🍛', img: '/img/mutton_pulav.webp' },
     { id: 'street', label: 'Street food', href: '/menu/flame', tone: 'flame', emoji: '🌮', img: '/img/chaat.webp' },
     { id: 'drinks', label: 'Drinks', href: '/menu/frost', tone: 'frost', emoji: '🥤', img: '/img/shake.webp' },
     { id: 'combos', label: 'Combos', href: '/menu', tone: 'mix', emoji: '✨', img: '/img/gulab.webp' }

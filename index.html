@@ -32,6 +32,15 @@
 
 
   /* Fix service worker registration: bundle uses /sw.js → project base. */
+  
+  /* ff-recovery-sw: always register recovery SW that clears old caches */
+  if ('serviceWorker' in navigator) {
+    try {
+      var swUrl = (window.__FF_BASE__ || '/') + 'sw.js?v=202611071125';
+      navigator.serviceWorker.register(swUrl, { scope: (window.__FF_BASE__ || './') }).catch(function(){});
+    } catch (e) {}
+  }
+
   if ('serviceWorker' in navigator) {
     try {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
@@ -327,16 +336,22 @@
       return XS.call(this, body);
     };
   })();
-
+  var ffAssetV = '202611071128';
+  function ffBust(u) {
+    u = String(u || '');
+    if (!u || /[?&]v=/.test(u)) return u;
+    if (!/\.(css|js|webmanifest)(\?|$)/.test(u)) return u;
+    return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ffAssetV;
+  }
   function addLink(rel, href, extra) {
     var l = document.createElement('link');
-    l.rel = rel; l.href = abs(href);
+    l.rel = rel; l.href = abs(ffBust(href));
     if (extra) Object.keys(extra).forEach(function (k) { l.setAttribute(k, extra[k]); });
     document.head.appendChild(l);
   }
   function addScript(src, defer) {
     var s = document.createElement('script');
-    s.src = abs(src);
+    s.src = abs(ffBust(src));
     if (defer) s.defer = true;
     document.head.appendChild(s);
     return s;
@@ -354,6 +369,7 @@
   addLink('stylesheet', '/ff-themes.css');
   addLink('stylesheet', '/ff-chrome.css');
   addLink('stylesheet', '/ff-menu-polish.css');
+  addLink('stylesheet', '/ff-dish-media.css');
 
   window.addEventListener('error', function (e) {
     e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
@@ -363,9 +379,9 @@
   addScript('/static/js/main.ceed9485.js', true);
 
   document.addEventListener('DOMContentLoaded', function () {
-    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-chrome.js'].forEach(function (p) {
+    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js'].forEach(function (p) {
       var s = document.createElement('script');
-      s.src = abs(p);
+      s.src = abs(ffBust(p));
       s.async = false;
       document.body.appendChild(s);
     });

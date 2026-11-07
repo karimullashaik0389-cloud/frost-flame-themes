@@ -1,17 +1,25 @@
-/* Pass-through SW for GH Pages PWA installability.
-   Do NOT intercept navigations — that caused infinite loading on slow mobile. */
-const CACHE = 'ff-themes-v3-passthrough';
-
-self.addEventListener('install', (event) => {
+/* One-shot recovery SW: unregister self + clear caches, then go away.
+   Old home-screen installs that cached a broken SW recover on next visit. */
+self.addEventListener('install', function (event) {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => caches.delete(k)));
-    await self.clients.claim();
+self.addEventListener('activate', function (event) {
+  event.waitUntil((async function () {
+    try {
+      var keys = await caches.keys();
+      await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    } catch (e) {}
+    try {
+      await self.registration.unregister();
+    } catch (e) {}
+    try {
+      var clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach(function (c) {
+        try { c.navigate(c.url); } catch (e) {}
+      });
+    } catch (e) {}
   })());
 });
 
-// Intentionally no fetch handler — browser handles all requests normally.
+/* Do not intercept fetches — browser handles everything. */

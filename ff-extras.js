@@ -7,7 +7,7 @@ function btn(host,label,fn){const e=n('button',label);e.type='button';e.onclick=
 function p(host,text,cls){host.append(n('p',text,cls));}
 function clone(s){return s.map(x=>x.slice());}
 function win(s){return s.every(t=>!t.length||(t.length===3&&t.every(c=>c===t[0])));}
-function legal(s,a,b){return a!==b&&s[a].length>0&&s[b].length<3&&(!s[b].length||s[b].at(-1)===s[a].at(-1));}
+function legal(s,a,b){return a!==b&&s[a].length>0&&s[b].length<3&&(!s[b].length||s[b][s[b].length-1]===s[a][s[a].length-1]);}
 function move(s,a,b){const t=clone(s);t[b].push(t[a].pop());return t;}
 function solve(state){if(win(state))return [];const key=s=>s.map(t=>t.join('')).join('|');const queue=[{s:clone(state),path:[]}],seen=new Set([key(state)]);let head=0;while(head<queue.length&&queue.length<200000){const {s,path}=queue[head++];for(let a=0;a<s.length;a++)for(let b=0;b<s.length;b++){if(!legal(s,a,b))continue;const t=move(s,a,b),k=key(t);if(seen.has(k))continue;seen.add(k);const next=path.concat([[a,b]]);if(win(t))return next;queue.push({s:t,path:next});}}return null;}
 function books(host,theme){const box=n('div');host.append(box);const names={solo_m:'Just me · for him',solo_f:'Just me · for her',couple:'Two hearts',friends:'Two friends',gang:'Three of us',family:'Big Family Feast',family_kids:'Family with kids'};let shelf=window.FFBooks[theme]?theme:'family_kids';let book=null,page=0;
