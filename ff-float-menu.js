@@ -46,7 +46,18 @@
       '<h2>Pick your menu</h2><p>Tap a bubble — they float like they’re in water.</p>');
     stage = el('div', { id: 'ff-float-stage' });
     var skip = el('button', { type: 'button', className: 'ff-float-skip' }, 'Skip — browse home');
-    skip.addEventListener('click', function () { hide(true); if (location.pathname !== '/') location.href = '/'; });
+    skip.addEventListener('click', function () {
+      hide(true);
+      var path = location.pathname || '/';
+      try {
+        var base = window.__FF_BASE__ || '';
+        if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+      } catch (e) {}
+      if (path !== '/') {
+        if (window.__FF_NAV__) window.__FF_NAV__('/');
+        else location.href = (window.__FF_ABS__ ? window.__FF_ABS__('/') : '/');
+      }
+    });
     root.appendChild(head); root.appendChild(stage); root.appendChild(skip);
     document.body.appendChild(root);
 
@@ -81,7 +92,8 @@
       });
       b.addEventListener('click', function () {
         hide(true);
-        location.href = item.href;
+        if (window.__FF_NAV__) window.__FF_NAV__(item.href);
+        else location.href = (window.__FF_ABS__ ? window.__FF_ABS__(item.href) : item.href);
       });
     });
 
@@ -193,6 +205,10 @@
     var treeOpen = tree && !tree.hidden;
     var floatOpen = root && !root.hidden;
     var path = location.pathname || '/';
+    try {
+      var base = window.__FF_BASE__ || '';
+      if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+    } catch (e) {}
     var ok = !treeOpen && !floatOpen && !/^\/(admin|login|signup)\/?$/.test(path);
     toggle.classList.toggle('is-on', ok);
   }

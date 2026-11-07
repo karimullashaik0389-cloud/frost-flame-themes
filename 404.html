@@ -8,23 +8,58 @@
     if (m) BASE = m[1];
   } catch (e) {}
   window.__FF_BASE__ = BASE;
-  function abs(p){ return (BASE || '') + (p.charAt(0) === '/' ? p : '/' + p); }
+  function abs(p){
+    if (!p) return BASE || '/';
+    if (/^https?:\/\//i.test(p)) return p;
+    return (BASE || '') + (p.charAt(0) === '/' ? p : '/' + p);
+  }
   window.__FF_ABS__ = abs;
-
-  /* Make React Router think pathname is without the GH Pages base. */
-  if (BASE) {
-    var desc = Object.getOwnPropertyDescriptor(Location.prototype, 'pathname');
-    if (desc && desc.get) {
-      Object.defineProperty(Location.prototype, 'pathname', {
-        configurable: true,
-        enumerable: true,
-        get: function () {
-          var p = desc.get.call(this);
-          return p.indexOf(BASE) === 0 ? (p.slice(BASE.length) || '/') : p;
-        }
-      });
+  window.__FF_NAV__ = function (p) {
+    try {
+      var target = abs(p);
+      if (location.pathname + location.search + location.hash === target) return;
+      location.assign(target);
+    } catch (e) {
+      location.href = abs(p);
     }
-    var wrap = function (fn) {
+  };
+
+  var LIVE_API = 'https://hackney-stone.emergent.host/api';
+
+  function toLocalApi(url) {
+    if (typeof url !== 'string') return url;
+    if (url.indexOf(LIVE_API) === 0) {
+      // Preview: prefer same-origin static /api (avoids credentialed CORS failures)
+      return abs('/api' + url.slice(LIVE_API.length));
+    }
+    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api/') === 0) {
+      return BASE + url;
+    }
+    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api') !== 0) {
+      // static assets under project base
+      if (url.indexOf('/static/') === 0 || url.indexOf('/vendor/') === 0 || url.indexOf('/img/') === 0 || url.indexOf('/dish/') === 0 || url.indexOf('/scroll/') === 0 || url.indexOf('/audio/') === 0 || url.indexOf('/ff-') === 0 || url.indexOf('/favicon') === 0 || url.indexOf('/apple-touch') === 0 || url.indexOf('/manifest') === 0) {
+        return BASE + url;
+      }
+    }
+    return url;
+  }
+
+  /* Best-effort pathname strip for older engines; modern Chromium keeps an own non-configurable getter. */
+  if (BASE) {
+    try {
+      var desc = Object.getOwnPropertyDescriptor(Location.prototype, 'pathname');
+      if (desc && desc.get && desc.configurable) {
+        Object.defineProperty(Location.prototype, 'pathname', {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            var p = desc.get.call(this);
+            return p.indexOf(BASE) === 0 ? (p.slice(BASE.length) || '/') : p;
+          }
+        });
+      }
+    } catch (e) {}
+    var wrapHist = function (fn) {
       return function (state, title, url) {
         if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0) {
           url = BASE + url;
@@ -32,23 +67,104 @@
         return fn.call(this, state, title, url);
       };
     };
-    history.pushState = wrap(history.pushState);
-    history.replaceState = wrap(history.replaceState);
-    /* Proxy /api/* to the live Emergent backend (CORS allows *). */
-    var _fetch = window.fetch;
-    window.fetch = function (input, init) {
-      try {
-        var url = typeof input === 'string' ? input : (input && input.url);
-        if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf('/api/') === 0) {
-          return _fetch.call(this, 'https://hackney-stone.emergent.host' + url, init);
-        }
-        if (typeof url === 'string' && url.charAt(0) === '/' && BASE && url.indexOf(BASE) !== 0 && url.indexOf('/api/') !== 0) {
-          if (typeof input === 'string') input = BASE + url;
-        }
-      } catch (e) {}
-      return _fetch.call(this, input, init);
-    };
+    history.pushState = wrapHist(history.pushState);
+    history.replaceState = wrapHist(history.replaceState);
   }
+
+  /* Rewrite Emergent absolute API → local static /api on GH Pages; keep relative /api local. */
+  var _fetch = window.fetch;
+  window.fetch = function (input, init) {
+    try {
+      if (typeof input === 'string') {
+        input = toLocalApi(input);
+      } else if (input && typeof input.url === 'string') {
+        var rewritten = toLocalApi(input.url);
+        if (rewritten !== input.url) input = new Request(rewritten, input);
+      }
+    } catch (e) {}
+    return _fetch.call(this, input, init);
+  };
+
+  /* Axios uses XHR, not fetch. Rewrite + soft-mock POST endpoints GH Pages cannot serve. */
+  (function patchXHR() {
+    var XO = XMLHttpRequest.prototype.open;
+    var XS = XMLHttpRequest.prototype.send;
+    var mocks = {
+      '/assist': function () {
+        return JSON.stringify({
+          reply: "I'm resting on this preview — chat needs the live kitchen link. Browse the menu, or try Games and Stories on the right!"
+        });
+      },
+      '/matchmaker': function () {
+        return JSON.stringify({
+          picks: [],
+          note: 'Matchmaker is preview-only here. Open the live site to get real picks.'
+        });
+      },
+      '/waitlist': function () {
+        return JSON.stringify({ ok: false, detail: 'Waitlist is not available on this preview.' });
+      },
+      '/orders': function () {
+        return JSON.stringify({ ok: false, detail: 'Ordering is not available on this preview. Use the live site or WhatsApp.' });
+      },
+      '/auth/logout': function () { return JSON.stringify({ ok: true }); }
+    };
+    XMLHttpRequest.prototype.open = function (method, url) {
+      this.__ff_method = String(method || 'GET').toUpperCase();
+      this.__ff_url = typeof url === 'string' ? url : String(url);
+      var local = toLocalApi(this.__ff_url);
+      this.__ff_local = local;
+      this.__ff_api_path = '';
+      if (typeof local === 'string') {
+        var idx = local.indexOf('/api/');
+        if (idx !== -1) this.__ff_api_path = local.slice(idx + 4); // e.g. /menu
+      }
+      var args = Array.prototype.slice.call(arguments);
+      args[1] = local;
+      return XO.apply(this, args);
+    };
+    XMLHttpRequest.prototype.send = function (body) {
+      var path = this.__ff_api_path || '';
+      var method = this.__ff_method || 'GET';
+      // Soft-mock mutating calls and assist chat on static preview
+      var mockKey = null;
+      if (path.indexOf('/assist') === 0) mockKey = '/assist';
+      else if (path.indexOf('/matchmaker') === 0) mockKey = '/matchmaker';
+      else if (path.indexOf('/waitlist') === 0) mockKey = '/waitlist';
+      else if (path.indexOf('/orders') === 0) mockKey = '/orders';
+      else if (path.indexOf('/auth/logout') === 0) mockKey = '/auth/logout';
+      else if (path.indexOf('/auth/') === 0 && method !== 'GET' && path.indexOf('/auth/me') !== 0) {
+        mockKey = '/waitlist'; // generic friendly fail
+      }
+      if (mockKey && (method !== 'GET' && method !== 'HEAD' || mockKey === '/assist')) {
+        var xhr = this;
+        var payload = mocks[mockKey] ? mocks[mockKey]() : JSON.stringify({ ok: false, detail: 'Not available on preview.' });
+        var status = (mockKey === '/assist' || mockKey === '/auth/logout' || mockKey === '/matchmaker') ? 200 : 503;
+        setTimeout(function () {
+          try {
+            Object.defineProperty(xhr, 'status', { configurable: true, get: function () { return status; } });
+            Object.defineProperty(xhr, 'readyState', { configurable: true, get: function () { return 4; } });
+            Object.defineProperty(xhr, 'responseText', { configurable: true, get: function () { return payload; } });
+            Object.defineProperty(xhr, 'response', { configurable: true, get: function () { return payload; } });
+            Object.defineProperty(xhr, 'responseURL', { configurable: true, get: function () { return xhr.__ff_local || ''; } });
+          } catch (e) {}
+          try {
+            if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange();
+          } catch (e) {}
+          try {
+            if (typeof xhr.onload === 'function') xhr.onload();
+          } catch (e) {}
+          try {
+            xhr.dispatchEvent(new Event('readystatechange'));
+            xhr.dispatchEvent(new Event('load'));
+            xhr.dispatchEvent(new Event('loadend'));
+          } catch (e) {}
+        }, 30);
+        return;
+      }
+      return XS.call(this, body);
+    };
+  })();
 
   function addLink(rel, href, extra) {
     var l = document.createElement('link');
@@ -87,7 +203,7 @@
     ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-chrome.js'].forEach(function (p) {
       var s = document.createElement('script');
       s.src = abs(p);
-      s.async = false; /* preserve order for dynamic scripts */
+      s.async = false;
       document.body.appendChild(s);
     });
   });

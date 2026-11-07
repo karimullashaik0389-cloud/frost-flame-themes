@@ -130,7 +130,28 @@
   function openFrostyPanel() {
     try { window.dispatchEvent(new Event('ff:frosty')); } catch (e) {}
     var openBtn = document.querySelector('[data-testid="frosty-open-btn"]');
-    if (openBtn) { try { openBtn.click(); } catch (e) {} }
+    if (openBtn) { try { openBtn.click(); return; } catch (e) {} }
+    // Preview-friendly panel when React Ask Frosty never mounts (GH Pages / CORS)
+    var existing = document.getElementById('ff-frosty-preview');
+    if (existing) { existing.hidden = false; return; }
+    var panel = el('div', {
+      id: 'ff-frosty-preview',
+      role: 'dialog',
+      'aria-modal': 'true',
+      'aria-label': 'Ask Frosty preview',
+      'data-testid': 'ff-frosty-preview'
+    });
+    panel.innerHTML = '<div class="ff-frosty-preview-card">' +
+      '<p class="ff-frosty-preview-title">❄️ Ask Frosty</p>' +
+      '<p class="ff-frosty-preview-body">Frosty\'s chat needs the live kitchen link, so it rests on this preview. Browse the menu, or open Games and Stories on the right while you wait.</p>' +
+      '<button type="button" class="ff-frosty-preview-close" data-testid="ff-frosty-preview-close">Got it</button>' +
+      '</div>';
+    panel.addEventListener('click', function (ev) {
+      if (ev.target === panel || (ev.target && ev.target.getAttribute && ev.target.getAttribute('data-testid') === 'ff-frosty-preview-close')) {
+        panel.hidden = true;
+      }
+    });
+    document.body.appendChild(panel);
   }
 
   function ensureFallbackFrosty() {
