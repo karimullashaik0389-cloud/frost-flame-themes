@@ -27,13 +27,17 @@
   }
 
   function openFrostyPanel() {
-    try { window.dispatchEvent(new Event('ff:frosty')); } catch (e) {}
+    // Preview uses offline FFFrosty (menu JSON). Suppress Emergent React panel if it mounts.
+    try {
+      document.querySelectorAll('[data-testid="frosty-panel"], [data-radix-portal]').forEach(function (n) {
+        var closeBtn = n.querySelector('button[aria-label*="Close" i], button[aria-label*="close" i], [data-testid="frosty-close"]');
+        if (closeBtn) { try { closeBtn.click(); } catch (e) {} }
+      });
+    } catch (e) {}
     if (window.FFFrosty && typeof window.FFFrosty.open === 'function') {
       window.FFFrosty.open();
       return;
     }
-    var openBtn = document.querySelector('[data-testid="frosty-open-btn"]');
-    if (openBtn) { try { openBtn.click(); return; } catch (e) {} }
   }
 
   function changeTheme() {

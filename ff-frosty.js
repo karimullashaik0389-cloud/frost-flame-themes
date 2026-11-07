@@ -328,6 +328,14 @@
 
   function open() {
     ensureUI();
+    try {
+      document.querySelectorAll('[data-testid="frosty-panel"]').forEach(function (n) {
+        n.setAttribute('hidden', '');
+        n.style.display = 'none';
+        var b = n.querySelector('button[aria-label*="lose" i]');
+        if (b) try { b.click(); } catch (e) {}
+      });
+    } catch (e) {}
     root.hidden = false;
     document.documentElement.classList.add('ff-frosty-open');
     loadMenu().then(function () {

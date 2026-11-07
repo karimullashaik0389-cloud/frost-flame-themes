@@ -188,3 +188,15 @@ body[class*="ff-theme-"] #main{
     border-radius: 20px !important;
   }
 }
+
+
+/* Preview: suppress Emergent Ask Frosty panel — we ship offline FFFrosty instead */
+[data-testid="frosty-panel"],
+div[data-testid="frosty-panel"]{
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body:has(#ff-frosty-chat:not([hidden])) [data-radix-portal]{
+  /* keep other portals; frosty panel already hidden by testid */
+}
