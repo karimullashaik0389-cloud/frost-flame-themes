@@ -1,0 +1,190 @@
+/* Menu + Ask Frosty polish — overlay only, professional restaurant spacing. */
+
+/* —— Ask Frosty chat —— */
+#ff-frosty-chat{
+  position:fixed; inset:0; z-index:100060;
+  display:flex; align-items:flex-end; justify-content:center;
+  padding:12px; padding-bottom:max(12px, env(safe-area-inset-bottom));
+  background:rgba(5,8,12,.58);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+#ff-frosty-chat[hidden]{display:none !important}
+.ff-fr-panel{
+  width:min(440px,100%);
+  max-height:min(86dvh,720px);
+  display:flex; flex-direction:column;
+  border-radius:22px 22px 16px 16px;
+  border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(180deg,#15202a 0%,#0c1218 100%);
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+  overflow:hidden; color:#e8f2f8;
+  font-family:Inter,system-ui,sans-serif;
+}
+.ff-fr-head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  padding:16px 16px 10px; border-bottom:1px solid rgba(255,255,255,.06);
+}
+.ff-fr-kicker{margin:0; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#7f90a0; font-weight:600}
+.ff-fr-head h2{margin:2px 0 4px; font-family:"Cormorant Garamond",Georgia,serif; font-size:24px; font-weight:600; color:#f4f9fc}
+.ff-fr-sub{margin:0; font-size:12px; line-height:1.4; color:#93a3b2}
+.ff-fr-x{
+  width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.12);
+  background:transparent; color:#c9d6e0; font-size:22px; line-height:1; cursor:pointer;
+}
+.ff-fr-log{
+  flex:1; overflow:auto; padding:14px 14px 8px;
+  display:flex; flex-direction:column; gap:10px; min-height:180px;
+}
+.ff-fr-bubble{
+  max-width:92%; padding:10px 12px; border-radius:14px;
+  font-size:13.5px; line-height:1.45; white-space:pre-wrap; word-break:break-word;
+}
+.ff-fr-frosty{
+  align-self:flex-start;
+  background:rgba(108,207,246,.1);
+  border:1px solid rgba(108,207,246,.22);
+  color:#eaf6fc;
+}
+.ff-fr-user{
+  align-self:flex-end;
+  background:rgba(255,106,26,.14);
+  border:1px solid rgba(255,106,26,.28);
+  color:#fff5ee;
+}
+.ff-fr-suggestions{
+  display:flex; gap:6px; overflow-x:auto; padding:4px 14px 8px;
+  -webkit-overflow-scrolling:touch;
+}
+.ff-fr-suggestions button{
+  flex:0 0 auto; min-height:32px; padding:6px 12px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04);
+  color:#d5e2ec; font:600 11px/1 Inter,system-ui,sans-serif; cursor:pointer;
+}
+.ff-fr-form{
+  display:flex; gap:8px; padding:10px 14px 14px; border-top:1px solid rgba(255,255,255,.06);
+}
+.ff-fr-form input{
+  flex:1; min-height:44px; border-radius:12px; padding:0 12px;
+  border:1px solid rgba(255,255,255,.12); background:#0a1016; color:#eaf6fc;
+  font:inherit; font-size:14px;
+}
+.ff-fr-form button[type=submit]{
+  min-height:44px; padding:0 16px; border-radius:12px; border:0;
+  background:linear-gradient(135deg,#7dd3fc,#38bdf8); color:#062033;
+  font:700 13px/1 Inter,system-ui,sans-serif; cursor:pointer;
+}
+@media (min-width:768px){
+  #ff-frosty-chat{align-items:center; padding:24px}
+  .ff-fr-panel{border-radius:20px; max-height:min(80vh,680px)}
+}
+
+/* —— Menu page layout polish —— */
+body[class*="ff-theme-"] .wrap{
+  padding-left: max(18px, env(safe-area-inset-left)) !important;
+  padding-right: max(18px, env(safe-area-inset-right)) !important;
+}
+body[class*="ff-theme-"] [data-testid="menu-title"].h1,
+body[class*="ff-theme-"] .h1{
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  margin-bottom: 0;
+}
+body[class*="ff-theme-"] .wrap > p.mt-3,
+body[class*="ff-theme-"] .wrap > p.text-muted2{
+  max-width: 36rem;
+  line-height: 1.55;
+  margin-top: 10px !important;
+}
+
+/* Side panels (Frost / Flame) */
+body[class*="ff-theme-"] [data-testid="menu-side-panels"]{
+  gap: 14px !important;
+  margin-top: 22px !important;
+}
+body[class*="ff-theme-"] [data-testid="side-panel-frost"],
+body[class*="ff-theme-"] [data-testid="side-panel-flame"]{
+  border-radius: 22px !important;
+  border-width: 1px !important;
+}
+
+/* Sticky category chips — tidy, no overlap */
+body[class*="ff-theme-"] .sticky.top-16{
+  top: 64px !important;
+  z-index: 35 !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  margin-top: 20px !important;
+  border-bottom-color: color-mix(in srgb, var(--border, #262b33) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--bg, #0b0d10) 88%, transparent) !important;
+}
+body[class*="ff-theme-"] .sticky.top-16 nav.flex{
+  gap: 8px !important;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+body[class*="ff-theme-"] .chip{
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 6px 14px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  border-color: color-mix(in srgb, var(--border-input, #6b7685) 70%, transparent) !important;
+  background: color-mix(in srgb, var(--surface, #15181d) 92%, transparent) !important;
+}
+body[class*="ff-theme-"] .chip.is-active{
+  border-color: var(--frost, #6ccff6) !important;
+  color: var(--text, #eaf6fc) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--frost, #6ccff6) 35%, transparent);
+  background: color-mix(in srgb, var(--frost, #6ccff6) 12%, var(--surface, #15181d)) !important;
+}
+
+/* Dish cards */
+body[class*="ff-theme-"] article.ff-card{
+  border-radius: 18px !important;
+  overflow: hidden;
+  background: var(--surface, #15181d) !important;
+  border-color: color-mix(in srgb, var(--border, #262b33) 90%, transparent) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22);
+}
+body[class*="ff-theme-"] article.ff-card.temp-cold{
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--frost, #6ccff6) 28%, transparent), 0 12px 30px rgba(0,0,0,.25) !important;
+}
+body[class*="ff-theme-"] article.ff-card.temp-hot{
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--flame, #ff6a1a) 30%, transparent), 0 12px 30px rgba(0,0,0,.25) !important;
+}
+body[class*="ff-theme-"] .mt-5.grid{
+  gap: 16px !important;
+  margin-top: 18px !important;
+}
+body[class*="ff-theme-"] section + section,
+body[class*="ff-theme-"] .wrap section{
+  margin-top: 28px;
+}
+
+/* Launch pill — quieter */
+body[class*="ff-theme-"] .pill.border{
+  font-size: 11px;
+  opacity: .85;
+  margin-bottom: 4px;
+}
+
+/* Bottom padding so More button never covers last cards */
+body[class*="ff-theme-"] main#main,
+body[class*="ff-theme-"] #main{
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 768px){
+  body[class*="ff-theme-"] .wrap{
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+  }
+  body[class*="ff-theme-"] .mt-5.grid{
+    gap: 20px !important;
+  }
+  body[class*="ff-theme-"] article.ff-card{
+    border-radius: 20px !important;
+  }
+}

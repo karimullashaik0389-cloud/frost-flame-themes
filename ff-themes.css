@@ -22,7 +22,7 @@ body[class*="ff-theme-"]::before{
   background: var(--ff-grad,
     radial-gradient(600px 380px at 20% 0%, rgba(255,106,26,.10), transparent 55%),
     linear-gradient(180deg, rgba(11,13,16,.12), rgba(11,13,16,.35)));
-  opacity:.45;
+  opacity:.55;
 }
 body[class*="ff-theme-"] #root{ position:relative; z-index:1; }
 
@@ -249,3 +249,16 @@ body.ff-theme-family_kids #ff-play-pill{
 }
 
 /* meta theme-color hint via JS optional — CSS alone can't set meta */
+
+
+/* premium theme site polish */
+body[class*="ff-theme-"]{
+  background-color: var(--bg, var(--ff-bg, #0B0D10)) !important;
+}
+body[class*="ff-theme-"]::before{
+  mix-blend-mode: soft-light;
+}
+body.ff-theme-couple::before{ opacity:.5; }
+body.ff-theme-gang::before{ opacity:.5; }
+body.ff-theme-solo_f::before{ opacity:.48; }
+body.ff-theme-family::before{ opacity:.5; }

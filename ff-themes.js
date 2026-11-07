@@ -12,134 +12,176 @@
     solo_m: {
       id: 'solo_m',
       label: 'Just you',
-      sublabel: 'For him · playful',
+      sublabel: 'For him · refined',
       emoji: '🧔',
-      title: 'Just you, boss',
-      greeting: 'Table for one? Treat yourself today.',
-      mood: 'Playful comic flames — cheeky, fast, for one.',
+      title: 'Table for one',
+      greeting: 'Quiet confidence. Order well.',
+      mood: 'Charcoal & amber ember — bar-seat polish.',
       surprise: 'flames',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#121212', '--ff-card': '#1c1c1c', '--ff-ink': '#fff8f0', '--ff-muted': '#c9b8a8',
-        '--ff-line': '#3d2a1f', '--ff-accent': '#ff6a00', '--ff-accent2': '#ffe566',
-        '--ff-grad': 'linear-gradient(135deg,#2a2a2a,#1a120c 60%,#2a1808)'
+        '--ff-bg': '#0e1012', '--ff-card': '#171a1e', '--ff-ink': '#f4efe8', '--ff-muted': '#b7aaa0',
+        '--ff-line': '#2c2622', '--ff-accent': '#e08a3c', '--ff-accent2': '#c9a227',
+        '--ff-grad': 'linear-gradient(160deg,#1a1612 0%,#0e1012 55%,#16110e 100%)'
+      },
+      site: {
+        '--bg': '#0e1012', '--surface': '#171a1e', '--surface-2': '#1e2228',
+        '--border': '#2c2622', '--text': '#f4efe8', '--muted': '#b7aaa0',
+        '--frost': '#8eb8c9', '--flame': '#e08a3c', '--copper': '#c9a227',
+        '--primary': '28 72% 56%'
       }
     },
     solo_f: {
       id: 'solo_f',
       label: 'Just you',
-      sublabel: 'For her · stylish',
+      sublabel: 'For her · elegant',
       emoji: '💁‍♀️',
       title: 'Just for you',
-      greeting: 'Table for one? You deserve every bite.',
-      mood: 'Stylish blush & lilac — soft, treat-yourself.',
+      greeting: 'Soft light. Your pace.',
+      mood: 'Champagne blush & rose gold — treat-yourself calm.',
       surprise: 'sparkles',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#2a1824', '--ff-card': '#3a2434', '--ff-ink': '#fff7fb', '--ff-muted': '#e8c9d8',
-        '--ff-line': '#5a3a4c', '--ff-accent': '#e891b0', '--ff-accent2': '#c4a1e0',
-        '--ff-grad': 'linear-gradient(135deg,#3a2434,#2a1824 55%,#3a2840)'
+        '--ff-bg': '#161018', '--ff-card': '#221a22', '--ff-ink': '#fbf5f8', '--ff-muted': '#d4bbc8',
+        '--ff-line': '#3a2a36', '--ff-accent': '#d4a0b5', '--ff-accent2': '#c4a574',
+        '--ff-grad': 'linear-gradient(160deg,#241820 0%,#161018 55%,#1e1620 100%)'
+      },
+      site: {
+        '--bg': '#161018', '--surface': '#221a22', '--surface-2': '#2a202a',
+        '--border': '#3a2a36', '--text': '#fbf5f8', '--muted': '#d4bbc8',
+        '--frost': '#c9b8d4', '--flame': '#d4a0b5', '--copper': '#c4a574',
+        '--primary': '340 40% 68%'
       }
     },
     friends: {
       id: 'friends',
       label: 'Two friends',
-      sublabel: 'Bright & social',
+      sublabel: 'Bright & easy',
       emoji: '👯',
       title: 'Friends night',
-      greeting: "Squad of two? Let's eat.",
-      mood: 'Bright teal & sunny yellow — share, laugh, split the bill.',
+      greeting: 'Two spoons. Easy laughs.',
+      mood: 'Sea-glass teal & soft gold — social, never loud.',
       surprise: 'confetti',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#0f2a2e', '--ff-card': '#16383c', '--ff-ink': '#f7fffb', '--ff-muted': '#b7e0d6',
-        '--ff-line': '#2a5558', '--ff-accent': '#ffe566', '--ff-accent2': '#2ec4b6',
-        '--ff-grad': 'linear-gradient(135deg,#16383c,#0f2a2e 50%,#1a4048)'
+        '--ff-bg': '#0c1c1f', '--ff-card': '#132428', '--ff-ink': '#f3fffb', '--ff-muted': '#9fc4bc',
+        '--ff-line': '#244044', '--ff-accent': '#3db8a8', '--ff-accent2': '#d4c07a',
+        '--ff-grad': 'linear-gradient(160deg,#143034 0%,#0c1c1f 55%,#102428 100%)'
+      },
+      site: {
+        '--bg': '#0c1c1f', '--surface': '#132428', '--surface-2': '#1a2e32',
+        '--border': '#244044', '--text': '#f3fffb', '--muted': '#9fc4bc',
+        '--frost': '#6ec9c0', '--flame': '#d4a86a', '--copper': '#d4c07a',
+        '--primary': '172 48% 48%'
       }
     },
     couple: {
       id: 'couple',
       label: 'Couple',
-      sublabel: 'Romantic date night',
+      sublabel: 'Date night',
       emoji: '💑',
-      title: 'For two hearts',
-      greeting: 'Two spoons, one table. Welcome.',
-      mood: 'Romantic wine-red & soft rose — date-night calm.',
+      title: 'For two',
+      greeting: 'Low light. Two spoons.',
+      mood: 'Burgundy velvet & champagne — intimate dining.',
       surprise: 'hearts',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#1a080c', '--ff-card': '#2a1018', '--ff-ink': '#fff5f7', '--ff-muted': '#e8b8c4',
-        '--ff-line': '#4a2030', '--ff-accent': '#c41e3a', '--ff-accent2': '#e8c87a',
-        '--ff-grad': 'linear-gradient(135deg,#2a1018,#1a080c 55%,#2a1420)'
+        '--ff-bg': '#14080c', '--ff-card': '#1e1016', '--ff-ink': '#fff6f8', '--ff-muted': '#d4aeb8',
+        '--ff-line': '#3a2028', '--ff-accent': '#a83248', '--ff-accent2': '#d4b87a',
+        '--ff-grad': 'linear-gradient(160deg,#241018 0%,#14080c 55%,#1a0c12 100%)'
+      },
+      site: {
+        '--bg': '#14080c', '--surface': '#1e1016', '--surface-2': '#28141c',
+        '--border': '#3a2028', '--text': '#fff6f8', '--muted': '#d4aeb8',
+        '--frost': '#c9a0b0', '--flame': '#c44a5e', '--copper': '#d4b87a',
+        '--primary': '350 55% 42%'
       }
     },
     gang: {
       id: 'gang',
       label: "The Gang's Night Out",
-      sublabel: 'Neon night street',
+      sublabel: 'City night',
       emoji: '🌃',
-      title: "The Gang's Night Out",
-      greeting: "Squad's here! Let's eat.",
-      mood: 'Neon cyan & lime on midnight — street-night energy.',
+      title: 'Night out',
+      greeting: 'The table’s full. Let’s eat.',
+      mood: 'Midnight navy & muted teal — city-night polish.',
       surprise: 'neon',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#060b18', '--ff-card': '#0e1630', '--ff-ink': '#e8fff8', '--ff-muted': '#8ec8c0',
-        '--ff-line': '#1e3a50', '--ff-accent': '#2de2c5', '--ff-accent2': '#ffb347',
-        '--ff-grad': 'linear-gradient(135deg,#0e1630,#060b18 50%,#0a1a28)'
+        '--ff-bg': '#070b14', '--ff-card': '#0e1424', '--ff-ink': '#e8f7f4', '--ff-muted': '#8aadb0',
+        '--ff-line': '#1c2a40', '--ff-accent': '#3ec4b0', '--ff-accent2': '#c9a06a',
+        '--ff-grad': 'linear-gradient(160deg,#101828 0%,#070b14 55%,#0a1220 100%)'
+      },
+      site: {
+        '--bg': '#070b14', '--surface': '#0e1424', '--surface-2': '#141c30',
+        '--border': '#1c2a40', '--text': '#e8f7f4', '--muted': '#8aadb0',
+        '--frost': '#5ec8c0', '--flame': '#d4955a', '--copper': '#c9a06a',
+        '--primary': '172 52% 50%'
       }
     },
     family: {
       id: 'family',
       label: 'Big Family Feast',
-      sublabel: 'Warm feast table',
+      sublabel: 'Warm table',
       emoji: '🪔',
-      title: 'The Big Family Feast',
-      greeting: 'The whole crew is here — nobody leaves hungry.',
-      mood: 'Marigold gold & deep green — feast, share, fill the table.',
+      title: 'Family feast',
+      greeting: 'Everyone’s here — fill the table.',
+      mood: 'Walnut & marigold — generous, warm, gathered.',
       surprise: 'petals',
       fonts: {
         display: '"Cinzel", "Cormorant Garamond", serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#1a1208', '--ff-card': '#2a1e10', '--ff-ink': '#fff8e8', '--ff-muted': '#d4c090',
-        '--ff-line': '#4a3820', '--ff-accent': '#e8a020', '--ff-accent2': '#2d6a4f',
-        '--ff-grad': 'linear-gradient(135deg,#2a1e10,#1a1208 55%,#241808)'
+        '--ff-bg': '#14100a', '--ff-card': '#1e1810', '--ff-ink': '#fff8ec', '--ff-muted': '#c9b896',
+        '--ff-line': '#3a3020', '--ff-accent': '#d4a024', '--ff-accent2': '#3d6b52',
+        '--ff-grad': 'linear-gradient(160deg,#241c10 0%,#14100a 55%,#1a140c 100%)'
+      },
+      site: {
+        '--bg': '#14100a', '--surface': '#1e1810', '--surface-2': '#282014',
+        '--border': '#3a3020', '--text': '#fff8ec', '--muted': '#c9b896',
+        '--frost': '#a8c4b0', '--flame': '#d4a024', '--copper': '#c9a040',
+        '--primary': '40 72% 48%'
       }
     },
     family_kids: {
       id: 'family_kids',
       label: 'Family with kids',
-      sublabel: 'Colourful & mild',
+      sublabel: 'Calm & colourful',
       emoji: '👨‍👩‍👧‍👦',
       title: 'Family table',
-      greeting: 'Welcome, grown-ups and little legends!',
-      mood: 'Sky blue, grass green, sunny coral — kids busy, parents calm.',
+      greeting: 'Grown-ups and little legends welcome.',
+      mood: 'Soft sky & sage — playful without the circus.',
       surprise: 'stars',
       fonts: {
         display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
-        '--ff-bg': '#0c2744', '--ff-card': '#143556', '--ff-ink': '#f5fbff', '--ff-muted': '#a8d4f0',
-        '--ff-line': '#2a5578', '--ff-accent': '#5ad67d', '--ff-accent2': '#ff8a65',
-        '--ff-grad': 'linear-gradient(135deg,#143556,#0c2744 50%,#1a3a28)'
+        '--ff-bg': '#0c1e30', '--ff-card': '#142838', '--ff-ink': '#f3f9ff', '--ff-muted': '#9ab8cc',
+        '--ff-line': '#243e54', '--ff-accent': '#5eb87a', '--ff-accent2': '#e09a78',
+        '--ff-grad': 'linear-gradient(160deg,#163044 0%,#0c1e30 55%,#123028 100%)'
+      },
+      site: {
+        '--bg': '#0c1e30', '--surface': '#142838', '--surface-2': '#1a3244',
+        '--border': '#243e54', '--text': '#f3f9ff', '--muted': '#9ab8cc',
+        '--frost': '#7ec8e8', '--flame': '#e09a78', '--copper': '#e0b060',
+        '--primary': '142 40% 54%'
       }
     }
   };
@@ -165,7 +207,9 @@
     if (!el || !el.style) return;
     [
       '--ff-bg', '--ff-card', '--ff-ink', '--ff-muted', '--ff-line',
-      '--ff-accent', '--ff-accent2', '--ff-grad', '--ff-display', '--ff-body'
+      '--ff-accent', '--ff-accent2', '--ff-grad', '--ff-display', '--ff-body',
+      '--bg', '--surface', '--surface-2', '--border', '--text', '--muted',
+      '--frost', '--flame', '--copper', '--primary', '--font-display', '--font-body'
     ].forEach(function (k) { el.style.removeProperty(k); });
   }
 
@@ -179,10 +223,20 @@
       root.style.setProperty(k, theme.vars[k]);
       body.style.setProperty(k, theme.vars[k]);
     });
+    if (theme.site) {
+      Object.keys(theme.site).forEach(function (k) {
+        root.style.setProperty(k, theme.site[k]);
+        body.style.setProperty(k, theme.site[k]);
+      });
+    }
     root.style.setProperty('--ff-display', theme.fonts.display);
     root.style.setProperty('--ff-body', theme.fonts.body);
+    root.style.setProperty('--font-display', theme.fonts.display);
+    root.style.setProperty('--font-body', theme.fonts.body);
     body.style.setProperty('--ff-display', theme.fonts.display);
     body.style.setProperty('--ff-body', theme.fonts.body);
+    body.style.setProperty('--font-display', theme.fonts.display);
+    body.style.setProperty('--font-body', theme.fonts.body);
   }
 
   function ensureGreet() {
