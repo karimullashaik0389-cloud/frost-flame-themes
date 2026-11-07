@@ -32,16 +32,7 @@
 
 
   /* Fix service worker registration: bundle uses /sw.js → project base. */
-  
-  /* ff-recovery-sw */
-  if ('serviceWorker' in navigator) {
-    try {
-      var __ffSw = abs(ffBust('sw.js'));
-      navigator.serviceWorker.register(__ffSw, { scope: BASE || './' }).catch(function () {});
-    } catch (e) {}
-  }
-
-  if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
     try {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
         regs.forEach(function (r) { try { r.update(); } catch (e) {} });
@@ -336,12 +327,20 @@
       return XS.call(this, body);
     };
   })();
-  var ffAssetV = '202611071132';
+  var ffAssetV = '202611071134';
   function ffBust(u) {
     u = String(u || '');
     if (!u || /[?&]v=/.test(u)) return u;
     if (!/\.(css|js|webmanifest)(\?|$)/.test(u)) return u;
     return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ffAssetV;
+  }
+
+  /* ff-recovery-sw */
+  if ('serviceWorker' in navigator) {
+    try {
+      var __ffSwUrl = abs(ffBust('/sw.js'));
+      navigator.serviceWorker.register(__ffSwUrl, { scope: (BASE || './') }).catch(function () {});
+    } catch (e) {}
   }
   function addLink(rel, href, extra) {
     var l = document.createElement('link');
