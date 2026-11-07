@@ -45,3 +45,16 @@
 .ff-dish-media-host:has(.ff-dish-video.is-playing) > img.ff-dish-still {
   opacity: 0;
 }
+
+
+/* Emergent card-loop videos must never steal taps (QV Add / size radios) */
+video[data-testid^="card-loop-"],
+[data-testid="quick-view"] video,
+[data-testid="quick-view"] .absolute.inset-0.z-\[1\] {
+  pointer-events: none !important;
+}
+[data-testid="quick-view"] .sticky.bottom-0 {
+  position: sticky;
+  z-index: 5;
+  pointer-events: auto !important;
+}

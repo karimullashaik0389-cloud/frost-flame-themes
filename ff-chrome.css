@@ -304,3 +304,104 @@ body:has([data-testid="sticky-cart-bar"]) #ff-fab-handle.is-on{
 @media (prefers-reduced-motion: reduce){
   #ff-more-btn.ff-more-btn{ transition: none !important; }
 }
+
+/* —— Bright Games row in More sheet —— */
+.ff-more-item--games{
+  background: linear-gradient(135deg, rgba(255,106,26,.22), rgba(108,207,246,.18)) !important;
+  border-color: rgba(255,210,122,.55) !important;
+  box-shadow: 0 0 0 1px rgba(255,106,26,.25), 0 8px 22px rgba(255,106,26,.18);
+}
+.ff-more-item--games:hover,
+.ff-more-item--games:focus-visible{
+  background: linear-gradient(135deg, rgba(255,106,26,.32), rgba(108,207,246,.24)) !important;
+  border-color: rgba(255,210,122,.8) !important;
+}
+.ff-more-ic--games{
+  background: linear-gradient(145deg, #ff8a3d, #ff6a1a) !important;
+  border-color: rgba(255,255,255,.25) !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  box-shadow: 0 0 12px rgba(255,106,26,.45);
+}
+.ff-more-item--games .ff-more-copy strong{
+  color: #fff7e8 !important;
+  font-size: 16px !important;
+}
+.ff-more-item--games .ff-more-copy em{
+  color: #ffe0b8 !important;
+}
+
+/* —— More sheet: always fit viewport, Close always visible —— */
+#ff-more-sheet{
+  max-height: min(88dvh, 720px) !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden !important;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#ff-more-sheet[hidden]{ display: none !important; }
+#ff-more-sheet .ff-more-list{
+  flex: 1 1 auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  padding-bottom: 4px;
+}
+#ff-more-sheet .ff-more-close{
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  margin-top: 10px;
+  background: rgba(12,16,22,.96);
+  z-index: 2;
+}
+
+/* —— Labelled Ask Frosty quick button (left of More) —— */
+#ff-frosty-quick.ff-frosty-quick{
+  position: fixed;
+  right: calc(16px + 56px + env(safe-area-inset-right, 0px));
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(108,207,246,.45);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 50%),
+    linear-gradient(145deg, #1a3a4a 0%, #0e2430 100%);
+  color: #e8f6fc;
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 0 1px rgba(108,207,246,.15);
+  cursor: pointer;
+  font: 700 12px/1 Inter, system-ui, sans-serif;
+  letter-spacing: .02em;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .25s ease, opacity .25s ease;
+}
+#ff-frosty-quick .ff-frosty-quick-ic{
+  width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(108,207,246,.2); font-size: 13px;
+}
+#ff-frosty-quick.ff-frosty-quick.is-tucked,
+#ff-frosty-quick.ff-frosty-quick[aria-hidden="true"]{
+  transform: translateX(140%);
+  opacity: 0;
+  pointer-events: none !important;
+}
+#ff-frosty-quick:focus-visible{ outline: 2px solid #6ccff6; outline-offset: 3px; }
+body:has([data-testid="sticky-cart-bar"]) #ff-frosty-quick.ff-frosty-quick{
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 768px){
+  #ff-frosty-quick.ff-frosty-quick{
+    right: calc(24px + 56px + env(safe-area-inset-right, 0px));
+    bottom: 28px;
+  }
+}
+@media (max-width: 360px){
+  #ff-frosty-quick .ff-frosty-quick-lbl{ display:none; }
+  #ff-frosty-quick.ff-frosty-quick{ padding: 0; width: 44px; justify-content: center; }
+}

@@ -1,24 +1,21 @@
 /**
- * Floating bubble menu — drifts in 360°, post-tree pick screen + toggleable overlay.
- * Does not alter existing Emergent DOM content.
+ * Floating bubble menu — fewer distinct bubbles, deep-link to category sections.
+ * Does not auto-open after theme pick (entry is skippable / remembered).
  */
 (function () {
   var ITEMS = [
-    { id: 'all', label: 'All menu', href: '/menu', tone: 'mix', emoji: '🍽️', img: null },
-    { id: 'frost', label: 'Frost', href: '/menu/frost', tone: 'frost', emoji: '❄️', img: '/img/stone.webp' },
-    { id: 'flame', label: 'Flame', href: '/menu/flame', tone: 'flame', emoji: '🔥', img: '/img/mutton_pulav.webp' },
-    { id: 'mix', label: 'Mix', href: '/mix', tone: 'mix', emoji: '⚡', img: null },
-    { id: 'build', label: 'Build yours', href: '/build', tone: 'frost', emoji: '🍦', img: '/img/scoops.webp' },
-    { id: 'stone', label: 'Stone ice cream', href: '/menu/frost', tone: 'frost', emoji: '🧊', img: '/img/stone.webp', hash: '' },
-    { id: 'pulao', label: 'Pulao', href: '/menu/flame', tone: 'flame', emoji: '🍛', img: '/img/mutton_pulav.webp' },
-    { id: 'street', label: 'Street food', href: '/menu/flame', tone: 'flame', emoji: '🌮', img: '/img/chaat.webp' },
-    { id: 'drinks', label: 'Drinks', href: '/menu/frost', tone: 'frost', emoji: '🥤', img: '/img/shake.webp' },
-    { id: 'combos', label: 'Combos', href: '/menu', tone: 'mix', emoji: '✨', img: '/img/gulab.webp' }
+    { id: 'all', label: 'All menu', href: '/menu', hash: '', tone: 'mix', emoji: '🍽️', img: null },
+    { id: 'frost', label: 'Frost', href: '/menu/frost', hash: '', tone: 'frost', emoji: '❄️', img: '/img/stone.webp' },
+    { id: 'flame', label: 'Flame', href: '/menu/flame', hash: '', tone: 'flame', emoji: '🔥', img: '/img/mutton_pulav.webp' },
+    { id: 'mix', label: 'Mix', href: '/mix', hash: '', tone: 'mix', emoji: '⚡', img: null },
+    { id: 'pulao', label: 'Pulao', href: '/menu', hash: 'cat-pulao', tone: 'flame', emoji: '🍛', img: '/img/mutton_pulav.webp' },
+    { id: 'street', label: 'Street food', href: '/menu', hash: 'cat-street', tone: 'flame', emoji: '🌮', img: '/img/chaat.webp' },
+    { id: 'drinks', label: 'Drinks', href: '/menu', hash: 'cat-shakes', tone: 'frost', emoji: '🥤', img: '/img/shake.webp' },
+    { id: 'combos', label: 'Combos', href: '/menu', hash: 'cat-combos', tone: 'mix', emoji: '✨', img: '/img/gulab.webp' }
   ];
 
   var root, stage, toggle, bubbles = [], raf = 0, running = false, reduced = false;
   var W = 390, H = 844, padTop = 72, padBottom = 100, padSide = 8;
-  // Keep clear of Ask Frosty (right) and cart strip (bottom)
   var avoidRight = 72, avoidBottom = 110;
 
   function reducedMotion() {
@@ -40,10 +37,23 @@
     H = window.innerHeight || 844;
   }
 
+  function goTo(item) {
+    hide(true);
+    var target = item.href + (item.hash ? ('#' + item.hash) : '');
+    if (window.__FF_NAV__) window.__FF_NAV__(target);
+    else location.href = (window.__FF_ABS__ ? window.__FF_ABS__(item.href) : item.href) + (item.hash ? ('#' + item.hash) : '');
+    if (item.hash) {
+      setTimeout(function () {
+        var el = document.getElementById(item.hash);
+        if (el) try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+      }, 450);
+    }
+  }
+
   function build() {
     root = el('div', { id: 'ff-float-root', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Pick your menu', hidden: 'true' });
     var head = el('div', { className: 'ff-float-head' },
-      '<h2>Pick your menu</h2><p>Tap a bubble — they float like they’re in water.</p>');
+      '<h2>Pick your menu</h2><p>Tap a bubble to jump in.</p>');
     stage = el('div', { id: 'ff-float-stage' });
     var skip = el('button', { type: 'button', className: 'ff-float-skip' }, 'Skip — browse home');
     skip.addEventListener('click', function () {
@@ -79,7 +89,7 @@
       } else {
         b.innerHTML = '<span class="ic emoji">' + item.emoji + '</span><span class="lb">' + item.label + '</span>';
       }
-      var r = 40 + (i % 3) * 4;
+      var r = 42 + (i % 2) * 4;
       b.style.width = b.style.height = (r * 2) + 'px';
       stage.appendChild(b);
       bubbles.push({
@@ -91,11 +101,7 @@
         o.paused = true; o.pauseUntil = performance.now() + 900;
         b.classList.add('is-paused');
       });
-      b.addEventListener('click', function () {
-        hide(true);
-        if (window.__FF_NAV__) window.__FF_NAV__(item.href);
-        else location.href = (window.__FF_ABS__ ? window.__FF_ABS__(item.href) : item.href);
-      });
+      b.addEventListener('click', function () { goTo(item); });
     });
 
     window.addEventListener('resize', function () { size(); layoutSeed(false); });
@@ -105,12 +111,12 @@
     size();
     var usableW = Math.max(120, W - padSide * 2 - avoidRight);
     var usableH = Math.max(120, H - padTop - Math.max(padBottom, avoidBottom));
-    bubbles.forEach(function (o, i) {
+    bubbles.forEach(function (o) {
       if (randomize || (!o.x && !o.y)) {
         o.x = padSide + o.r + Math.random() * (usableW - o.r * 2);
         o.y = padTop + o.r + Math.random() * (usableH - o.r * 2);
         var ang = Math.random() * Math.PI * 2;
-        var spd = 0.25 + Math.random() * 0.35; // slow enough to tap
+        var spd = 0.22 + Math.random() * 0.28;
         o.vx = Math.cos(ang) * spd;
         o.vy = Math.sin(ang) * spd;
       }
@@ -119,7 +125,6 @@
   }
 
   function applyTransform(o, t) {
-    // gentle bob + slight parallax by depth (radius)
     var bob = reduced ? 0 : Math.sin(t / 700 + o.r) * 3;
     var parallax = reduced ? 0 : Math.sin(t / 1100 + o.x * 0.01) * (o.r / 40);
     var x = o.x - o.r;
@@ -134,7 +139,6 @@
     var minX = padSide;
     var minY = padTop;
 
-    // integrate
     for (var i = 0; i < bubbles.length; i++) {
       var o = bubbles[i];
       if (o.paused) {
@@ -142,13 +146,11 @@
         applyTransform(o, t); continue;
       }
       o.x += o.vx; o.y += o.vy;
-      // edge bounce
       if (o.x - o.r < minX) { o.x = minX + o.r; o.vx = Math.abs(o.vx); }
       if (o.x + o.r > maxX) { o.x = maxX - o.r; o.vx = -Math.abs(o.vx); }
       if (o.y - o.r < minY) { o.y = minY + o.r; o.vy = Math.abs(o.vy); }
       if (o.y + o.r > maxY) { o.y = maxY - o.r; o.vy = -Math.abs(o.vy); }
     }
-    // soft collisions
     for (var a = 0; a < bubbles.length; a++) {
       for (var b = a + 1; b < bubbles.length; b++) {
         var A = bubbles[a], B = bubbles[b];
@@ -161,7 +163,6 @@
           var overlap = (min - dist) / 2;
           A.x -= nx * overlap; A.y -= ny * overlap;
           B.x += nx * overlap; B.y += ny * overlap;
-          // exchange a bit of velocity along normal
           var dvx = A.vx - B.vx, dvy = A.vy - B.vy;
           var impact = dvx * nx + dvy * ny;
           if (impact > 0) {
@@ -186,7 +187,6 @@
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(step);
     } else {
-      // static grid: clear absolute transforms
       bubbles.forEach(function (o) { o.el.style.transform = ''; });
     }
     if (fromTree) root.dataset.fromTree = '1';
@@ -201,7 +201,6 @@
   }
 
   function maybeShowToggle() {
-    // Professional chrome: Menus entry lives in the More sheet — keep orb hidden
     if (toggle) {
       toggle.classList.remove('is-on');
       toggle.hidden = true;
@@ -209,24 +208,22 @@
     }
   }
 
-  function afterTheme() {
-    // Called when tree finishes
-    show(true);
+  function afterTheme(ev) {
+    // Do not auto-open after entry — keeps clicks instant. Browse menus via More.
+    var detail = (ev && ev.detail) || {};
+    if (detail.skipFloat || detail.restored) return;
   }
 
   function boot() {
     build();
     maybeShowToggle();
-    window.addEventListener('ff:theme', function () { afterTheme(); });
-    // If theme already set (session) and fresh load on home, optional: don't auto-open float
-    // Toggle visibility on route-ish changes
+    window.addEventListener('ff:theme', afterTheme);
     var _push = history.pushState;
     history.pushState = function () {
       _push.apply(this, arguments);
       setTimeout(maybeShowToggle, 50);
     };
     window.addEventListener('popstate', function () { setTimeout(maybeShowToggle, 50); });
-    // Observe tree hide
     var tree = document.getElementById('ff-tree-root');
     if (tree) {
       var mo = new MutationObserver(function () { maybeShowToggle(); });

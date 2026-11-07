@@ -200,3 +200,120 @@ div[data-testid="frosty-panel"]{
 body:has(#ff-frosty-chat:not([hidden])) [data-radix-portal]{
   /* keep other portals; frosty panel already hidden by testid */
 }
+
+/* —— Sticky category + filter: one compact horizontally scrollable row —— */
+body[class*="ff-theme-"] .sticky.top-16{
+  top: 56px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  margin-top: 8px !important;
+  max-height: 52px;
+  overflow: hidden;
+}
+body[class*="ff-theme-"] .sticky.top-16 > div,
+body[class*="ff-theme-"] .sticky.top-16 nav,
+body[class*="ff-theme-"] .sticky.top-16 .flex{
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  gap: 8px !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  max-height: 40px;
+}
+body[class*="ff-theme-"] .sticky.top-16::-webkit-scrollbar,
+body[class*="ff-theme-"] .sticky.top-16 *::-webkit-scrollbar{ display:none; }
+body[class*="ff-theme-"] .chip{
+  min-height: 32px !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
+}
+
+/* —— Dish cards: equal height, price/Add pinned —— */
+body[class*="ff-theme-"] .mt-5.grid,
+body[class*="ff-theme-"] section .grid{
+  align-items: stretch !important;
+}
+body[class*="ff-theme-"] article.ff-card{
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+  min-height: 0;
+}
+body[class*="ff-theme-"] article.ff-card > .p-3,
+body[class*="ff-theme-"] article.ff-card > .p-4,
+body[class*="ff-theme-"] article.ff-card > div:last-child{
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+body[class*="ff-theme-"] article.ff-card .price,
+body[class*="ff-theme-"] article.ff-card [data-testid*="add"],
+body[class*="ff-theme-"] article.ff-card button.btn-flame,
+body[class*="ff-theme-"] article.ff-card .mt-auto{
+  margin-top: auto;
+}
+
+/* —— Added toast: bottom, single —— */
+[data-sonner-toaster],
+ol[data-sonner-toaster],
+section[aria-label="Notifications viewport"],
+li[data-sonner-toast],
+.ff-toast-host{
+  top: auto !important;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: min(360px, calc(100vw - 24px)) !important;
+  z-index: 100010 !important;
+}
+[data-sonner-toaster] [data-sonner-toast] + [data-sonner-toast]{
+  display: none !important; /* single confirmation */
+}
+
+/* —— Black strip above header on /menu —— */
+body[class*="ff-theme-"] header,
+#root > div > header{
+  margin-top: 0 !important;
+}
+body[class*="ff-theme-"] #root > div{
+  padding-top: 0 !important;
+}
+body[class*="ff-theme-"]::before{
+  top: 0 !important;
+}
+html, body{
+  background-color: var(--bg, #0b0d10);
+}
+/* kill mysterious top gap / safe-area double padding */
+body[class*="ff-theme-"] main#main,
+body[class*="ff-theme-"] #main{
+  padding-top: 0 !important;
+}
+
+/* —— Ask Frosty greeting bubble sizing —— */
+.ff-fr-bubble.ff-fr-frosty{
+  max-width: 88%;
+  width: fit-content;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.ff-fr-log{ gap: 8px; }
+
+/* —— Basket: hide duplicate upsell / launch banners —— */
+body[class*="ff-theme-"] [data-testid="cart-upsell"] ~ [data-testid="cart-upsell"],
+body[class*="ff-theme-"] [data-testid="pair-upsell"] ~ [data-testid="pair-upsell"]{
+  display: none !important;
+}
+
+
+/* Emergent spacing baseline — don't invent a new layout */
+body[class*="ff-theme-"] .wrap{
+  max-width: 1200px;
+}
+body[class*="ff-theme-"] article.ff-card{
+  box-shadow: var(--shadow, 0 10px 30px #00000073) !important;
+}

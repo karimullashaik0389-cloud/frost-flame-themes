@@ -219,24 +219,26 @@
     clearInlineVars(root);
     clearInlineVars(body);
     if (!theme) return;
+    // Keep Emergent base design language (bg/surface/text/fonts).
+    // Themes only nudge accents + our overlay tokens.
     Object.keys(theme.vars).forEach(function (k) {
       root.style.setProperty(k, theme.vars[k]);
       body.style.setProperty(k, theme.vars[k]);
     });
+    // Accent-only site tokens — never rewrite layout/surface/ink/type
+    var ACCENT_KEYS = { '--frost': 1, '--flame': 1, '--copper': 1, '--primary': 1 };
     if (theme.site) {
       Object.keys(theme.site).forEach(function (k) {
+        if (!ACCENT_KEYS[k]) return;
         root.style.setProperty(k, theme.site[k]);
         body.style.setProperty(k, theme.site[k]);
       });
     }
+    // Overlay chrome may still use theme display font; leave host --font-* alone
     root.style.setProperty('--ff-display', theme.fonts.display);
     root.style.setProperty('--ff-body', theme.fonts.body);
-    root.style.setProperty('--font-display', theme.fonts.display);
-    root.style.setProperty('--font-body', theme.fonts.body);
     body.style.setProperty('--ff-display', theme.fonts.display);
     body.style.setProperty('--ff-body', theme.fonts.body);
-    body.style.setProperty('--font-display', theme.fonts.display);
-    body.style.setProperty('--font-body', theme.fonts.body);
   }
 
   function ensureGreet() {
@@ -250,33 +252,10 @@
   }
 
   function showGreet(theme) {
+    // Mood chip removed — it overlapped titles and the launch pill. Theme still applies via CSS vars.
     var el = ensureGreet();
-    if (!theme) {
-      el.hidden = true;
-      el.classList.remove('is-on', 'is-dim');
-      return;
-    }
-    el.innerHTML =
-      '<span class="ff-tg-emoji">' + theme.emoji + '</span>' +
-      '<strong class="ff-tg-title">' + theme.title + '</strong>' +
-      '<span class="ff-tg-sub">' + theme.greeting + '</span>';
-    el.hidden = false;
-    el.classList.add('is-on');
-    el.classList.remove('is-dim');
-    // Show once briefly, then remove — keeps the menu calm and professional
-    clearTimeout(showGreet._t);
-    clearTimeout(showGreet._t2);
-    showGreet._t = setTimeout(function () {
-      el.classList.add('is-dim');
-    }, 1800);
-    showGreet._t2 = setTimeout(function () {
-      el.hidden = true;
-      el.classList.remove('is-on', 'is-dim');
-    }, 2800);
-    el.onclick = function () {
-      el.hidden = true;
-      el.classList.remove('is-on', 'is-dim');
-    };
+    el.hidden = true;
+    el.classList.remove('is-on', 'is-dim');
   }
 
   function burst(theme) {

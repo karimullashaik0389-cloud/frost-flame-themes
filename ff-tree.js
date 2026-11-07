@@ -1,22 +1,23 @@
 /**
- * Frost & Flame — step-by-step entry tree (ONE screen visible at a time).
- * Hi → How many → branch → apply theme id → enter site.
+ * Frost & Flame — one-screen entry (fast).
+ * Remembered in localStorage; deep links / saved theme skip straight to content.
  * Themes: solo_m, solo_f, friends, couple, gang, family, family_kids
- * Theme styling applied by ff-themes.js when a theme is chosen.
  */
 (function () {
   var STORAGE = 'ff_entry_theme';
+  var STORAGE_LEGACY = 'ff_entry_theme'; // was sessionStorage
   var root, changeBtn;
-  var state = { step: 'hi', count: null, themeId: null };
+  var state = { step: 'pick', count: null, themeId: null };
+  var finishing = false;
 
   var THEME_META = {
-    solo_m: { label: 'Just you · playful', emoji: '🧔' },
-    solo_f: { label: 'Just you · stylish', emoji: '💁‍♀️' },
-    friends: { label: 'Two friends', emoji: '👯' },
-    couple: { label: 'Couple · date night', emoji: '💑' },
-    gang: { label: "Gang's Night Out", emoji: '🌃' },
-    family: { label: 'Big Family Feast', emoji: '🪔' },
-    family_kids: { label: 'Family with kids', emoji: '👨‍👩‍👧‍👦' }
+    solo_m: { label: 'Just you · for him', emoji: '🧔', group: '1' },
+    solo_f: { label: 'Just you · for her', emoji: '💁‍♀️', group: '1' },
+    friends: { label: 'Two friends', emoji: '👯', group: '2' },
+    couple: { label: 'Couple', emoji: '💑', group: '2' },
+    gang: { label: "Gang's night out", emoji: '🌃', group: '3+' },
+    family: { label: 'Family feast', emoji: '🪔', group: '3+' },
+    family_kids: { label: 'Family with kids', emoji: '👨‍👩‍👧‍👦', group: '3+' }
   };
 
   function timeGreeting() {
@@ -39,38 +40,36 @@
     return n;
   }
 
-  function clearActive() {
-    if (!root) return;
-    root.querySelectorAll('.ff-tree-step').forEach(function (s) {
-      s.classList.remove('is-active');
-      s.setAttribute('aria-hidden', 'true');
-    });
-  }
-
-  function showStep(id) {
-    clearActive();
-    state.step = id;
-    var step = root.querySelector('[data-ff-step="' + id + '"]');
-    if (!step) return;
-    step.classList.add('is-active');
-    step.setAttribute('aria-hidden', 'false');
-    // Assert invariant for tests / safety
-    var visible = root.querySelectorAll('.ff-tree-step.is-active');
-    if (visible.length !== 1) {
-      console.error('[ff-tree] expected exactly 1 active step, got', visible.length);
-    }
-  }
-
-  function finish(themeId) {
-    state.themeId = themeId;
-    try { sessionStorage.setItem(STORAGE, themeId); } catch (e) {}
-    document.documentElement.setAttribute('data-ff-theme', themeId);
-    document.body.classList.add('ff-theme-' + themeId);
-    hideOverlay();
-    updateChangeChip();
+  function readSaved() {
     try {
-      window.dispatchEvent(new CustomEvent('ff:theme', { detail: { themeId: themeId } }));
+      var v = localStorage.getItem(STORAGE);
+      if (v && THEME_META[v]) return v;
     } catch (e) {}
+    try {
+      var s = sessionStorage.getItem(STORAGE_LEGACY);
+      if (s && THEME_META[s]) {
+        try { localStorage.setItem(STORAGE, s); } catch (e2) {}
+        return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function writeSaved(themeId) {
+    try { localStorage.setItem(STORAGE, themeId); } catch (e) {}
+    try { sessionStorage.setItem(STORAGE_LEGACY, themeId); } catch (e) {}
+  }
+
+  function clearSaved() {
+    try { localStorage.removeItem(STORAGE); } catch (e) {}
+    try { sessionStorage.removeItem(STORAGE_LEGACY); } catch (e) {}
+  }
+
+  function applyThemeClasses(themeId) {
+    document.documentElement.setAttribute('data-ff-theme', themeId);
+    document.body.className = document.body.className
+      .split(/\s+/).filter(function (c) { return c && c.indexOf('ff-theme-') !== 0; }).join(' ');
+    document.body.classList.add('ff-theme-' + themeId);
   }
 
   function hideOverlay() {
@@ -80,12 +79,11 @@
     document.body.style.overflow = '';
   }
 
-  function showOverlay(startStep) {
+  function showOverlay() {
     if (!root) return;
     root.hidden = false;
     root.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    showStep(startStep || 'hi');
     updateChangeChip();
   }
 
@@ -101,15 +99,45 @@
     changeBtn.classList.add('is-on');
   }
 
+  function finish(themeId, opts) {
+    if (finishing) return;
+    finishing = true;
+    opts = opts || {};
+    state.themeId = themeId;
+    writeSaved(themeId);
+    applyThemeClasses(themeId);
+    hideOverlay();
+    updateChangeChip();
+    // Defer theme event so the click paints immediately (no main-thread hang)
+    var fire = function () {
+      try {
+        window.dispatchEvent(new CustomEvent('ff:theme', {
+          detail: { themeId: themeId, skipFloat: !!opts.skipFloat, fromEntry: !opts.silent }
+        }));
+      } catch (e) {}
+      finishing = false;
+    };
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () { setTimeout(fire, 0); });
+    } else {
+      setTimeout(fire, 0);
+    }
+  }
+
+  function skipStraight() {
+    // Default calm theme so CSS tokens apply; user can change later via More
+    finish('friends', { skipFloat: true });
+  }
+
   function restart() {
     state.count = null;
     state.themeId = null;
-    try { sessionStorage.removeItem(STORAGE); } catch (e) {}
+    clearSaved();
     document.documentElement.removeAttribute('data-ff-theme');
-    // remove theme classes
     document.body.className = document.body.className
       .split(/\s+/).filter(function (c) { return c && c.indexOf('ff-theme-') !== 0; }).join(' ');
-    showOverlay('hi');
+    finishing = false;
+    showOverlay();
   }
 
   function build() {
@@ -121,78 +149,34 @@
     });
 
     var sheet = el('div', { className: 'ff-tree-sheet' });
+    var pick = el('div', { className: 'ff-tree-step is-active', 'data-ff-step': 'pick', 'aria-hidden': 'false' });
+    pick.appendChild(el('div', { className: 'ff-tree-emoji', text: '🔥❄️' }));
+    pick.appendChild(el('h1', { className: 'ff-tree-title', text: timeGreeting() }));
+    pick.appendChild(el('p', { className: 'ff-tree-sub', text: 'Welcome to Frost & Flame. Who’s at your table? One tap — or skip straight to the menu.' }));
 
-    // Screen 1: Hi
-    var hi = el('div', { className: 'ff-tree-step', 'data-ff-step': 'hi', 'aria-hidden': 'true' });
-    hi.appendChild(el('div', { className: 'ff-tree-emoji', text: '🔥❄️' }));
-    hi.appendChild(el('h1', { className: 'ff-tree-title', text: 'Hi' }));
-    hi.appendChild(el('p', { className: 'ff-tree-sub', text: timeGreeting() + ' — welcome to Frost & Flame.' }));
-    var hiOpts = el('div', { className: 'ff-tree-opts' });
-    var hiBtn = el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-action': 'to-count' }, 'Continue');
-    hiOpts.appendChild(hiBtn);
-    hi.appendChild(hiOpts);
-
-    // Screen 2: How many
-    var count = el('div', { className: 'ff-tree-step', 'data-ff-step': 'count', 'aria-hidden': 'true' });
-    count.appendChild(el('div', { className: 'ff-tree-emoji', text: '👥' }));
-    count.appendChild(el('h1', { className: 'ff-tree-title', text: 'How many people are you?' }));
-    count.appendChild(el('p', { className: 'ff-tree-sub', text: 'Pick one — we’ll shape the menu for your table.' }));
-    var countOpts = el('div', { className: 'ff-tree-opts' });
-    ;[
-      { v: '1', label: '1' },
-      { v: '2', label: '2' },
-      { v: '3', label: '3' },
-      { v: 'more', label: 'More than 3', hint: 'Four or more' }
-    ].forEach(function (o) {
+    var opts = el('div', { className: 'ff-tree-opts ff-tree-opts--grid' });
+    Object.keys(THEME_META).forEach(function (id) {
+      var m = THEME_META[id];
       var b = el('button', {
-        type: 'button', className: 'ff-tree-btn',
-        'data-ff-count': o.v
-      }, o.label + (o.hint ? '<span class="hint">' + o.hint + '</span>' : ''));
-      countOpts.appendChild(b);
+        type: 'button',
+        className: 'ff-tree-btn ff-tree-btn--compact',
+        'data-ff-theme': id,
+        'data-testid': 'ff-tree-theme-' + id
+      }, '<span class="ff-tree-btn-emoji" aria-hidden="true">' + m.emoji + '</span>' +
+         '<span class="ff-tree-btn-label">' + m.label + '</span>');
+      opts.appendChild(b);
     });
-    count.appendChild(countOpts);
-    count.appendChild(el('button', { type: 'button', className: 'ff-tree-back', 'data-ff-back': 'hi' }, '← Back'));
+    pick.appendChild(opts);
 
-    // Screen 3a: gender (solo)
-    var gender = el('div', { className: 'ff-tree-step', 'data-ff-step': 'gender', 'aria-hidden': 'true' });
-    gender.appendChild(el('div', { className: 'ff-tree-emoji', text: '✨' }));
-    gender.appendChild(el('h1', { className: 'ff-tree-title', text: 'Are you male or female?' }));
-    gender.appendChild(el('p', { className: 'ff-tree-sub', text: 'So we can set the right vibe for one.' }));
-    var gOpts = el('div', { className: 'ff-tree-opts' });
-    gOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'solo_m' }, 'Male'));
-    gOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'solo_f' }, 'Female'));
-    gender.appendChild(gOpts);
-    gender.appendChild(el('button', { type: 'button', className: 'ff-tree-back', 'data-ff-back': 'count' }, '← Back'));
+    var skip = el('button', {
+      type: 'button',
+      className: 'ff-tree-skip',
+      'data-ff-action': 'skip',
+      'data-testid': 'ff-tree-skip'
+    }, 'Skip — browse the menu');
+    pick.appendChild(skip);
 
-    // Screen 3b: who with (two)
-    var who2 = el('div', { className: 'ff-tree-step', 'data-ff-step': 'who2', 'aria-hidden': 'true' });
-    who2.appendChild(el('div', { className: 'ff-tree-emoji', text: 'ふたり' }));
-    who2.appendChild(el('h1', { className: 'ff-tree-title', text: "Who's with you?" }));
-    who2.appendChild(el('p', { className: 'ff-tree-sub', text: 'Friend night or date night?' }));
-    // fix emoji - I used wrong chars
-    who2.querySelector('.ff-tree-emoji').textContent = '🫶';
-    var wOpts = el('div', { className: 'ff-tree-opts' });
-    wOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'friends' }, 'Friend<span class="hint">Two friends</span>'));
-    wOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'couple' }, 'Partner<span class="hint">Date night</span>'));
-    who2.appendChild(wOpts);
-    who2.appendChild(el('button', { type: 'button', className: 'ff-tree-back', 'data-ff-back': 'count' }, '← Back'));
-
-    // Screen 3c: kids? (more than 3)
-    var kids = el('div', { className: 'ff-tree-step', 'data-ff-step': 'kids', 'aria-hidden': 'true' });
-    kids.appendChild(el('div', { className: 'ff-tree-emoji', text: '👨‍👩‍👧‍👦' }));
-    kids.appendChild(el('h1', { className: 'ff-tree-title', text: 'Any kids with you?' }));
-    kids.appendChild(el('p', { className: 'ff-tree-sub', text: 'We’ll keep little ones busy if yes.' }));
-    var kOpts = el('div', { className: 'ff-tree-opts' });
-    kOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'family_kids' }, 'Yes<span class="hint">Kids’ colouring zone</span>'));
-    kOpts.appendChild(el('button', { type: 'button', className: 'ff-tree-btn', 'data-ff-theme': 'family' }, 'No<span class="hint">Big Family Feast</span>'));
-    kids.appendChild(kOpts);
-    kids.appendChild(el('button', { type: 'button', className: 'ff-tree-back', 'data-ff-back': 'count' }, '← Back'));
-
-    sheet.appendChild(hi);
-    sheet.appendChild(count);
-    sheet.appendChild(gender);
-    sheet.appendChild(who2);
-    sheet.appendChild(kids);
+    sheet.appendChild(pick);
     root.appendChild(sheet);
     document.body.appendChild(root);
 
@@ -203,62 +187,68 @@
     changeBtn.addEventListener('click', restart);
     document.body.appendChild(changeBtn);
 
+    // Capture-phase so the UI responds before any heavy listeners
     root.addEventListener('click', function (e) {
-      var t = e.target.closest('[data-ff-action],[data-ff-count],[data-ff-theme],[data-ff-back]');
+      var t = e.target.closest('[data-ff-theme],[data-ff-action]');
       if (!t || !root.contains(t)) return;
-      if (t.hasAttribute('data-ff-action') && t.getAttribute('data-ff-action') === 'to-count') {
-        showStep('count');
-        return;
-      }
-      if (t.hasAttribute('data-ff-back')) {
-        showStep(t.getAttribute('data-ff-back'));
-        return;
-      }
-      if (t.hasAttribute('data-ff-count')) {
-        var c = t.getAttribute('data-ff-count');
-        state.count = c;
-        if (c === '1') showStep('gender');
-        else if (c === '2') showStep('who2');
-        else if (c === '3') finish('gang');
-        else if (c === 'more') showStep('kids');
+      e.preventDefault();
+      if (t.getAttribute('data-ff-action') === 'skip') {
+        skipStraight();
         return;
       }
       if (t.hasAttribute('data-ff-theme')) {
-        finish(t.getAttribute('data-ff-theme'));
+        finish(t.getAttribute('data-ff-theme'), { skipFloat: true });
       }
-    });
+    }, true);
+  }
+
+  function isDeepLink() {
+    var path = location.pathname || '/';
+    try {
+      var base = window.__FF_BASE__ || '';
+      if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+    } catch (e) {}
+    if (path !== '/' && path !== '') return true;
+    if (location.hash && location.hash.length > 1) return true;
+    return false;
   }
 
   function boot() {
     build();
     var params = new URLSearchParams(location.search);
     var forced = params.get('group') || params.get('theme');
-    var saved = null;
-    try { saved = sessionStorage.getItem(STORAGE); } catch (e) {}
-    if (params.get('fresh') === '1') {
-      try { sessionStorage.removeItem(STORAGE); } catch (e) {}
-      saved = null;
-    }
+    if (params.get('fresh') === '1') clearSaved();
+    var saved = readSaved();
+
     if (forced && THEME_META[forced]) {
-      finish(forced);
+      finish(forced, { skipFloat: true, silent: true });
     } else if (saved && THEME_META[saved]) {
       state.themeId = saved;
-      document.documentElement.setAttribute('data-ff-theme', saved);
-      document.body.classList.add('ff-theme-' + saved);
+      applyThemeClasses(saved);
       hideOverlay();
       updateChangeChip();
+      // Soft notify themes layer without reopening float
+      try {
+        window.dispatchEvent(new CustomEvent('ff:theme', {
+          detail: { themeId: saved, skipFloat: true, restored: true }
+        }));
+      } catch (e) {}
+    } else if (isDeepLink()) {
+      // Deep link: skip gate, apply calm default so themed CSS still works
+      finish('friends', { skipFloat: true, silent: true });
     } else {
-      showOverlay('hi');
+      showOverlay();
     }
-    // Test helper
+
     window.FFTree = {
-      getStep: function () { return state.step; },
+      getStep: function () { return root.hidden ? 'done' : 'pick'; },
       getTheme: function () { return state.themeId; },
       visibleStepCount: function () {
         if (root.hidden) return 0;
         return root.querySelectorAll('.ff-tree-step.is-active').length;
       },
       restart: restart,
+      finish: finish,
       THEME_META: THEME_META
     };
   }

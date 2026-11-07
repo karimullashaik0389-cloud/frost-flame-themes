@@ -9,6 +9,30 @@
 
   var STORAGE_FORCE = 'ff_fab_force_show';
   var moreBtn = null;
+
+  var frostyQuick = null;
+
+  function ensureFrostyBtn() {
+    if (frostyQuick && frostyQuick.isConnected) return frostyQuick;
+    frostyQuick = document.getElementById('ff-frosty-quick');
+    if (!frostyQuick) {
+      frostyQuick = el('button', {
+        type: 'button',
+        id: 'ff-frosty-quick',
+        className: 'ff-frosty-quick',
+        'aria-label': 'Ask Frosty',
+        'data-testid': 'ff-frosty-quick'
+      }, '<span class="ff-frosty-quick-ic" aria-hidden="true">❄</span><span class="ff-frosty-quick-lbl">Ask Frosty</span>');
+      frostyQuick.addEventListener('click', function (e) {
+        e.preventDefault();
+        closeSheet();
+        openFrostyPanel();
+      });
+      document.body.appendChild(frostyQuick);
+    }
+    return frostyQuick;
+  }
+
   var sheet = null;
   var backdrop = null;
   var handle = null;
@@ -124,9 +148,9 @@
             '<span class="ff-more-ic" aria-hidden="true">❄</span>' +
             '<span class="ff-more-copy"><strong>Ask Frosty</strong><em>Menu help &amp; recommendations</em></span>' +
           '</button>' +
-          '<button type="button" class="ff-more-item" data-ff-more="games" data-testid="ff-more-games">' +
-            '<span class="ff-more-ic" aria-hidden="true">◆</span>' +
-            '<span class="ff-more-copy"><strong>Games</strong><em>Light puzzles while you wait</em></span>' +
+          '<button type="button" class="ff-more-item ff-more-item--games" data-ff-more="games" data-testid="ff-more-games">' +
+            '<span class="ff-more-ic ff-more-ic--games" aria-hidden="true">🎮</span>' +
+            '<span class="ff-more-copy"><strong>Games</strong><em>Bright puzzles while you wait</em></span>' +
           '</button>' +
           '<button type="button" class="ff-more-item" data-ff-more="stories" data-testid="ff-more-stories">' +
             '<span class="ff-more-ic" aria-hidden="true">☰</span>' +
@@ -293,6 +317,10 @@
     ensureHandle();
     moreBtn.classList.toggle('is-tucked', tucked);
     moreBtn.setAttribute('aria-hidden', tucked ? 'true' : 'false');
+    if (frostyQuick) {
+      frostyQuick.classList.toggle('is-tucked', tucked);
+      frostyQuick.setAttribute('aria-hidden', tucked ? 'true' : 'false');
+    }
     if (tucked) {
       closeSheet();
       handle.hidden = false;
@@ -318,16 +346,19 @@
     hideLegacyChrome();
     guardHeaderLogin();
     ensureMoreBtn();
+    ensureFrostyBtn();
     ensureHandle();
     ensureSheet();
 
     if (entryOpen()) {
       moreBtn.style.display = 'none';
+      if (frostyQuick) frostyQuick.style.display = 'none';
       if (handle) handle.hidden = true;
       closeSheet();
       return;
     }
     moreBtn.style.display = '';
+    if (frostyQuick) frostyQuick.style.display = '';
 
     if (cartCount() === 0 && !pathIsCheckout() && !stickyCartVisible() && !document.querySelector('[data-testid="order-sent-confirmation"]')) {
       try { sessionStorage.removeItem(STORAGE_FORCE); } catch (e) {}
@@ -338,6 +369,7 @@
 
   function boot() {
     ensureMoreBtn();
+    ensureFrostyBtn();
     ensureHandle();
     ensureSheet();
     hideLegacyChrome();

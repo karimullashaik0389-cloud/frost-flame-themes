@@ -12,7 +12,8 @@ body.ff-theme-couple,
 body.ff-theme-gang,
 body.ff-theme-family,
 body.ff-theme-family_kids{
-  background-color: var(--ff-bg, #0B0D10);
+  /* Keep Emergent base background; themes are accents only */
+  background-color: var(--bg, #0B0D10);
 }
 
 /* Ambient motif behind the React root — pointer-events none, no layout shift */
@@ -22,7 +23,7 @@ body[class*="ff-theme-"]::before{
   background: var(--ff-grad,
     radial-gradient(600px 380px at 20% 0%, rgba(255,106,26,.10), transparent 55%),
     linear-gradient(180deg, rgba(11,13,16,.12), rgba(11,13,16,.35)));
-  opacity:.55;
+  opacity:.22;
 }
 body[class*="ff-theme-"] #root{ position:relative; z-index:1; }
 
@@ -262,3 +263,40 @@ body.ff-theme-couple::before{ opacity:.5; }
 body.ff-theme-gang::before{ opacity:.5; }
 body.ff-theme-solo_f::before{ opacity:.48; }
 body.ff-theme-family::before{ opacity:.5; }
+
+
+/* Fix: remove floating mood chip that overlapped titles / launch pill */
+#ff-theme-greet{ display:none !important; }
+
+
+/* —— Emergent-first: themes are accents, not a redesign —— */
+body[class*="ff-theme-"] .h1,
+body[class*="ff-theme-"] .h2,
+body[class*="ff-theme-"] .h3,
+body[class*="ff-theme-"] .font-display{
+  font-family: var(--font-display, "Cormorant Garamond", Georgia, serif) !important;
+}
+body[class*="ff-theme-"]{
+  font-family: var(--font-body, Inter, system-ui, sans-serif);
+}
+body[class*="ff-theme-"] .ff-card,
+body[class*="ff-theme-"] article.ff-card{
+  background: var(--surface, #15181d) !important;
+  border-color: var(--border, #262b33) !important;
+  border-radius: var(--r-card, 16px) !important;
+}
+body[class*="ff-theme-"] .btn-flame{
+  background: var(--flame, #ff6a1a) !important;
+  border-color: var(--flame, #ff6a1a) !important;
+  color: var(--bg, #0b0d10) !important;
+}
+body[class*="ff-theme-"] .btn-ghost{
+  border-color: var(--frost, #6ccff6) !important;
+  color: var(--frost, #6ccff6) !important;
+}
+body[class*="ff-theme-"] .chip{
+  background: var(--surface, #15181d) !important;
+  border-color: var(--border-input, #6b7685) !important;
+  color: var(--text, #eaf6fc) !important;
+}
+body[class*="ff-theme-"] .price{ color: var(--copper, #f0a848) !important; }
