@@ -21,7 +21,7 @@
 
   function loadMenu() {
     if (loaded) return Promise.resolve();
-    var url = withBase('/api/menu');
+    var url = (typeof window.__FF_ABS__ === 'function') ? window.__FF_ABS__('/api/menu') : withBase('/api/menu');
     return fetch(url, { credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -36,25 +36,22 @@
   }
 
   function findItemFromQuickView(qv) {
-    // Prefer add button testid: add-<id>
-    var add = qv.querySelector('[data-testid^="add-"], [data-testid="qv-add-btn"]');
-    var root = qv;
-    // Look for title
     var titleEl = qv.querySelector('h1, h2, [class*="title"], .h1');
     var title = titleEl ? String(titleEl.textContent || '').trim().toLowerCase() : '';
     if (title && byName[title]) return byName[title];
-    // Scan page for recently clicked add-<id>
     var hit = null;
     Object.keys(byId).forEach(function (id) {
-      if (title && byId[id].name && title.indexOf(String(byId[id].name).toLowerCase()) === 0) hit = byId[id];
+      var n = byId[id].name ? String(byId[id].name).toLowerCase() : '';
+      if (title && n && title.indexOf(n) === 0) hit = byId[id];
     });
     if (hit) return hit;
-    // Match visible card near open state via aria
     var img = qv.querySelector('img');
     if (img && img.getAttribute('alt')) {
       var alt = String(img.getAttribute('alt') || '').toLowerCase();
       if (byName[alt]) return byName[alt];
     }
+    // data-testid on qv-add / nearby
+    var add = document.querySelector('[data-testid^="add-"].opacity-50, [data-testid="qv-add-btn"]');
     return null;
   }
 
