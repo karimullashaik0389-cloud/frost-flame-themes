@@ -1,13 +1,19 @@
 /**
- * Right-side compact FAB dock: Stories, Games, Ask Frosty (distinct looks).
- * Tucks away during cart/checkout/order so the bill keeps focus.
- * Moves Emergent frosty-fab into the dock; keeps header login free.
+ * Premium single-entry chrome: one calm More button → tidy sheet
+ * (Ask Frosty, Games, Stories, Change theme, Browse menus).
+ * Hides on cart/checkout. Never covers login, cart, or bottom nav.
  */
 (function () {
   'use strict';
   if (window.FFChrome) return;
 
   var STORAGE_FORCE = 'ff_fab_force_show';
+  var moreBtn = null;
+  var sheet = null;
+  var backdrop = null;
+  var handle = null;
+  var tucked = false;
+  var sheetOpen = false;
 
   function el(tag, attrs, html) {
     var n = document.createElement(tag);
@@ -20,118 +26,12 @@
     return n;
   }
 
-  var dock = null;
-  var handle = null;
-  var tucked = false;
-
-  function ensureDock() {
-    if (dock && dock.isConnected) return dock;
-    dock = document.getElementById('ff-fab-dock');
-    if (!dock) {
-      dock = el('div', { id: 'ff-fab-dock', 'aria-label': 'Quick actions' });
-      document.body.appendChild(dock);
-    }
-    return dock;
-  }
-
-  function ensureHandle() {
-    if (handle && handle.isConnected) return handle;
-    handle = document.getElementById('ff-fab-handle');
-    if (!handle) {
-      handle = el('button', {
-        type: 'button',
-        id: 'ff-fab-handle',
-        className: 'ff-fab-handle',
-        'aria-label': 'Show Games, Stories and Ask Frosty',
-        'data-testid': 'ff-fab-handle',
-        hidden: 'hidden'
-      }, '<span aria-hidden="true">✨</span><span class="ff-fab-handle-lbl">Play</span>');
-      handle.addEventListener('click', function () {
-        try { sessionStorage.setItem(STORAGE_FORCE, '1'); } catch (e) {}
-        setTucked(false, true);
-      });
-      document.body.appendChild(handle);
-    }
-    return handle;
-  }
-
-  function makeFab(id, cls, icon, label, onClick, testid) {
-    var b = el('button', {
-      type: 'button',
-      id: id,
-      className: 'ff-fab ' + cls,
-      'aria-label': label,
-      'data-testid': testid || id
-    });
-    b.appendChild(el('span', { className: 'ff-fab-ic', 'aria-hidden': 'true', text: icon }));
-    b.appendChild(el('span', { className: 'ff-fab-lbl', text: label }));
-    b.addEventListener('click', function (e) {
-      e.preventDefault();
-      onClick();
-    });
-    return b;
-  }
-
-  function placeGamesStories() {
-    var d = ensureDock();
-    if (!document.getElementById('ff-fab-stories')) {
-      d.appendChild(makeFab('ff-fab-stories', 'ff-fab-stories', '📖', 'Stories', function () {
-        if (window.FFPlay && window.FFPlay.openStories) window.FFPlay.openStories();
-        else if (window.FFPlay) window.FFPlay.open('books');
-      }, 'ff-fab-stories'));
-    }
-    if (!document.getElementById('ff-fab-games')) {
-      d.appendChild(makeFab('ff-fab-games', 'ff-fab-games', '🎮', 'Games', function () {
-        if (window.FFPlay && window.FFPlay.openGames) window.FFPlay.openGames();
-        else if (window.FFPlay) window.FFPlay.open('puzzles');
-      }, 'ff-fab-games'));
-    }
-  }
-
-  function restyleFrosty(fab) {
-    if (!fab || fab.dataset.ffRestyled === '1') return;
-    fab.dataset.ffRestyled = '1';
-    fab.classList.add('ff-fab-restyle');
-    var label = fab.querySelector('[data-testid="frosty-fab-label"]');
-    if (label) label.textContent = 'Ask Frosty';
-    if (!fab.querySelector('.ff-fab-ic')) {
-      var ic = el('span', { className: 'ff-fab-ic', 'aria-hidden': 'true', text: '❄️' });
-      var first = fab.firstChild;
-      if (first && first.getAttribute && first.getAttribute('aria-hidden') === 'true' && String(first.className || '').indexOf('absolute') !== -1) {
-        fab.insertBefore(ic, first.nextSibling);
-      } else {
-        fab.insertBefore(ic, fab.firstChild);
-      }
-    }
-  }
-
-  function adoptFrosty() {
-    var fab = document.querySelector('[data-testid="frosty-fab"]');
-    if (!fab) {
-      // Preview fallback when React FAB never mounts (e.g. auth/API on GH Pages)
-      ensureFallbackFrosty();
-      return !!document.getElementById('ff-fab-frosty-fallback');
-    }
-    // Prefer real FAB; remove fallback if React one appeared
-    var fb = document.getElementById('ff-fab-frosty-fallback');
-    if (fb) fb.remove();
-    restyleFrosty(fab);
-    var d = ensureDock();
-    if (fab.parentElement !== d) {
-      fab.style.bottom = 'auto';
-      fab.style.right = 'auto';
-      fab.style.position = 'relative';
-      fab.style.transform = 'none';
-      d.appendChild(fab);
-    }
-    return true;
-  }
-
   function openFrostyPanel() {
     try { window.dispatchEvent(new Event('ff:frosty')); } catch (e) {}
     var openBtn = document.querySelector('[data-testid="frosty-open-btn"]');
     if (openBtn) { try { openBtn.click(); return; } catch (e) {} }
-    // Preview-friendly panel when React Ask Frosty never mounts (GH Pages / CORS)
+    var realFab = document.querySelector('[data-testid="frosty-fab"]');
+    if (realFab) { try { realFab.click(); return; } catch (e) {} }
     var existing = document.getElementById('ff-frosty-preview');
     if (existing) { existing.hidden = false; return; }
     var panel = el('div', {
@@ -142,8 +42,8 @@
       'data-testid': 'ff-frosty-preview'
     });
     panel.innerHTML = '<div class="ff-frosty-preview-card">' +
-      '<p class="ff-frosty-preview-title">❄️ Ask Frosty</p>' +
-      '<p class="ff-frosty-preview-body">Frosty\'s chat needs the live kitchen link, so it rests on this preview. Browse the menu, or open Games and Stories on the right while you wait.</p>' +
+      '<p class="ff-frosty-preview-title">Ask Frosty</p>' +
+      '<p class="ff-frosty-preview-body">Chat rests on this preview — the live kitchen link is needed. Browse the menu, or try Games and Stories from More.</p>' +
       '<button type="button" class="ff-frosty-preview-close" data-testid="ff-frosty-preview-close">Got it</button>' +
       '</div>';
     panel.addEventListener('click', function (ev) {
@@ -154,13 +54,182 @@
     document.body.appendChild(panel);
   }
 
-  function ensureFallbackFrosty() {
-    if (document.querySelector('[data-testid="frosty-fab"]')) return;
-    if (document.getElementById('ff-fab-frosty-fallback')) return;
-    var d = ensureDock();
-    var b = makeFab('ff-fab-frosty-fallback', 'ff-fab-frosty', '❄️', 'Ask Frosty', openFrostyPanel, 'ff-fab-frosty-fallback');
-    // Match round icy styling class already in CSS for .ff-fab-frosty
-    d.appendChild(b);
+  function changeTheme() {
+    try {
+      if (window.FFTree && typeof window.FFTree.restart === 'function') {
+        window.FFTree.restart();
+        return;
+      }
+    } catch (e) {}
+    var chip = document.getElementById('ff-tree-change');
+    if (chip) { try { chip.click(); return; } catch (e) {} }
+  }
+
+  function browseMenus() {
+    try {
+      if (window.FFFloatMenu && typeof window.FFFloatMenu.show === 'function') {
+        window.FFFloatMenu.show(false);
+        return;
+      }
+    } catch (e) {}
+    var t = document.getElementById('ff-float-toggle');
+    if (t) { try { t.click(); } catch (e) {} }
+  }
+
+  function closeSheet() {
+    sheetOpen = false;
+    if (sheet) sheet.hidden = true;
+    if (backdrop) backdrop.hidden = true;
+    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+    document.documentElement.classList.remove('ff-more-open');
+  }
+
+  function openSheet() {
+    if (tucked || entryOpen()) return;
+    ensureSheet();
+    sheetOpen = true;
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    moreBtn.setAttribute('aria-expanded', 'true');
+    document.documentElement.classList.add('ff-more-open');
+    var first = sheet.querySelector('button');
+    if (first) try { first.focus(); } catch (e) {}
+  }
+
+  function toggleSheet() {
+    if (sheetOpen) closeSheet();
+    else openSheet();
+  }
+
+  function ensureSheet() {
+    if (backdrop && backdrop.isConnected && sheet && sheet.isConnected) return;
+    if (!backdrop || !backdrop.isConnected) {
+      backdrop = el('div', {
+        id: 'ff-more-backdrop',
+        'data-testid': 'ff-more-backdrop',
+        hidden: 'hidden'
+      });
+      backdrop.addEventListener('click', closeSheet);
+      document.body.appendChild(backdrop);
+    }
+    if (!sheet || !sheet.isConnected) {
+      sheet = el('div', {
+        id: 'ff-more-sheet',
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-label': 'More from Frost & Flame',
+        'data-testid': 'ff-more-sheet',
+        hidden: 'hidden'
+      });
+      sheet.innerHTML =
+        '<div class="ff-more-head">' +
+          '<p class="ff-more-kicker">Frost &amp; Flame</p>' +
+          '<h2 class="ff-more-title">More</h2>' +
+          '<p class="ff-more-sub">A quiet corner while you browse.</p>' +
+        '</div>' +
+        '<div class="ff-more-list" role="menu">' +
+          '<button type="button" class="ff-more-item" data-ff-more="frosty" data-testid="ff-more-frosty">' +
+            '<span class="ff-more-ic" aria-hidden="true">❄</span>' +
+            '<span class="ff-more-copy"><strong>Ask Frosty</strong><em>Menu help &amp; recommendations</em></span>' +
+          '</button>' +
+          '<button type="button" class="ff-more-item" data-ff-more="games" data-testid="ff-more-games">' +
+            '<span class="ff-more-ic" aria-hidden="true">◆</span>' +
+            '<span class="ff-more-copy"><strong>Games</strong><em>Light puzzles while you wait</em></span>' +
+          '</button>' +
+          '<button type="button" class="ff-more-item" data-ff-more="stories" data-testid="ff-more-stories">' +
+            '<span class="ff-more-ic" aria-hidden="true">☰</span>' +
+            '<span class="ff-more-copy"><strong>Stories</strong><em>Short reads for the table</em></span>' +
+          '</button>' +
+          '<button type="button" class="ff-more-item" data-ff-more="theme" data-testid="ff-more-theme">' +
+            '<span class="ff-more-ic" aria-hidden="true">◎</span>' +
+            '<span class="ff-more-copy"><strong>Change theme</strong><em>Who’s at your table</em></span>' +
+          '</button>' +
+          '<button type="button" class="ff-more-item" data-ff-more="menus" data-testid="ff-more-menus">' +
+            '<span class="ff-more-ic" aria-hidden="true">◌</span>' +
+            '<span class="ff-more-copy"><strong>Browse menus</strong><em>Frost, Flame, Mix &amp; more</em></span>' +
+          '</button>' +
+        '</div>' +
+        '<button type="button" class="ff-more-close" data-testid="ff-more-close">Close</button>';
+      sheet.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('[data-ff-more], .ff-more-close');
+        if (!btn || !sheet.contains(btn)) return;
+        if (btn.classList.contains('ff-more-close')) { closeSheet(); return; }
+        var act = btn.getAttribute('data-ff-more');
+        closeSheet();
+        setTimeout(function () {
+          if (act === 'frosty') openFrostyPanel();
+          else if (act === 'games') {
+            if (window.FFPlay && window.FFPlay.openGames) window.FFPlay.openGames();
+            else if (window.FFPlay) window.FFPlay.open('puzzles');
+          } else if (act === 'stories') {
+            if (window.FFPlay && window.FFPlay.openStories) window.FFPlay.openStories();
+            else if (window.FFPlay) window.FFPlay.open('books');
+          } else if (act === 'theme') changeTheme();
+          else if (act === 'menus') browseMenus();
+        }, 120);
+      });
+      document.body.appendChild(sheet);
+    }
+  }
+
+  function ensureMoreBtn() {
+    if (moreBtn && moreBtn.isConnected) return moreBtn;
+    moreBtn = document.getElementById('ff-more-btn');
+    if (!moreBtn) {
+      moreBtn = el('button', {
+        type: 'button',
+        id: 'ff-more-btn',
+        className: 'ff-more-btn',
+        'aria-label': 'More — Ask Frosty, Games, Stories',
+        'aria-expanded': 'false',
+        'aria-haspopup': 'dialog',
+        'data-testid': 'ff-more-btn'
+      }, '<span class="ff-more-btn-mark" aria-hidden="true"></span>');
+      moreBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        toggleSheet();
+      });
+      document.body.appendChild(moreBtn);
+    }
+    return moreBtn;
+  }
+
+  function ensureHandle() {
+    if (handle && handle.isConnected) return handle;
+    handle = document.getElementById('ff-fab-handle');
+    if (!handle) {
+      handle = el('button', {
+        type: 'button',
+        id: 'ff-fab-handle',
+        className: 'ff-fab-handle',
+        'aria-label': 'Show More menu',
+        'data-testid': 'ff-fab-handle',
+        hidden: 'hidden'
+      }, '<span class="ff-fab-handle-lbl">More</span>');
+      handle.addEventListener('click', function () {
+        try { sessionStorage.setItem(STORAGE_FORCE, '1'); } catch (e) {}
+        setTucked(false, true);
+        openSheet();
+      });
+      document.body.appendChild(handle);
+    }
+    return handle;
+  }
+
+  function hideLegacyChrome() {
+    // Hide scattered legacy controls — functionality lives in More sheet
+    ['ff-fab-dock', 'ff-fab-games', 'ff-fab-stories', 'ff-fab-frosty-fallback', 'ff-float-toggle', 'ff-tree-change', 'ff-play-pill', 'ff-play-nudge'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) {
+        n.setAttribute('hidden', '');
+        n.style.display = 'none';
+      }
+    });
+    document.querySelectorAll('[data-testid="frosty-fab"]').forEach(function (fab) {
+      fab.classList.add('ff-chrome-hidden-fab');
+      fab.style.display = 'none';
+      fab.setAttribute('aria-hidden', 'true');
+    });
   }
 
   function guardHeaderLogin() {
@@ -192,7 +261,6 @@
 
   function pathIsCheckout() {
     var path = location.pathname || '';
-    // GH Pages base may be stripped by shim for React; raw path may include /frost-flame-themes
     path = path.replace(/^\/frost-flame-themes/, '') || '/';
     return path === '/cart' || path.indexOf('/cart/') === 0 || path === '/build' || path.indexOf('/build/') === 0;
   }
@@ -206,27 +274,17 @@
     return r.height > 8 && r.width > 8;
   }
 
-  function orderFocusVisible() {
-    return !!(
-      document.querySelector('[data-testid="order-sent-confirmation"]') ||
-      document.querySelector('[data-testid="checkout-name"]') ||
-      document.querySelector('[data-testid="cart-total"]')
-    );
-  }
-
   function forceShow() {
     try { return sessionStorage.getItem(STORAGE_FORCE) === '1'; } catch (e) { return false; }
   }
 
   function shouldTuck() {
-    var forced = forceShow();
     var onCart = pathIsCheckout();
     var ordered = !!document.querySelector('[data-testid="order-sent-confirmation"]');
-    if (onCart || ordered) return true; // hard tuck — bill/order focus
-    if (forced) return false; // user restored via handle on menu
+    if (onCart || ordered) return true;
+    if (forceShow()) return false;
     if (stickyCartVisible()) return true;
     if (cartCount() > 0) return true;
-    if (orderFocusVisible() && onCart) return true;
     return false;
   }
 
@@ -234,25 +292,25 @@
     try {
       if (window.FFPlay && typeof window.FFPlay.close === 'function') window.FFPlay.close();
     } catch (e) {}
-    var nudge = document.getElementById('ff-play-nudge');
-    if (nudge) nudge.hidden = true;
+    closeSheet();
   }
 
   function setTucked(on, fromHandle) {
     tucked = !!on;
-    var d = ensureDock();
-    var h = ensureHandle();
-    d.classList.toggle('is-tucked', tucked);
-    d.setAttribute('aria-hidden', tucked ? 'true' : 'false');
+    ensureMoreBtn();
+    ensureHandle();
+    moreBtn.classList.toggle('is-tucked', tucked);
+    moreBtn.setAttribute('aria-hidden', tucked ? 'true' : 'false');
     if (tucked) {
-      h.hidden = false;
-      h.removeAttribute('hidden');
-      h.classList.add('is-on');
+      closeSheet();
+      handle.hidden = false;
+      handle.removeAttribute('hidden');
+      handle.classList.add('is-on');
       if (!fromHandle) closePlayPanels();
     } else {
-      h.hidden = true;
-      h.setAttribute('hidden', '');
-      h.classList.remove('is-on');
+      handle.hidden = true;
+      handle.setAttribute('hidden', '');
+      handle.classList.remove('is-on');
     }
     document.documentElement.classList.toggle('ff-fabs-tucked', tucked);
   }
@@ -265,20 +323,20 @@
   }
 
   function tick() {
-    placeGamesStories();
-    adoptFrosty();
+    hideLegacyChrome();
     guardHeaderLogin();
-    var d = ensureDock();
+    ensureMoreBtn();
     ensureHandle();
+    ensureSheet();
 
     if (entryOpen()) {
-      d.style.display = 'none';
+      moreBtn.style.display = 'none';
       if (handle) handle.hidden = true;
+      closeSheet();
       return;
     }
-    d.style.display = 'flex';
+    moreBtn.style.display = '';
 
-    // Clear force-show only when cart is truly idle (no sticky bar, no items, not on cart/order)
     if (cartCount() === 0 && !pathIsCheckout() && !stickyCartVisible() && !document.querySelector('[data-testid="order-sent-confirmation"]')) {
       try { sessionStorage.removeItem(STORAGE_FORCE); } catch (e) {}
     }
@@ -287,18 +345,21 @@
   }
 
   function boot() {
-    ensureDock();
+    ensureMoreBtn();
     ensureHandle();
-    placeGamesStories();
+    ensureSheet();
+    hideLegacyChrome();
     tick();
-    setInterval(tick, 700);
+    setInterval(tick, 800);
     window.addEventListener('ff:added', function () {
       try { sessionStorage.removeItem(STORAGE_FORCE); } catch (e) {}
       setTimeout(tick, 50);
     });
     window.addEventListener('ff:theme', tick);
     window.addEventListener('popstate', function () { setTimeout(tick, 50); });
-    // React router pushState
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && sheetOpen) closeSheet();
+    });
     var _ps = history.pushState;
     history.pushState = function () {
       var r = _ps.apply(this, arguments);
@@ -312,16 +373,18 @@
       return r;
     };
     try {
-      var obs = new MutationObserver(function () { adoptFrosty(); });
+      var obs = new MutationObserver(function () { hideLegacyChrome(); });
       obs.observe(document.body, { childList: true, subtree: true });
     } catch (e) {}
   }
 
   window.FFChrome = {
     tick: tick,
-    adoptFrosty: adoptFrosty,
     setTucked: setTucked,
-    shouldTuck: shouldTuck
+    shouldTuck: shouldTuck,
+    openSheet: openSheet,
+    closeSheet: closeSheet,
+    openFrostyPanel: openFrostyPanel
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

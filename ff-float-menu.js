@@ -201,17 +201,12 @@
   }
 
   function maybeShowToggle() {
-    // show on customer pages except when tree/float overlays are open
-    var tree = document.getElementById('ff-tree-root');
-    var treeOpen = tree && !tree.hidden;
-    var floatOpen = root && !root.hidden;
-    var path = location.pathname || '/';
-    try {
-      var base = window.__FF_BASE__ || '';
-      if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
-    } catch (e) {}
-    var ok = !treeOpen && !floatOpen && !/^\/(admin|login|signup)\/?$/.test(path);
-    toggle.classList.toggle('is-on', ok);
+    // Professional chrome: Menus entry lives in the More sheet — keep orb hidden
+    if (toggle) {
+      toggle.classList.remove('is-on');
+      toggle.hidden = true;
+      toggle.style.display = 'none';
+    }
   }
 
   function afterTheme() {

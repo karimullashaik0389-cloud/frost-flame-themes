@@ -19,7 +19,7 @@
       mood: 'Playful comic flames — cheeky, fast, for one.',
       surprise: 'flames',
       fonts: {
-        display: '"Bangers", "Comic Sans MS", system-ui, sans-serif',
+        display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
@@ -38,7 +38,7 @@
       mood: 'Stylish blush & lilac — soft, treat-yourself.',
       surprise: 'sparkles',
       fonts: {
-        display: '"Pacifico", "Segoe Script", cursive',
+        display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
@@ -57,7 +57,7 @@
       mood: 'Bright teal & sunny yellow — share, laugh, split the bill.',
       surprise: 'confetti',
       fonts: {
-        display: '"Fredoka", Inter, system-ui, sans-serif',
+        display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
@@ -95,8 +95,8 @@
       mood: 'Neon cyan & lime on midnight — street-night energy.',
       surprise: 'neon',
       fonts: {
-        display: '"Orbitron", Inter, system-ui, sans-serif',
-        body: '"Special Elite", "Courier New", monospace'
+        display: '"Cormorant Garamond", Georgia, serif',
+        body: 'Inter, system-ui, sans-serif'
       },
       vars: {
         '--ff-bg': '#060b18', '--ff-card': '#0e1630', '--ff-ink': '#e8fff8', '--ff-muted': '#8ec8c0',
@@ -133,7 +133,7 @@
       mood: 'Sky blue, grass green, sunny coral — kids busy, parents calm.',
       surprise: 'stars',
       fonts: {
-        display: '"Fredoka", Inter, system-ui, sans-serif',
+        display: '"Cormorant Garamond", Georgia, serif',
         body: 'Inter, system-ui, sans-serif'
       },
       vars: {
@@ -199,7 +199,7 @@
     var el = ensureGreet();
     if (!theme) {
       el.hidden = true;
-      el.classList.remove('is-on');
+      el.classList.remove('is-on', 'is-dim');
       return;
     }
     el.innerHTML =
@@ -208,18 +208,25 @@
       '<span class="ff-tg-sub">' + theme.greeting + '</span>';
     el.hidden = false;
     el.classList.add('is-on');
-    // Soft auto-hide after a few seconds so it doesn't block the menu
+    el.classList.remove('is-dim');
+    // Show once briefly, then remove — keeps the menu calm and professional
     clearTimeout(showGreet._t);
+    clearTimeout(showGreet._t2);
     showGreet._t = setTimeout(function () {
       el.classList.add('is-dim');
-    }, 4500);
-    el.classList.remove('is-dim');
+    }, 1800);
+    showGreet._t2 = setTimeout(function () {
+      el.hidden = true;
+      el.classList.remove('is-on', 'is-dim');
+    }, 2800);
     el.onclick = function () {
-      el.classList.toggle('is-dim');
+      el.hidden = true;
+      el.classList.remove('is-on', 'is-dim');
     };
   }
 
   function burst(theme) {
+    // Premium: no falling emoji over menu content. Optional faint header sparkle only.
     if (!theme || reduceMotion) return;
     if (particlesEl) {
       particlesEl.remove();
@@ -227,18 +234,20 @@
     }
     var set = SURPRISE[theme.surprise] || SURPRISE.sparkles;
     particlesEl = document.createElement('div');
-    particlesEl.className = 'ff-theme-particles';
+    particlesEl.className = 'ff-theme-particles ff-theme-particles--header';
     particlesEl.setAttribute('aria-hidden', 'true');
     document.body.appendChild(particlesEl);
-    var n = 14;
+    var n = 4;
     for (var i = 0; i < n; i++) {
       var p = document.createElement('span');
       p.className = 'ff-theme-particle';
       p.textContent = set[i % set.length];
-      p.style.left = (8 + Math.random() * 84) + 'vw';
-      p.style.animationDuration = (2.2 + Math.random() * 2.2) + 's';
-      p.style.animationDelay = (Math.random() * 0.6) + 's';
-      p.style.fontSize = (14 + Math.random() * 12) + 'px';
+      p.style.left = (18 + Math.random() * 64) + 'vw';
+      p.style.top = (6 + Math.random() * 10) + 'px';
+      p.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+      p.style.animationDelay = (Math.random() * 0.3) + 's';
+      p.style.fontSize = (10 + Math.random() * 4) + 'px';
+      p.style.opacity = '0.28';
       particlesEl.appendChild(p);
     }
     setTimeout(function () {
@@ -246,7 +255,7 @@
         particlesEl.remove();
         particlesEl = null;
       }
-    }, 4800);
+    }, 2600);
   }
 
   function syncMeta(theme) {

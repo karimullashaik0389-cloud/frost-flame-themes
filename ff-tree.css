@@ -144,3 +144,8 @@
 #ff-float-toggle.is-on{display:inline-flex; align-items:center; gap:6px}
 #ff-float-toggle .orb{width:10px; height:10px; border-radius:50%;
   background:linear-gradient(135deg,#6ccff6,#ff6a1a)}
+
+
+/* professional chrome: hide standalone toggles — use More sheet instead */
+#ff-tree-change,
+#ff-float-toggle{ display:none !important; }
