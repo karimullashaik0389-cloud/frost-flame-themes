@@ -2,7 +2,7 @@
    Only active when body has .ff-theme-* (set by entry tree).
    Without a theme class the host Emergent UI is untouched. */
 
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Cinzel:wght@600;700&family=Fredoka:wght@500;600;700&family=Orbitron:wght@600;700&family=Pacifico&family=Special+Elite&display=swap');
+/* Emergent already loads Cormorant Garamond and Inter. No extra display fonts. */
 
 /* —— Soft page wash + accent (does not rewrite React layout) —— */
 body.ff-theme-solo_m,
@@ -265,8 +265,10 @@ body.ff-theme-solo_f::before{ opacity:.48; }
 body.ff-theme-family::before{ opacity:.5; }
 
 
-/* Fix: remove floating mood chip that overlapped titles / launch pill */
-#ff-theme-greet{ display:none !important; }
+/* No floating mood chip and no emoji layer over the header or the menu */
+#ff-theme-greet,
+.ff-theme-particles{ display:none !important; pointer-events:none !important; }
+body[class*="ff-theme-"]::before{ display:none !important; content:none !important; }
 
 
 /* —— Emergent-first: themes are accents, not a redesign —— */

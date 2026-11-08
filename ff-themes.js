@@ -258,37 +258,12 @@
     el.classList.remove('is-on', 'is-dim');
   }
 
-  function burst(theme) {
-    // Premium: no falling emoji over menu content. Optional faint header sparkle only.
-    if (!theme || reduceMotion) return;
+  function burst() {
+    /* Emoji particles sat on the logo and the menu. Themes stay accent-only. */
     if (particlesEl) {
       particlesEl.remove();
       particlesEl = null;
     }
-    var set = SURPRISE[theme.surprise] || SURPRISE.sparkles;
-    particlesEl = document.createElement('div');
-    particlesEl.className = 'ff-theme-particles ff-theme-particles--header';
-    particlesEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(particlesEl);
-    var n = 4;
-    for (var i = 0; i < n; i++) {
-      var p = document.createElement('span');
-      p.className = 'ff-theme-particle';
-      p.textContent = set[i % set.length];
-      p.style.left = (18 + Math.random() * 64) + 'vw';
-      p.style.top = (6 + Math.random() * 10) + 'px';
-      p.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
-      p.style.animationDelay = (Math.random() * 0.3) + 's';
-      p.style.fontSize = (10 + Math.random() * 4) + 'px';
-      p.style.opacity = '0.28';
-      particlesEl.appendChild(p);
-    }
-    setTimeout(function () {
-      if (particlesEl) {
-        particlesEl.remove();
-        particlesEl = null;
-      }
-    }, 2600);
   }
 
   function syncMeta(theme) {

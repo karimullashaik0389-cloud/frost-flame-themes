@@ -39,16 +39,26 @@ if ('serviceWorker' in navigator) {
       });
     } catch (e) {}
   }
-  if (BASE && 'serviceWorker' in navigator) {
+  /* One worker, project scope. Never let the bundled listener reload on controllerchange
+     (that froze iPhone Safari and prompted a refresh with no error). */
+  if ('serviceWorker' in navigator) {
+    try {
+      var _swAdd = navigator.serviceWorker.addEventListener.bind(navigator.serviceWorker);
+      navigator.serviceWorker.addEventListener = function (type, fn, opts) {
+        if (type === 'controllerchange') return _swAdd(type, function () {}, opts);
+        return _swAdd(type, fn, opts);
+      };
+    } catch (e) {}
+  }
+  if ('serviceWorker' in navigator) {
     try {
       var _reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
       navigator.serviceWorker.register = function (url, opts) {
         try {
-          if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0) {
-            url = BASE + url;
-          }
           opts = opts || {};
-          if (!opts.scope) opts.scope = BASE + '/';
+          if (typeof url === 'string' && /\/sw\.js(\?|$)/.test(url)) url = '/ff-sw.js';
+          if (typeof url === 'string' && url.charAt(0) === '/' && BASE && url.indexOf(BASE) !== 0) url = BASE + url;
+          if (!opts.scope) opts.scope = (BASE || '') + '/';
         } catch (e) {}
         return _reg(url, opts);
       };
@@ -327,7 +337,7 @@ if ('serviceWorker' in navigator) {
       return XS.call(this, body);
     };
   })();
-  var ffAssetV = '202611071137';
+  var ffAssetV = '202611081000';
   function ffBust(u) {
     u = String(u || '');
     if (!u || /[?&]v=/.test(u)) return u;
@@ -335,11 +345,42 @@ if ('serviceWorker' in navigator) {
     return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ffAssetV;
   }
 
-  /* ff-recovery-sw */
+  /* Self-updating worker. Same scope as any older /sw.js so phones replace it
+     without a reload loop and without clearing site data. */
   if ('serviceWorker' in navigator) {
     try {
-      var __ffSwUrl = abs(ffBust('/sw.js'));
-      navigator.serviceWorker.register(__ffSwUrl, { scope: (BASE || './') }).catch(function () {});
+      var __ffSwUrl = abs('/ff-sw.js');
+      navigator.serviceWorker.register(__ffSwUrl, { scope: (BASE ? BASE + '/' : './') }).then(function (reg) {
+        var hadController = !!navigator.serviceWorker.controller;
+        var worker = reg.installing || reg.waiting;
+        if (hadController && worker) {
+          worker.addEventListener('statechange', function () {
+            if (worker.state !== 'activated') return;
+            try {
+              if (sessionStorage.getItem('ff_sw_reloaded') === '1') return;
+              sessionStorage.setItem('ff_sw_reloaded', '1');
+            } catch (e) { return; }
+            location.reload();
+          });
+        }
+        return navigator.serviceWorker.getRegistrations();
+      }).then(function (regs) {
+        regs.forEach(function (r) {
+          var scope = r.scope || '';
+          if (BASE && scope.indexOf(BASE + '/') === -1) {
+            try { r.unregister(); } catch (e) {}
+          }
+        });
+      }).catch(function () {});
+    } catch (e) {}
+    try {
+      var sweep = function () {
+        document.querySelectorAll('[data-sonner-toast]').forEach(function (n) {
+          var t = n.textContent || '';
+          if (t.indexOf('Fresh menu') !== -1) { try { n.remove(); } catch (e) {} }
+        });
+      };
+      setInterval(sweep, 700);
     } catch (e) {}
   }
   function addLink(rel, href, extra) {
@@ -369,6 +410,7 @@ if ('serviceWorker' in navigator) {
   addLink('stylesheet', '/ff-chrome.css');
   addLink('stylesheet', '/ff-menu-polish.css');
   addLink('stylesheet', '/ff-dish-media.css');
+  addLink('stylesheet', '/ff-menu-ready.css');
 
   window.addEventListener('error', function (e) {
     e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
@@ -378,7 +420,7 @@ if ('serviceWorker' in navigator) {
   addScript('/static/js/main.ceed9485.js', true);
 
   document.addEventListener('DOMContentLoaded', function () {
-    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js'].forEach(function (p) {
+    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js','/ff-menu-ready.js'].forEach(function (p) {
       var s = document.createElement('script');
       s.src = abs(ffBust(p));
       s.async = false;

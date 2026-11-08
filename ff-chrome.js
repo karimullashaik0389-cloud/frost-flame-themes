@@ -12,6 +12,20 @@
 
   var frostyQuick = null;
 
+  function ensureDock() {
+    var dock = document.getElementById('ff-chrome-dock');
+    if (!dock) {
+      dock = el('div', { id: 'ff-chrome-dock', 'data-testid': 'ff-chrome-dock' });
+    }
+    var header = document.querySelector('header');
+    if (header) {
+      if (dock.parentNode !== header) header.appendChild(dock);
+    } else if (!dock.parentNode) {
+      document.body.appendChild(dock);
+    }
+    return dock;
+  }
+
   function ensureFrostyBtn() {
     if (frostyQuick && frostyQuick.isConnected) return frostyQuick;
     frostyQuick = document.getElementById('ff-frosty-quick');
@@ -28,7 +42,7 @@
         closeSheet();
         openFrostyPanel();
       });
-      document.body.appendChild(frostyQuick);
+      ensureDock().appendChild(frostyQuick);
     }
     return frostyQuick;
   }
@@ -200,12 +214,12 @@
         'aria-expanded': 'false',
         'aria-haspopup': 'dialog',
         'data-testid': 'ff-more-btn'
-      }, '<span class="ff-more-btn-mark" aria-hidden="true"></span>');
+      }, 'More');
       moreBtn.addEventListener('click', function (e) {
         e.preventDefault();
         toggleSheet();
       });
-      document.body.appendChild(moreBtn);
+      ensureDock().appendChild(moreBtn);
     }
     return moreBtn;
   }
@@ -227,7 +241,7 @@
         setTucked(false, true);
         openSheet();
       });
-      document.body.appendChild(handle);
+      ensureDock().appendChild(handle);
     }
     return handle;
   }
@@ -295,6 +309,8 @@
   }
 
   function shouldTuck() {
+    /* Top dock never covers the menu or the bill, so it does not need to hide. */
+    return false;
     var onCart = pathIsCheckout();
     var ordered = !!document.querySelector('[data-testid="order-sent-confirmation"]');
     if (onCart || ordered) return true;
@@ -349,6 +365,14 @@
     ensureFrostyBtn();
     ensureHandle();
     ensureSheet();
+
+    ensureDock();
+    var header = document.querySelector('header');
+    if (header) {
+      var hh = Math.round(header.getBoundingClientRect().height);
+      if (hh > 20) document.documentElement.style.setProperty('--ff-header-h', hh + 'px');
+    }
+    document.documentElement.classList.toggle('ff-dock-on', !entryOpen());
 
     if (entryOpen()) {
       moreBtn.style.display = 'none';

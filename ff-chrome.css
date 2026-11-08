@@ -403,5 +403,42 @@ body:has([data-testid="sticky-cart-bar"]) #ff-frosty-quick.ff-frosty-quick{
 }
 @media (max-width: 360px){
   #ff-frosty-quick .ff-frosty-quick-lbl{ display:none; }
-  #ff-frosty-quick.ff-frosty-quick{ padding: 0; width: 44px; justify-content: center; }
+  #ff-frosty-quick.ff-frosty-quick{ padding: 0 10px; width: auto; justify-content: center; }
 }
+
+/* More and Ask Frosty live inside the header, so they scroll with it and never sit on a dish. */
+#ff-chrome-dock{
+  position:static;
+  display:none;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  width:100%;
+  height:auto;
+  margin:0;
+  padding:0 12px 8px;
+  box-sizing:border-box;
+  background:transparent;
+  border:0;
+}
+html.ff-dock-on #ff-chrome-dock{ display:flex; }
+#ff-chrome-dock #ff-more-btn.ff-more-btn,
+#ff-chrome-dock #ff-frosty-quick.ff-frosty-quick,
+#ff-chrome-dock #ff-fab-handle{
+  position:static !important;
+  transform:none !important;
+  right:auto !important;
+  bottom:auto !important;
+  width:auto;
+  height:32px;
+  min-width:0;
+  min-height:32px;
+  padding:0 12px;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  box-shadow:none;
+  font:700 12px/1 Inter, system-ui, sans-serif;
+  color:#e8f6fc;
+}
+#ff-chrome-dock #ff-more-btn.ff-more-btn{ display:inline-flex; align-items:center; justify-content:center; }
+#ff-chrome-dock .ff-more-btn-mark{ display:none; }

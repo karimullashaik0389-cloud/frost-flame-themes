@@ -67,8 +67,15 @@
     return best;
   }
 
+  var STAR = {
+    'create-your-own-stone': 1, 'signature-stone': 1, 'desi-stone': 1,
+    'masala-chai-stone': 1, 'chilli-mango-stone': 1,
+    'gongura-chicken-pulao': 1, 'gongura-mutton-pulao': 1, 'veg-pulao': 1,
+    'paneer-pulao': 1, 'chicken-pulao': 1, 'chicken-65-pulao': 1, 'mutton-pulao': 1
+  };
+
   function ensureVideo(qv, item) {
-    if (!item || !item.video) return;
+    if (!item || !item.video || !STAR[item.id]) return;
     if (qv.querySelector('.ff-dish-video')) return;
 
     var mediaHost =

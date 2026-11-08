@@ -77,6 +77,7 @@
     root.hidden = true;
     root.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    setTimeout(mountHello, 30);
   }
 
   function showOverlay() {
@@ -124,6 +125,91 @@
     }
   }
 
+  var GREET_LINE = "Oh, you are hungry? Come on in, we've got something hot and something cold waiting for you";
+
+  function prefersReduce() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
+
+  function typeLine(node) {
+    if (!node || node.getAttribute('data-typed') === '1') return;
+    node.setAttribute('data-typed', '1');
+    if (prefersReduce()) { node.textContent = GREET_LINE; return; }
+    node.textContent = '';
+    var i = 0;
+    (function step() {
+      i = Math.min(GREET_LINE.length, i + 4);
+      node.textContent = GREET_LINE.slice(0, i);
+      if (i < GREET_LINE.length) requestAnimationFrame(step);
+    })();
+  }
+
+  function goTemp(side) {
+    var path = side === 'hot' ? '/menu/flame' : '/menu/frost';
+    try {
+      if (root && !root.hidden) finish(state.themeId || 'friends', { skipFloat: true });
+    } catch (e) {}
+    if (window.__FF_NAV__) window.__FF_NAV__(path);
+    else location.href = (window.__FF_ABS__ ? window.__FF_ABS__(path) : path);
+  }
+
+  function appPath() {
+    var path = location.pathname || '/';
+    try {
+      var base = window.__FF_BASE__ || '';
+      if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+    } catch (e) {}
+    return path;
+  }
+
+  function helloHidden() {
+    try { return sessionStorage.getItem('ff_hello_hide') === '1'; } catch (e) { return false; }
+  }
+
+  function buildHello() {
+    var el = document.createElement('section');
+    el.id = 'ff-hello';
+    el.setAttribute('data-testid', 'ff-hello');
+    el.setAttribute('aria-label', 'Welcome');
+    el.innerHTML =
+      '<div class="ff-greet-shimmer" aria-hidden="true"></div>' +
+      '<p class="ff-hello-when" data-testid="ff-hello-when"></p>' +
+      '<p class="ff-greet-line" data-ff-greet-line></p>' +
+      '<div class="ff-temp-row">' +
+        '<button type="button" class="ff-temp-btn" data-ff-temp="cold" data-testid="ff-hello-cold">Something cold</button>' +
+        '<button type="button" class="ff-temp-btn ff-temp-btn--hot" data-ff-temp="hot" data-testid="ff-hello-hot">Something hot</button>' +
+        '<button type="button" class="ff-temp-btn ff-temp-btn--quiet" data-ff-hello-dismiss data-testid="ff-hello-dismiss">Not now</button>' +
+      '</div>';
+    el.addEventListener('click', function (e) {
+      var dismiss = e.target.closest('[data-ff-hello-dismiss]');
+      if (dismiss) {
+        try { sessionStorage.setItem('ff_hello_hide', '1'); } catch (err) {}
+        el.remove();
+        return;
+      }
+      var b = e.target.closest('[data-ff-temp]');
+      if (!b) return;
+      e.preventDefault();
+      goTemp(b.getAttribute('data-ff-temp'));
+    });
+    return el;
+  }
+
+  function mountHello() {
+    var existing = document.getElementById('ff-hello');
+    if (helloHidden() || (root && !root.hidden) || appPath() !== '/') {
+      if (existing) existing.remove();
+      return;
+    }
+    var main = document.querySelector('main') || document.getElementById('root');
+    if (!main) return;
+    if (!existing) existing = buildHello();
+    var when = existing.querySelector('[data-testid="ff-hello-when"]');
+    if (when) when.textContent = timeGreeting() + '.';
+    typeLine(existing.querySelector('[data-ff-greet-line]'));
+    if (existing.parentNode !== main) main.insertBefore(existing, main.firstChild);
+  }
+
   function skipStraight() {
     // Default calm theme so CSS tokens apply; user can change later via More
     finish('friends', { skipFloat: true });
@@ -150,9 +236,20 @@
 
     var sheet = el('div', { className: 'ff-tree-sheet' });
     var pick = el('div', { className: 'ff-tree-step is-active', 'data-ff-step': 'pick', 'aria-hidden': 'false' });
-    pick.appendChild(el('div', { className: 'ff-tree-emoji', text: '🔥❄️' }));
-    pick.appendChild(el('h1', { className: 'ff-tree-title', text: timeGreeting() }));
-    pick.appendChild(el('p', { className: 'ff-tree-sub', text: 'Welcome to Frost & Flame. Who’s at your table? One tap — or skip straight to the menu.' }));
+    var greet = el('div', { className: 'ff-greet-block' });
+    greet.appendChild(el('div', { className: 'ff-greet-shimmer', 'aria-hidden': 'true' }));
+    greet.appendChild(el('h1', { className: 'ff-tree-title', text: timeGreeting() + '.' }));
+    greet.appendChild(el('p', { className: 'ff-greet-line', 'data-ff-greet-line': '1' }));
+    var temps = el('div', { className: 'ff-temp-row' });
+    temps.appendChild(el('button', {
+      type: 'button', className: 'ff-temp-btn', 'data-ff-temp': 'cold', 'data-testid': 'ff-tree-cold'
+    }, 'Something cold'));
+    temps.appendChild(el('button', {
+      type: 'button', className: 'ff-temp-btn ff-temp-btn--hot', 'data-ff-temp': 'hot', 'data-testid': 'ff-tree-hot'
+    }, 'Something hot'));
+    greet.appendChild(temps);
+    pick.appendChild(greet);
+    pick.appendChild(el('p', { className: 'ff-tree-sub', text: 'Who’s at your table? One tap — or skip straight to the menu.' }));
 
     var opts = el('div', { className: 'ff-tree-opts ff-tree-opts--grid' });
     Object.keys(THEME_META).forEach(function (id) {
@@ -189,9 +286,13 @@
 
     // Capture-phase so the UI responds before any heavy listeners
     root.addEventListener('click', function (e) {
-      var t = e.target.closest('[data-ff-theme],[data-ff-action]');
+      var t = e.target.closest('[data-ff-theme],[data-ff-action],[data-ff-temp]');
       if (!t || !root.contains(t)) return;
       e.preventDefault();
+      if (t.hasAttribute('data-ff-temp')) {
+        goTemp(t.getAttribute('data-ff-temp'));
+        return;
+      }
       if (t.getAttribute('data-ff-action') === 'skip') {
         skipStraight();
         return;
@@ -200,6 +301,7 @@
         finish(t.getAttribute('data-ff-theme'), { skipFloat: true });
       }
     }, true);
+    typeLine(pick.querySelector('[data-ff-greet-line]'));
   }
 
   function isDeepLink() {
@@ -239,6 +341,10 @@
     } else {
       showOverlay();
     }
+
+    mountHello();
+    setInterval(mountHello, 700);
+    window.addEventListener('ff:theme', function () { setTimeout(mountHello, 40); });
 
     window.FFTree = {
       getStep: function () { return root.hidden ? 'done' : 'pick'; },

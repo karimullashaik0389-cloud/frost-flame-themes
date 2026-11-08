@@ -180,6 +180,37 @@
 #ff-tree-root .ff-tree-skip:focus-visible{
   border-color:rgba(108,207,246,.45); color:#fff; outline:none;
 }
+
+/* Greeting — in the sheet and on the home page, never a floating cover */
+.ff-greet-block{position:relative;margin:0 0 16px;padding:4px 2px 2px}
+.ff-greet-shimmer{
+  position:absolute;inset:-6px -8px auto -8px;height:100%;pointer-events:none;border-radius:18px;
+  background:linear-gradient(100deg, rgba(108,207,246,0) 0%, rgba(108,207,246,.22) 32%, rgba(255,255,255,.05) 48%, rgba(255,106,26,.2) 68%, rgba(255,106,26,0) 100%);
+  background-size:220% 100%;animation:ffShimmer 2.2s ease-in-out infinite;opacity:.85;
+}
+.ff-greet-block > :not(.ff-greet-shimmer),
+#ff-hello > :not(.ff-greet-shimmer){position:relative;z-index:1}
+@keyframes ffShimmer{from{background-position:80% 0}to{background-position:-80% 0}}
+.ff-greet-line{margin:0 0 12px;min-height:3.2em;color:#d5e2ec;font:500 15px/1.45 Inter,system-ui,sans-serif}
+.ff-temp-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.ff-temp-btn{
+  appearance:none;min-height:44px;padding:0 14px;border-radius:999px;cursor:pointer;touch-action:manipulation;
+  border:1px solid rgba(232,246,252,.2);background:#15181d;color:#eaf6fc;
+  font:600 13px/1.2 Inter,system-ui,sans-serif;
+}
+.ff-temp-btn--hot{border-color:rgba(255,106,26,.55)}
+.ff-temp-btn--quiet{background:transparent;color:#aab5c0}
+.ff-temp-btn:focus-visible{outline:2px solid #6ccff6;outline-offset:2px}
+#ff-hello{
+  position:relative;margin:12px 0 8px;padding:14px 14px 12px;border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);background:#12161c;overflow:hidden;text-align:left;
+}
+#ff-hello .ff-hello-when{margin:0 0 4px;font:600 13px/1.3 "Cormorant Garamond",Georgia,serif;color:#e8f6fc}
+#ff-hello .ff-greet-shimmer{inset:0;height:auto}
+#ff-hello .ff-temp-row{justify-content:flex-start}
+@media (prefers-reduced-motion:reduce){
+  .ff-greet-shimmer{animation:none}
+}
 @media (min-width:480px){
   #ff-tree-root .ff-tree-opts--grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

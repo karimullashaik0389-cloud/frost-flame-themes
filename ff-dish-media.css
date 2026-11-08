@@ -32,7 +32,9 @@
 }
 /* When no absolute host, stack video above content image area */
 [data-testid="quick-view"] .ff-dish-video {
-  min-height: 180px;
+  position: absolute;
+  inset: 0;
+  min-height: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   .ff-dish-video { display: none !important; }

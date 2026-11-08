@@ -1647,6 +1647,10 @@
     "instagram": "",
     "tiktok": "",
     "allergens_verified": true,
+    "allergen_owner": {
+      "status": "unconfirmed",
+      "by_dish": {}
+    },
     "topping_prices": {
       "Whipped cream": 0.99,
       "Chocolate sauce": 0.99,

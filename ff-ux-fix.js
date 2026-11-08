@@ -117,7 +117,7 @@
       if (row) rows = (rows.length ? rows : []);
     });
     var list = Array.prototype.slice.call(document.querySelectorAll(
-      'main li, main article, main [data-testid^="cart-item"], main [data-testid^="line-"]'
+      '[data-testid^="cart-line"], main li, main article, main [data-testid^="cart-item"], main [data-testid^="line-"]'
     ));
     // Prefer rows that contain a £ and a +/- or qty
     list.forEach(function (row) {
@@ -230,11 +230,22 @@
         if (existing.indexOf(s.name) !== -1) return;
         var row = document.createElement('div');
         row.className = 'ff-size-soon';
-        row.innerHTML = '<span>' + s.name + '</span><em>Price coming soon</em>';
+        row.innerHTML = '<span>' + s.name + '</span><em>Unpriced</em>';
         host.appendChild(row);
       });
       qv.setAttribute('data-ff-sizes-enhanced', '1');
     });
+  }
+
+  function releaseScrollIfIdle() {
+    var open = false;
+    ['ff-tree-root', 'ff-float-root', 'ff-more-sheet', 'ff-play-modal', 'ff-frosty-chat'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n && !n.hidden) open = true;
+    });
+    var qv = document.querySelector('[data-testid="quick-view"]');
+    if (qv && qv.offsetParent !== null) open = true;
+    if (!open && document.body.style.overflow === 'hidden') document.body.style.overflow = '';
   }
 
   function tick() {
@@ -243,6 +254,7 @@
     dedupeUpsells();
     killBlackStrip();
     enhanceCartEdit();
+    releaseScrollIfIdle();
   }
 
   function boot() {
