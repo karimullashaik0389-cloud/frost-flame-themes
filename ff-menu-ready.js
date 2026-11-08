@@ -123,6 +123,7 @@
     note.className = 'ff-fsa';
     note.innerHTML =
       '<p data-testid="ff-allergen-notice">Ask us about allergens. Tell a member of staff before you order — we will check the 14 major allergens with the kitchen.</p>' +
+      '<p data-testid="ff-vat-note">All prices include VAT.</p>' +
       '<button type="button" data-testid="ff-allergen-open">Allergen info</button>';
     if (title && title.parentNode) title.parentNode.insertBefore(note, title.nextSibling);
     else main.insertBefore(note, main.firstChild);
@@ -218,28 +219,10 @@
         }
       }
       Array.prototype.forEach.call(frame.querySelectorAll('video'), function (video) {
-        if (STAR[id]) {
-          video.classList.add('ff-media-video');
-          video.setAttribute('playsinline', '');
-          video.muted = true;
-        } else {
-          video.setAttribute('data-ff-video-hidden', '1');
-          try { video.pause(); } catch (e) {}
-        }
+        video.setAttribute('data-ff-video-hidden', '1');
+        video.removeAttribute('src');
+        try { video.pause(); } catch (e) {}
       });
-      if (STAR[id] && !frame.querySelector('video')) {
-        var video = document.createElement('video');
-        video.className = 'ff-media-video';
-        video.setAttribute('playsinline', '');
-        video.setAttribute('muted', '');
-        video.muted = true;
-        video.loop = true;
-        video.autoplay = true;
-        video.preload = 'metadata';
-        video.setAttribute('aria-hidden', 'true');
-        video.src = withBase('/dish/' + id + '/' + id + '-loop.mp4');
-        frame.appendChild(video);
-      }
       if (STAR[id] && !frame.querySelector('.ff-watch')) {
         var badge = document.createElement('span');
         badge.className = 'ff-watch';
