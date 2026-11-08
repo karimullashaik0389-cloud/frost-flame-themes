@@ -369,7 +369,7 @@
     ensureDock();
     var header = document.querySelector('header');
     if (header) {
-      var hh = Math.round(header.getBoundingClientRect().height);
+      var hh = Math.round(header.offsetHeight || header.getBoundingClientRect().height);
       if (hh > 20) document.documentElement.style.setProperty('--ff-header-h', hh + 'px');
     }
     document.documentElement.classList.toggle('ff-dock-on', !entryOpen());

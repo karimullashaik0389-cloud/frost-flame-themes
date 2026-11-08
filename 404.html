@@ -337,7 +337,7 @@ if ('serviceWorker' in navigator) {
       return XS.call(this, body);
     };
   })();
-  var ffAssetV = '202611081050';
+  var ffAssetV = '202611081120';
   function ffBust(u) {
     u = String(u || '');
     if (!u || /[?&]v=/.test(u)) return u;
@@ -411,6 +411,7 @@ if ('serviceWorker' in navigator) {
   addLink('stylesheet', '/ff-menu-polish.css');
   addLink('stylesheet', '/ff-dish-media.css');
   addLink('stylesheet', '/ff-menu-ready.css');
+  addLink('stylesheet', '/ff-stage.css');
 
   window.addEventListener('error', function (e) {
     e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
@@ -420,7 +421,7 @@ if ('serviceWorker' in navigator) {
   addScript('/static/js/main.ceed9485.js', true);
 
   document.addEventListener('DOMContentLoaded', function () {
-    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js','/ff-menu-ready.js'].forEach(function (p) {
+    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js','/ff-menu-ready.js','/ff-stage.js'].forEach(function (p) {
       var s = document.createElement('script');
       s.src = abs(ffBust(p));
       s.async = false;
