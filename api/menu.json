@@ -1633,7 +1633,7 @@
       "name": "Upma Pesarattu",
       "category": "street",
       "description": "Crispy green moong dal pesarattu, Andhra-style, filled with savoury tomato upma, served with two house chutneys.",
-      "level": 5,
+      "level": null,
       "diet": [
         "V"
       ],
@@ -1647,7 +1647,8 @@
       "opens_build": false,
       "sold_out": false,
       "order": 22,
-      "side": "flame"
+      "side": "flame",
+      "realPhoto": true
     }
   ],
   "settings": {

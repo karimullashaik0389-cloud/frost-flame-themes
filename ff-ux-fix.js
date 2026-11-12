@@ -248,6 +248,62 @@
     if (!open && document.body.style.overflow === 'hidden') document.body.style.overflow = '';
   }
 
+  function hideEl(el) {
+    if (!el) return;
+    el.setAttribute('hidden', '');
+    el.style.display = 'none';
+    el.setAttribute('aria-hidden', 'true');
+  }
+
+  var itemsById = null;
+  function itemsMap() {
+    if (itemsById) return Promise.resolve(itemsById);
+    return loadMenu().then(function (data) {
+      var map = {};
+      if (data && data.items) {
+        data.items.forEach(function (it) { if (it && it.id) map[it.id] = it; });
+      }
+      itemsById = map;
+      return map;
+    });
+  }
+
+  /* Preview-only: hide the global Illustrative badge on real owner photos,
+     and hide the Ice-to-Fire meter when a dish has no level. */
+  function polishMenuFlags(map) {
+    if (!map) return;
+    Object.keys(map).forEach(function (id) {
+      var it = map[id];
+      if (it.realPhoto) {
+        document.querySelectorAll('[data-testid="illus-' + id + '"]').forEach(hideEl);
+      }
+      if (it.level == null || it.level === '') {
+        document.querySelectorAll('[data-testid="pip-' + id + '"]').forEach(hideEl);
+      }
+    });
+    var qv = document.querySelector('[data-testid="quick-view"]');
+    if (!qv || qv.offsetParent === null) return;
+    var title = ((qv.querySelector('h1, h2, h3') || {}).textContent || '').trim().toLowerCase();
+    var item = null;
+    Object.keys(map).forEach(function (id) {
+      var n = (map[id].name || '').toLowerCase();
+      if (n && title && title.indexOf(n) !== -1) item = map[id];
+    });
+    if (!item) return;
+    if (item.realPhoto) {
+      qv.querySelectorAll('[data-testid="illus-' + item.id + '"], .illus-sub').forEach(hideEl);
+    }
+    if (item.level == null || item.level === '') {
+      qv.querySelectorAll('[aria-label^="Ice-to-Fire"], [aria-label*="Ice-to-Fire"]').forEach(function (el) {
+        hideEl(el.closest('span.inline-flex') || el.parentElement || el);
+      });
+    }
+  }
+
+  function tickMenuFlags() {
+    itemsMap().then(polishMenuFlags);
+  }
+
   function tick() {
     enhanceSizePicker();
     dedupeToasts();
@@ -255,6 +311,7 @@
     killBlackStrip();
     enhanceCartEdit();
     releaseScrollIfIdle();
+    tickMenuFlags();
   }
 
   function boot() {
