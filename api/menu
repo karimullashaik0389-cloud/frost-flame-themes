@@ -1627,6 +1627,27 @@
       "sold_out": false,
       "order": 21,
       "side": "flame"
+    },
+    {
+      "id": "upma-pesarattu",
+      "name": "Upma Pesarattu",
+      "category": "street",
+      "description": "Crispy green moong dal pesarattu, Andhra-style, filled with savoury tomato upma, served with two house chutneys.",
+      "level": 5,
+      "diet": [
+        "V"
+      ],
+      "allergens": [],
+      "price": 8.99,
+      "sizes": null,
+      "choices": [],
+      "image": "/img/upma_pesarattu.webp",
+      "note": null,
+      "separately": null,
+      "opens_build": false,
+      "sold_out": false,
+      "order": 22,
+      "side": "flame"
     }
   ],
   "settings": {
@@ -1647,6 +1668,10 @@
     "instagram": "",
     "tiktok": "",
     "allergens_verified": true,
+    "allergen_owner": {
+      "status": "unconfirmed",
+      "by_dish": {}
+    },
     "topping_prices": {
       "Whipped cream": 0.99,
       "Chocolate sauce": 0.99,
