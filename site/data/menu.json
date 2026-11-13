@@ -113,7 +113,7 @@
       "order": 6,
       "hidden": false,
       "tone": "flame",
-      "split_diet": true,
+      "split_diet": false,
       "note": "Served with peanut chutney."
     },
     {
@@ -2111,7 +2111,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 603,
+      "order": 609,
       "ingredients": [
         "Green moong dal",
         "Rice",
@@ -3044,99 +3044,8 @@
       "ingredients_review": true
     },
     {
-      "id": "dosa",
-      "name": "Dosa",
-      "category": "tiffins",
-      "description": "Crisp fermented rice-and-lentil dosa, served with peanut chutney. Choose a filling.",
-      "diet": [
-        "V"
-      ],
-      "allergens": [
-        "peanuts"
-      ],
-      "price": 3.99,
-      "sizes": null,
-      "choices": [
-        {
-          "label": "Dosa type",
-          "options": [
-            {
-              "name": "Onion",
-              "add": 0,
-              "allergens": [
-                "peanuts"
-              ]
-            },
-            {
-              "name": "Masala",
-              "add": 0,
-              "allergens": [
-                "peanuts"
-              ]
-            },
-            {
-              "name": "Ghee Karam",
-              "add": 1.0,
-              "allergens": [
-                "peanuts",
-                "milk"
-              ]
-            },
-            {
-              "name": "Paneer",
-              "add": 2.0,
-              "allergens": [
-                "peanuts",
-                "milk"
-              ]
-            },
-            {
-              "name": "Egg",
-              "add": 1.0,
-              "allergens": [
-                "peanuts",
-                "eggs"
-              ]
-            },
-            {
-              "name": "Cheese",
-              "add": 1.0,
-              "allergens": [
-                "peanuts",
-                "milk"
-              ]
-            },
-            {
-              "name": "Upma",
-              "add": 1.0,
-              "allergens": [
-                "peanuts",
-                "gluten"
-              ]
-            }
-          ]
-        }
-      ],
-      "photo": null,
-      "tone": "flame",
-      "opens_build": false,
-      "sold_out": false,
-      "order": 600,
-      "level": 3,
-      "ingredients": [
-        "Rice",
-        "Urad dal",
-        "Fenugreek",
-        "Oil or ghee",
-        "Chosen filling",
-        "Peanut chutney"
-      ],
-      "ingredients_review": true,
-      "note": "Egg dosa is non-veg."
-    },
-    {
       "id": "idly",
-      "name": "Idly",
+      "name": "Idly with Chutney",
       "category": "tiffins",
       "description": "Soft steamed rice-and-lentil idlis, served with peanut chutney.",
       "diet": [
@@ -3152,7 +3061,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 601,
+      "order": 607,
       "level": 1,
       "ingredients": [
         "Rice",
@@ -3180,7 +3089,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 602,
+      "order": 610,
       "level": 3,
       "ingredients": [
         "Eggs",
@@ -3483,6 +3392,266 @@
         "Avocado"
       ],
       "ingredients_review": true
+    },
+    {
+      "id": "plain-dosa",
+      "name": "Plain Dosa",
+      "category": "tiffins",
+      "description": "A crisp, plain fermented rice-and-lentil dosa, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 600,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "onion-dosa",
+      "name": "Onion Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa filled with spiced fried onion, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts"
+      ],
+      "price": 3.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 601,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Onion",
+        "Green chilli",
+        "Curry leaves",
+        "Spices",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "masala-dosa",
+      "name": "Masala Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa filled with spiced potato masala, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "mustard"
+      ],
+      "price": 3.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 602,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Potato",
+        "Onion",
+        "Mustard seeds",
+        "Curry leaves",
+        "Turmeric",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "ghee-karam-dosa",
+      "name": "Ghee Karam Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa spread with ghee and spicy Andhra karam podi, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "milk"
+      ],
+      "price": 4.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 603,
+      "level": 5,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Ghee",
+        "Karam podi (roasted lentils, chilli, spices)",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "paneer-dosa",
+      "name": "Paneer Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa filled with spiced paneer, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "milk"
+      ],
+      "price": 5.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 604,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Paneer",
+        "Onion",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "egg-dosa",
+      "name": "Egg Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa with a spiced egg layer, served with peanut chutney.",
+      "diet": [],
+      "allergens": [
+        "peanuts",
+        "eggs"
+      ],
+      "price": 4.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 605,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Egg",
+        "Onion",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "cheese-dosa",
+      "name": "Cheese Dosa",
+      "category": "tiffins",
+      "description": "A crisp dosa filled with melted cheese, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "milk"
+      ],
+      "price": 4.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 606,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Cheese",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "ghee-idly-chutney",
+      "name": "Ghee Idly with Chutney",
+      "category": "tiffins",
+      "description": "Soft steamed idlis finished with ghee, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 608,
+      "level": 1,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Ghee",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true,
+      "price_review": true
     }
   ],
   "clips": {
