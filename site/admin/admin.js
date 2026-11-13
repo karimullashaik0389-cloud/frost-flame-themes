@@ -33,6 +33,9 @@
     toastType: "",
     pendingDeleteId: null,
     pendingDeleteCat: null,
+    pendingPhotos: {},
+    photoTarget: null,
+    busyLabel: "",
   };
 
   const apiHeaders = (token) => ({
@@ -109,6 +112,147 @@
 
   const priceShown = (v) => (v == null || v === "" ? "" : String(v));
 
+  const PHOTO_MAX_WIDTH = 1200;
+  const PHOTO_MAX_BYTES = 300 * 1024;
+  const PHOTO_DIR = "site/img/dishes/";
+  const PHOTO_MENU_PREFIX = "img/dishes/";
+
+  const encodeBytes = (bytes) => {
+    let bin = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  };
+
+  const encodeBlob = async (blob) => {
+    const buf = await blob.arrayBuffer();
+    return encodeBytes(new Uint8Array(buf));
+  };
+
+  const photoSrc = (photo) => {
+    if (!photo) return "";
+    if (/^(https?:|blob:|data:)/i.test(photo)) return photo;
+    if (photo.startsWith("../")) return photo;
+    return "../" + photo.replace(/^\//, "");
+  };
+
+  const revokePreview = (id) => {
+    const pending = state.pendingPhotos[id];
+    if (pending && pending.preview && String(pending.preview).startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(pending.preview);
+      } catch (_) {}
+    }
+  };
+
+  const dishPhoto = (id, item) => {
+    const pending = state.pendingPhotos[id];
+    if (pending && pending.preview) return pending.preview;
+    return item && item.photo ? photoSrc(item.photo) : "";
+  };
+
+  const loadImage = (file) =>
+    new Promise((resolve, reject) => {
+      const fail = () => reject(new Error("That photo could not be read. Please try another picture."));
+      const fromUrl = (url, revoke) => {
+        const img = new Image();
+        img.onload = () => {
+          if (revoke) URL.revokeObjectURL(url);
+          resolve(img);
+        };
+        img.onerror = () => {
+          if (revoke) URL.revokeObjectURL(url);
+          fail();
+        };
+        img.src = url;
+      };
+      if (typeof createImageBitmap === "function") {
+        createImageBitmap(file)
+          .then(resolve)
+          .catch(() => fromUrl(URL.createObjectURL(file), true));
+        return;
+      }
+      fromUrl(URL.createObjectURL(file), true);
+    });
+
+  const canvasBlob = (canvas, type, quality) =>
+    new Promise((resolve) => canvas.toBlob((b) => resolve(b || null), type, quality));
+
+  const compressImage = async (file) => {
+    if (!file) throw new Error("Please choose a photo.");
+    const kind = String(file.type || "");
+    if (kind && !kind.startsWith("image/")) throw new Error("Please choose a photo.");
+    const source = await loadImage(file);
+    let w = source.width;
+    let h = source.height;
+    if (!w || !h) throw new Error("That photo could not be read. Please try another picture.");
+    if (w > PHOTO_MAX_WIDTH) {
+      h = Math.max(1, Math.round((h * PHOTO_MAX_WIDTH) / w));
+      w = PHOTO_MAX_WIDTH;
+    }
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const draw = (cw, ch) => {
+      canvas.width = cw;
+      canvas.height = ch;
+      ctx.fillStyle = "#111111";
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.drawImage(source, 0, 0, cw, ch);
+    };
+    draw(w, h);
+
+    const shrinkToFit = async (type) => {
+      let tw = canvas.width;
+      let th = canvas.height;
+      let quality = 0.82;
+      let blob = await canvasBlob(canvas, type, quality);
+      if (!blob) return null;
+      while (blob.size > PHOTO_MAX_BYTES && quality > 0.42) {
+        quality = Math.round((quality - 0.12) * 100) / 100;
+        blob = await canvasBlob(canvas, type, quality);
+        if (!blob) return null;
+      }
+      while (blob.size > PHOTO_MAX_BYTES && tw > 640) {
+        tw = Math.max(640, Math.round(tw * 0.85));
+        th = Math.max(1, Math.round(th * 0.85));
+        draw(tw, th);
+        blob = await canvasBlob(canvas, type, 0.7);
+        if (!blob) return null;
+      }
+      return blob;
+    };
+
+    let blob = await shrinkToFit("image/webp");
+    let ext = "webp";
+    if (!blob) {
+      blob = await shrinkToFit("image/jpeg");
+      ext = "jpg";
+    }
+    if (!blob) throw new Error("That photo could not be prepared. Please try another picture.");
+    if (blob.size > 360 * 1024) {
+      throw new Error("That photo is still too large after shrinking. Please try another picture.");
+    }
+    return { blob, ext };
+  };
+
+  const photoBlockHTML = (id, item) => {
+    const src = dishPhoto(id, item);
+    const has = !!src;
+    const label = has ? "Change photo" : "Add photo";
+    const img = has
+      ? `<img class="photo-thumb" src="${escapeHtml(src)}" alt="">`
+      : `<div class="photo-placeholder">No photo yet</div>`;
+    return `<div class="photo-block" data-photo-block="${escapeHtml(id)}">
+      ${img}
+      <div class="photo-actions${has ? " has-remove" : ""}">
+        <button class="btn btn-frost btn-small" type="button" data-pick-photo="${escapeHtml(id)}">${label}</button>
+        ${has ? `<button class="btn btn-ghost btn-small" type="button" data-remove-photo="${escapeHtml(id)}">Remove photo</button>` : ""}
+      </div>
+    </div>`;
+  };
+
   const visibleCategories = () =>
     (state.menu.categories || []).filter((c) => !c.hidden).sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -183,6 +327,8 @@
       const old = aCats.get(id);
       if (old && JSON.stringify(old) !== JSON.stringify(cat)) n += 1;
     }
+    const pending = Object.keys(state.pendingPhotos).filter((id) => id !== "__add__");
+    n += pending.length;
     return n;
   };
 
@@ -214,17 +360,20 @@
 
   const saveBarHTML = () => {
     const n = changeCount();
-    if (state.toast) {
-      const cls = state.toastType === "error" ? "toast error-toast" : "toast";
-      return `<div class="${cls}" role="status" data-toast>${escapeHtml(state.toast)}</div>`;
-    }
-    if (!n) return "";
-    const label = n === 1 ? "Save changes (1)" : "Save changes (" + n + ")";
-    return `<div class="save-bar">
+    const toast = state.toast
+      ? `<div class="toast${state.toastType === "error" ? " error-toast" : ""}" role="status" data-toast>${escapeHtml(state.toast)}</div>`
+      : "";
+    let bar = "";
+    if (n || state.busy) {
+      const label = n === 1 ? "Save changes (1)" : "Save changes (" + n + ")";
+      bar = `<div class="save-bar">
       <button class="btn btn-frost" type="button" data-save ${state.busy ? "disabled" : ""} data-testid="save-bar">
-        ${state.busy ? "Saving…" : escapeHtml(label)}
+        ${state.busy ? escapeHtml(state.busyLabel || "Saving…") : escapeHtml(label)}
       </button>
     </div>`;
+    }
+    if (!toast && !bar) return "";
+    return `<div class="save-stack">${toast}${bar}</div>`;
   };
 
   const priceBox = (label, value, attrs) => `
@@ -259,6 +408,7 @@
     return `
       <article class="card${pending ? " is-pending" : ""}${item.sold_out ? " is-sold" : ""}" data-id="${escapeHtml(item.id)}" data-testid="dish-card">
         <h2 class="card-name">${escapeHtml(item.name)}</h2>
+        ${photoBlockHTML(item.id, item)}
         ${pending ? `<span class="pending-tag">Price coming soon</span>` : ""}
         ${state.query && cat ? section : ""}
         ${prices}
@@ -404,8 +554,8 @@
             <textarea class="field" name="description"></textarea>
           </div>
           <div class="field-row">
-            <span class="lbl">Photo link (optional)</span>
-            <input class="field" name="photo" type="text" inputmode="url" placeholder="https://">
+            <span class="lbl">Photo</span>
+            ${photoBlockHTML("__add__", { photo: null })}
           </div>
           <div class="modal-actions">
             <button class="btn btn-ghost" type="button" data-close="add-dish-dialog">Cancel</button>
@@ -433,10 +583,6 @@
           <div class="field-row">
             <span class="lbl">Short description</span>
             <textarea class="field" name="description"></textarea>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Photo link (optional)</span>
-            <input class="field" name="photo" type="text" inputmode="url" placeholder="https://">
           </div>
           <div class="modal-actions">
             <button class="btn btn-ghost" type="button" data-close="edit-dish-dialog">Cancel</button>
@@ -494,7 +640,7 @@
   };
 
   const refreshChrome = () => {
-    $$(".save-bar, [data-toast]").forEach((el) => el.remove());
+    $$(".save-stack, .save-bar, [data-toast]").forEach((el) => el.remove());
     app.insertAdjacentHTML("beforeend", saveBarHTML());
   };
 
@@ -554,6 +700,9 @@
     state.toast = "";
     state.query = "";
     state.view = "list";
+    Object.keys(state.pendingPhotos).forEach((id) => revokePreview(id));
+    state.pendingPhotos = {};
+    state.photoTarget = null;
     renderLogin();
   };
 
@@ -603,12 +752,23 @@
     return { ok: problems.length === 0, problems };
   };
 
+  const refreshAddPhotoBlock = () => {
+    const mount = $("#add-dish-form [data-photo-block='__add__']");
+    if (!mount) return;
+    const wrap = document.createElement("div");
+    wrap.innerHTML = photoBlockHTML("__add__", { photo: null });
+    mount.replaceWith(wrap.firstElementChild);
+  };
+
   const openAddDish = () => {
     const d = $("#add-dish-dialog");
     if (!d) return;
     const form = $("#add-dish-form");
     form.reset();
     if (state.activeCat && form.category) form.category.value = state.activeCat;
+    revokePreview("__add__");
+    delete state.pendingPhotos["__add__"];
+    refreshAddPhotoBlock();
     d.showModal();
   };
 
@@ -626,7 +786,6 @@
     const cat = catById(catId);
     const siblings = itemsIn(catId);
     const order = siblings.length ? Math.max(...siblings.map((i) => i.order || 0)) + 1 : (cat?.order || 0) * 100;
-    const photo = String(form.photo.value || "").trim();
     const item = {
       id: slugify(name, (state.menu.items || []).map((i) => i.id)),
       name,
@@ -637,7 +796,7 @@
       price: parsed.value,
       sizes: null,
       choices: [],
-      photo: photo || null,
+      photo: null,
       tone: (cat && cat.tone) || "both",
       opens_build: false,
       sold_out: false,
@@ -647,6 +806,10 @@
       ingredients_review: true,
     };
     if (parsed.value == null) item.price_review = true;
+    if (state.pendingPhotos["__add__"]) {
+      state.pendingPhotos[item.id] = state.pendingPhotos["__add__"];
+      delete state.pendingPhotos["__add__"];
+    }
     state.menu.items.push(item);
     $("#add-dish-dialog")?.close();
     state.view = "category";
@@ -663,7 +826,6 @@
     form.name.value = item.name;
     form.category.value = item.category;
     form.description.value = item.description || "";
-    form.photo.value = item.photo && /^https?:/i.test(item.photo) ? item.photo : item.photo || "";
     form.veg.value = isVegItem(item) ? "yes" : "no";
     $("#edit-dish-dialog").showModal();
   };
@@ -679,12 +841,6 @@
     item.description = String(form.description.value || "").trim();
     item.category = form.category.value;
     setVeg(item, form.veg.value === "yes");
-    const photo = String(form.photo.value || "").trim();
-    if (photo) item.photo = photo;
-    else if (form.photo.value === "") {
-      // leave existing relative photos unless the box was cleared from a URL edit; if it was a path, keep it
-      if (item.photo && /^https?:/i.test(item.photo)) item.photo = null;
-    }
     $("#edit-dish-dialog")?.close();
     render();
   };
@@ -773,6 +929,8 @@
       const id = state.pendingDeleteId;
       state.pendingDeleteId = null;
       $("#confirm-dialog")?.close();
+      revokePreview(id);
+      delete state.pendingPhotos[id];
       state.menu.items = state.menu.items.filter((i) => i.id !== id);
       if (Array.isArray(state.menu.signature_ids)) {
         state.menu.signature_ids = state.menu.signature_ids.filter((x) => x !== id);
@@ -828,6 +986,104 @@
     return problems;
   };
 
+  const ensurePhotoInput = () => {
+    let el = document.getElementById("photo-file");
+    if (el) return el;
+    el = document.createElement("input");
+    el.id = "photo-file";
+    el.type = "file";
+    el.accept = "image/*";
+    el.hidden = true;
+    el.setAttribute("data-photo-file", "");
+    document.body.appendChild(el);
+    el.addEventListener("change", onPhotoFile);
+    return el;
+  };
+
+  const pickPhoto = (id) => {
+    state.photoTarget = id;
+    const input = ensurePhotoInput();
+    input.value = "";
+    input.click();
+  };
+
+  const onPhotoFile = async (e) => {
+    const input = e.target;
+    const file = input.files && input.files[0];
+    const target = state.photoTarget;
+    input.value = "";
+    if (!file || !target) return;
+    try {
+      const { blob, ext } = await compressImage(file);
+      revokePreview(target);
+      state.pendingPhotos[target] = { blob, ext, preview: URL.createObjectURL(blob) };
+      if (target === "__add__") {
+        refreshAddPhotoBlock();
+        return;
+      }
+      applyCardInputs();
+      render();
+    } catch (err) {
+      showToast(err.message || "That photo could not be used. Please try another picture.", "error", 4500);
+    }
+  };
+
+  const removePhoto = (id) => {
+    revokePreview(id);
+    delete state.pendingPhotos[id];
+    if (id === "__add__") {
+      refreshAddPhotoBlock();
+      return;
+    }
+    applyCardInputs();
+    const item = state.menu.items.find((i) => i.id === id);
+    if (item) item.photo = null;
+    render();
+  };
+
+  const putRepoFile = async (path, message, contentB64, sha) => {
+    const url = API + "/repos/" + OWNER + "/" + REPO + "/contents/" + path;
+    let res;
+    try {
+      const payload = { message, content: contentB64, branch: "main" };
+      if (sha) payload.sha = sha;
+      res = await fetch(url, {
+        method: "PUT",
+        headers: { ...apiHeaders(state.token), "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (_) {
+      throw new Error("Could not reach the internet. Check your connection and try again.");
+    }
+    return res;
+  };
+
+  const uploadPendingPhotos = async () => {
+    const entries = Object.entries(state.pendingPhotos).filter(([id]) => id !== "__add__");
+    let i = 0;
+    for (const [id, pending] of entries) {
+      i += 1;
+      const item = state.menu.items.find((it) => it.id === id);
+      if (!item || !pending || !pending.blob) {
+        revokePreview(id);
+        delete state.pendingPhotos[id];
+        continue;
+      }
+      state.busyLabel = entries.length > 1 ? "Uploading photo " + i + " of " + entries.length + "…" : "Uploading photo…";
+      refreshChrome();
+      const stamp = Date.now() + "-" + i;
+      const ext = pending.ext === "jpg" ? "jpg" : "webp";
+      const repoPath = PHOTO_DIR + id + "-" + stamp + "." + ext;
+      const menuPath = PHOTO_MENU_PREFIX + id + "-" + stamp + "." + ext;
+      const content = await encodeBlob(pending.blob);
+      const res = await putRepoFile(repoPath, "Admin: add dish photo", content);
+      if (!res.ok) throw new Error(friendlyHttpError(res.status, true));
+      item.photo = menuPath;
+      revokePreview(id);
+      delete state.pendingPhotos[id];
+    }
+  };
+
   const save = async () => {
     const applied = applyCardInputs();
     if (!applied.ok) {
@@ -843,12 +1099,12 @@
       showToast("Please sign in again.", "error", 4000);
       return;
     }
+    state.toast = "";
+    state.toastType = "";
     state.busy = true;
+    state.busyLabel = Object.keys(state.pendingPhotos).some((id) => id !== "__add__") ? "Uploading photo…" : "Saving…";
     refreshChrome();
-    const payload = cleanMenu(state.menu);
-    const body = JSON.stringify(payload, null, 2) + "\n";
-
-    const putOnce = async (sha) => {
+    const putOnce = async (sha, body) => {
       const url = API + "/repos/" + OWNER + "/" + REPO + "/contents/" + FILE_PATH;
       let res;
       try {
@@ -869,20 +1125,27 @@
     };
 
     try {
-      let res = await putOnce(state.sha);
+      await uploadPendingPhotos();
+      state.busyLabel = "Saving…";
+      refreshChrome();
+      const payload = cleanMenu(state.menu);
+      const body = JSON.stringify(payload, null, 2) + "\n";
+      let res = await putOnce(state.sha, body);
       if (res.status === 409) {
         const latest = await loadFile(state.token);
         state.sha = latest.sha;
-        res = await putOnce(state.sha);
+        res = await putOnce(state.sha, body);
       }
       if (!res.ok) throw new Error(friendlyHttpError(res.status, true));
       const result = await res.json();
       if (result && result.content && result.content.sha) state.sha = result.content.sha;
       state.busy = false;
+      state.busyLabel = "";
       markClean();
       showToast("Saved! Live in about 1 minute", "ok", 6000);
     } catch (err) {
       state.busy = false;
+      state.busyLabel = "";
       showToast(err.message || "Could not save.", "error", 5000);
     }
   };
@@ -906,6 +1169,10 @@
         return render();
       }
       if (e.target.closest("[data-add-dish]")) return openAddDish();
+      const pick = e.target.closest("[data-pick-photo]");
+      if (pick) return pickPhoto(pick.dataset.pickPhoto);
+      const drop = e.target.closest("[data-remove-photo]");
+      if (drop) return removePhoto(drop.dataset.removePhoto);
       if (e.target.closest("[data-add-cat]")) return $("#add-cat-dialog")?.showModal();
       const rename = e.target.closest("[data-rename-cat]");
       if (rename) return openRenameCat(rename.dataset.renameCat);
@@ -959,6 +1226,7 @@
   };
 
   const boot = async () => {
+    ensurePhotoInput();
     bind();
     let stored = "";
     try {
@@ -993,6 +1261,8 @@
     hasPrice,
     changeCount,
     getState: () => state,
+    compressImage,
+    photoSrc,
   };
 
   boot();

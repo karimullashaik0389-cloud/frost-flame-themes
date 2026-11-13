@@ -21,6 +21,10 @@ This page is only for you. It is not linked from the public website. You sign in
 2. Paste the token and tap **Sign in**.
 3. The token stays only in this browser. It is never saved in the website files.
 
+## Adding or changing a photo
+
+Open a section, then the dish. Tap **Add photo** or **Change photo**, and pick a picture from your camera or gallery. You will see a preview on the card. Tap **Save changes** at the bottom. The photo is sent first, then the menu is saved, and it appears on the public menu in about a minute. **Remove photo** takes the picture off that dish.
+
 ## After you save
 
 Changes go live on the public menu in about a minute. If you do not see them, wait a moment and refresh.
