@@ -58,6 +58,17 @@
       const max = Math.max(...prices);
       return min === max ? money(min) : `From ${money(min)}`;
     }
+    if (isMoney(item.price)) {
+      const adds = (item.choices || []).flatMap((c) =>
+        (c.options || []).map((o) => Number(o.add || 0)).filter((n) => Number.isFinite(n))
+      );
+      if (adds.length) {
+        const min = Number(item.price) + Math.min(...adds);
+        const max = Number(item.price) + Math.max(...adds);
+        if (min !== max) return `From ${money(min)}`;
+      }
+      return money(item.price);
+    }
     return money(item.price);
   };
 

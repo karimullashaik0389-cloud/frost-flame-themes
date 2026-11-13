@@ -501,7 +501,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 8.99,
+      "price": 7.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -535,7 +535,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 10.99,
+      "price": 9.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -662,7 +662,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 7.49,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -692,7 +692,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 7.49,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -727,7 +727,7 @@
         "eggs",
         "mustard"
       ],
-      "price": 8.49,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -757,7 +757,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 9.99,
+      "price": 8.99,
       "sizes": null,
       "choices": [],
       "photo": "img/dishes/mutton-pulao.webp",
@@ -788,7 +788,7 @@
         "S"
       ],
       "allergens": [],
-      "price": 5.49,
+      "price": 4.99,
       "sizes": null,
       "choices": [
         {
@@ -837,7 +837,7 @@
         "V"
       ],
       "allergens": [],
-      "price": 5.99,
+      "price": 6.99,
       "sizes": null,
       "choices": [
         {
@@ -889,7 +889,7 @@
         "milk",
         "nuts"
       ],
-      "price": 7.99,
+      "price": 8.99,
       "sizes": null,
       "choices": [
         {
@@ -946,7 +946,7 @@
       "allergens": [
         "gluten"
       ],
-      "price": 4.49,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -978,7 +978,7 @@
         "gluten",
         "milk"
       ],
-      "price": 5.49,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1009,7 +1009,7 @@
         "gluten",
         "milk"
       ],
-      "price": 5.49,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1042,7 +1042,7 @@
         "eggs",
         "mustard"
       ],
-      "price": 7.49,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1079,7 +1079,7 @@
         "eggs",
         "mustard"
       ],
-      "price": 5.99,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1168,7 +1168,7 @@
         "milk",
         "gluten"
       ],
-      "price": 4.49,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1310,7 +1310,7 @@
         "gluten",
         "soya"
       ],
-      "price": 5.49,
+      "price": 3.99,
       "sizes": null,
       "choices": [
         {
@@ -1485,7 +1485,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": 0.99,
+      "price": 1.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -1510,21 +1510,11 @@
       "allergens": [
         "milk"
       ],
-      "price": null,
-      "sizes": [
-        {
-          "name": "Small",
-          "price": 1.99
-        },
-        {
-          "name": "Regular",
-          "price": 2.99
-        }
-      ],
+      "price": 3.99,
+      "sizes": null,
       "choices": [
         {
           "label": "Add-on",
-          "price_review": true,
           "options": [
             {
               "name": "None",
@@ -1581,7 +1571,7 @@
       "allergens": [
         "milk"
       ],
-      "price": 2.99,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2114,7 +2104,7 @@
       "allergens": [
         "peanuts"
       ],
-      "price": 8.99,
+      "price": 4.99,
       "sizes": null,
       "choices": [],
       "photo": "img/dishes/upma-pesarattu.webp",
@@ -2132,7 +2122,8 @@
         "Tomato upma (semolina, tomato, onion, spices)",
         "Two house chutneys"
       ],
-      "ingredients_review": true
+      "ingredients_review": true,
+      "price_review": true
     },
     {
       "id": "chilli-chicken",
@@ -2146,7 +2137,7 @@
         "gluten",
         "soya"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2167,8 +2158,7 @@
         "Chilli sauce",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "chicken-majestic",
@@ -2182,7 +2172,7 @@
         "milk",
         "gluten"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2203,8 +2193,7 @@
         "Cornflour or rice flour",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "chicken-tandoori",
@@ -2222,11 +2211,11 @@
       "sizes": [
         {
           "name": "Half",
-          "price": null
+          "price": 6.99
         },
         {
           "name": "Full",
-          "price": null
+          "price": 9.99
         }
       ],
       "choices": [],
@@ -2247,8 +2236,7 @@
         "Lemon",
         "Spices"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "paneer-65",
@@ -2263,7 +2251,7 @@
         "milk",
         "gluten"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2283,8 +2271,7 @@
         "Gram or wheat flour",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "paneer-manchurian",
@@ -2300,7 +2287,7 @@
         "gluten",
         "soya"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2320,8 +2307,7 @@
         "Chilli sauce",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "veg-manchurian",
@@ -2336,7 +2322,7 @@
         "gluten",
         "soya"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2356,8 +2342,7 @@
         "Chilli sauce",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "paneer-tikka",
@@ -2371,7 +2356,7 @@
         "milk",
         "mustard"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2391,11 +2376,7 @@
         "Onion",
         "Spices"
       ],
-      "ingredients_review": true,
-      "price_review": true,
-      "name_review": true,
-      "note": "Name to confirm — the handwritten starter only said “Paneer”.",
-      "note_review": true
+      "ingredients_review": true
     },
     {
       "id": "chicken-fried-rice",
@@ -2408,7 +2389,7 @@
         "gluten",
         "eggs"
       ],
-      "price": null,
+      "price": 8.99,
       "sizes": null,
       "choices": [
         {
@@ -2444,8 +2425,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "egg-fried-rice",
@@ -2458,7 +2438,7 @@
         "soya",
         "gluten"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [
         {
@@ -2493,8 +2473,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "chicken-noodles",
@@ -2507,7 +2486,7 @@
         "soya",
         "eggs"
       ],
-      "price": null,
+      "price": 7.99,
       "sizes": null,
       "choices": [
         {
@@ -2544,8 +2523,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "egg-noodles",
@@ -2558,7 +2536,7 @@
         "eggs",
         "soya"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2578,8 +2556,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "paneer-fried-rice",
@@ -2594,7 +2571,7 @@
         "soya",
         "gluten"
       ],
-      "price": null,
+      "price": 8.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2613,8 +2590,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "veg-fried-rice",
@@ -2628,7 +2604,7 @@
         "soya",
         "gluten"
       ],
-      "price": null,
+      "price": 7.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2646,8 +2622,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "veg-noodles",
@@ -2661,7 +2636,7 @@
         "gluten",
         "soya"
       ],
-      "price": null,
+      "price": 7.99,
       "sizes": null,
       "choices": [
         {
@@ -2696,8 +2671,7 @@
         "Garlic",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "spiral-potato",
@@ -2709,7 +2683,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": null,
+      "price": 4.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2723,8 +2697,7 @@
         "Oil",
         "Chilli powder or masala salt"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "punugulu",
@@ -2735,7 +2708,7 @@
         "V"
       ],
       "allergens": [],
-      "price": null,
+      "price": 4.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2754,8 +2727,7 @@
         "Curry leaves",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "bajji",
@@ -2766,7 +2738,7 @@
         "V"
       ],
       "allergens": [],
-      "price": null,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2782,8 +2754,7 @@
         "Spices",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "gongura-prawns-pulao",
@@ -2797,7 +2768,7 @@
         "crustaceans",
         "milk"
       ],
-      "price": null,
+      "price": 9.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2819,8 +2790,7 @@
         "Raita",
         "Salan"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "ragi-sankati-chicken",
@@ -2831,7 +2801,7 @@
         "S"
       ],
       "allergens": [],
-      "price": null,
+      "price": 8.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2852,8 +2822,7 @@
         "Spices",
         "Oil"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "butter-chicken",
@@ -2865,7 +2834,7 @@
         "milk",
         "nuts"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2884,8 +2853,7 @@
         "Garlic",
         "Spices"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "paneer-65-pulao",
@@ -2900,7 +2868,7 @@
         "milk",
         "gluten"
       ],
-      "price": null,
+      "price": 6.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2916,8 +2884,7 @@
         "Raita",
         "Salan"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "plain-pulao",
@@ -2930,7 +2897,7 @@
       "allergens": [
         "milk"
       ],
-      "price": null,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2947,8 +2914,7 @@
         "Raita",
         "Salan"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "palak-paneer",
@@ -2961,7 +2927,7 @@
       "allergens": [
         "milk"
       ],
-      "price": null,
+      "price": 7.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -2981,8 +2947,7 @@
         "Cream or butter",
         "Spices"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "lemon-rice",
@@ -2996,7 +2961,7 @@
         "peanuts",
         "mustard"
       ],
-      "price": null,
+      "price": 5.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3015,8 +2980,7 @@
         "Peanuts",
         "Oil or ghee"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "plain-naan",
@@ -3030,7 +2994,7 @@
         "gluten",
         "milk"
       ],
-      "price": null,
+      "price": 1.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3046,8 +3010,7 @@
         "Ghee or butter",
         "Salt"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "garlic-naan",
@@ -3061,7 +3024,7 @@
         "gluten",
         "milk"
       ],
-      "price": null,
+      "price": 2.49,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3078,8 +3041,7 @@
         "Butter or ghee",
         "Salt"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "dosa",
@@ -3092,7 +3054,7 @@
       "allergens": [
         "peanuts"
       ],
-      "price": null,
+      "price": 3.99,
       "sizes": null,
       "choices": [
         {
@@ -3114,7 +3076,7 @@
             },
             {
               "name": "Ghee Karam",
-              "add": 0,
+              "add": 1.0,
               "allergens": [
                 "peanuts",
                 "milk"
@@ -3122,7 +3084,7 @@
             },
             {
               "name": "Paneer",
-              "add": 0,
+              "add": 2.0,
               "allergens": [
                 "peanuts",
                 "milk"
@@ -3130,7 +3092,7 @@
             },
             {
               "name": "Egg",
-              "add": 0,
+              "add": 1.0,
               "allergens": [
                 "peanuts",
                 "eggs"
@@ -3138,7 +3100,7 @@
             },
             {
               "name": "Cheese",
-              "add": 0,
+              "add": 1.0,
               "allergens": [
                 "peanuts",
                 "milk"
@@ -3146,7 +3108,7 @@
             },
             {
               "name": "Upma",
-              "add": 0,
+              "add": 1.0,
               "allergens": [
                 "peanuts",
                 "gluten"
@@ -3170,7 +3132,6 @@
         "Peanut chutney"
       ],
       "ingredients_review": true,
-      "price_review": true,
       "note": "Egg dosa is non-veg."
     },
     {
@@ -3212,7 +3173,7 @@
         "eggs",
         "peanuts"
       ],
-      "price": null,
+      "price": 4.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3244,7 +3205,7 @@
       "allergens": [
         "milk"
       ],
-      "price": null,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3258,8 +3219,7 @@
         "Cocoa or chocolate",
         "Sugar"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "bread-halwa",
@@ -3273,7 +3233,7 @@
         "gluten",
         "milk"
       ],
-      "price": null,
+      "price": 3.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3290,8 +3250,7 @@
         "Cardamom",
         "Nuts (if used)"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "brownie-shake",
@@ -3307,7 +3266,7 @@
         "soya",
         "eggs"
       ],
-      "price": null,
+      "price": 2.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3321,8 +3280,7 @@
         "Ice cream",
         "Brownie (wheat, sugar, cocoa, butter, egg)"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "coke",
@@ -3334,7 +3292,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": null,
+      "price": 1.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3346,8 +3304,7 @@
       "ingredients": [
         "Coca-Cola"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "lychee-aloe",
@@ -3359,7 +3316,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": null,
+      "price": 2.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3374,8 +3331,7 @@
         "Sugar or syrup",
         "Ice"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "coconut-water",
@@ -3387,7 +3343,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": null,
+      "price": 2.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3399,8 +3355,7 @@
       "ingredients": [
         "Coconut water"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "goli-soda-lemon",
@@ -3412,7 +3367,7 @@
         "VG"
       ],
       "allergens": [],
-      "price": null,
+      "price": 1.99,
       "sizes": null,
       "choices": [
         {
@@ -3442,8 +3397,7 @@
         "Lemon",
         "Sugar or salt"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
     },
     {
       "id": "masala-majjiga",
@@ -3456,7 +3410,7 @@
       "allergens": [
         "milk"
       ],
-      "price": null,
+      "price": 1.99,
       "sizes": null,
       "choices": [],
       "photo": null,
@@ -3474,8 +3428,61 @@
         "Salt",
         "Spices"
       ],
-      "ingredients_review": true,
-      "price_review": true
+      "ingredients_review": true
+    },
+    {
+      "id": "banana-shake",
+      "name": "Banana Shake",
+      "category": "drinks",
+      "description": "A thick banana shake, blended with milk and ice cream.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": 4.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 901.3,
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Ice cream",
+        "Banana"
+      ],
+      "ingredients_review": true
+    },
+    {
+      "id": "avocado-shake",
+      "name": "Avocado Shake",
+      "category": "drinks",
+      "description": "A thick avocado shake, blended with milk and ice cream.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": 5.99,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 901.6,
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Ice cream",
+        "Avocado"
+      ],
+      "ingredients_review": true
     }
   ],
   "clips": {
