@@ -544,7 +544,6 @@
     const launch = formatLaunch(meta.launch_date);
     const eye = $("[data-launch]");
     if (eye) eye.innerHTML = `Opening ${escapeHtml(launch)}<br>Hackney Road E2`;
-    $$("footer p")[1] && ($$("footer p")[1].innerHTML = `<a data-wa-direct href="${buildWaHref()}">WhatsApp</a> · Opening ${escapeHtml(launch)}`);
     const areas = $("#delivery-areas");
     if (areas && meta.delivery_areas) {
       areas.innerHTML = meta.delivery_areas.map((a) => `<span class="area">${escapeHtml(a)}</span>`).join("");
@@ -647,6 +646,15 @@
     renderMenu();
     updateCartBadges();
     setDirectWaLinks();
+    window.FF = {
+      data: state.data,
+      money,
+      itemById,
+      addLine,
+      openCart,
+      getCart: () => state.cart,
+    };
+    document.dispatchEvent(new CustomEvent("ff:ready"));
   };
 
   if (document.readyState === "loading") {

@@ -41,3 +41,10 @@ When the site is ready, point the domain at GitHub Pages for this repository, an
 - Reviews (the kitchen is not open yet — none are invented)
 - Instagram or TikTok links (those fields are empty in the source data)
 - An admin or CMS page — edits are made in `data/menu.json`
+
+
+## Features on this site
+
+The homepage also includes a Frost/Flame look (with snowfall or rising flames), a dining-mood picker, Frosty and Flamey (menu assistants, not people), the Flavour Matchmaker, Build Your Stone, an Ice-to-Fire dial, Mix one of each, a short quiz and puzzles, and meal-plan requests on WhatsApp.
+
+Real dish photos currently in `img/dishes/` are used automatically when `photo` is set in `data/menu.json`. Other dishes keep a branded placeholder until a photo is added.

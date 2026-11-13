@@ -137,7 +137,8 @@
     "chilli-mango-stone",
     "gongura-chicken-pulao",
     "pani-puri",
-    "chicken-65"
+    "chicken-65",
+    "upma-pesarattu"
   ],
   "builder": {
     "bases": [
@@ -323,7 +324,8 @@
       "tone": "frost",
       "opens_build": true,
       "sold_out": false,
-      "order": 0
+      "order": 0,
+      "level": 2
     },
     {
       "id": "signature-stone",
@@ -382,7 +384,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 1
+      "order": 1,
+      "level": 2
     },
     {
       "id": "desi-stone",
@@ -442,7 +445,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 2
+      "order": 2,
+      "level": 2
     },
     {
       "id": "gongura-chicken-pulao",
@@ -462,7 +466,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 3
+      "order": 3,
+      "level": 6
     },
     {
       "id": "gongura-mutton-pulao",
@@ -482,7 +487,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 4
+      "order": 4,
+      "level": 6
     },
     {
       "id": "masala-chai-stone",
@@ -504,7 +510,8 @@
       "opens_build": false,
       "sold_out": false,
       "order": 5,
-      "course": "dessert"
+      "course": "dessert",
+      "level": 3
     },
     {
       "id": "chilli-mango-stone",
@@ -528,7 +535,8 @@
       "sold_out": false,
       "order": 6,
       "note": "Check sorbet label – allergens none listed.",
-      "course": "dessert"
+      "course": "dessert",
+      "level": 4
     },
     {
       "id": "veg-pulao",
@@ -548,7 +556,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 7
+      "order": 7,
+      "level": 5
     },
     {
       "id": "paneer-pulao",
@@ -568,7 +577,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 8
+      "order": 8,
+      "level": 5
     },
     {
       "id": "chicken-pulao",
@@ -586,7 +596,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 9
+      "order": 9,
+      "level": 5
     },
     {
       "id": "chicken-65-pulao",
@@ -609,7 +620,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 10
+      "order": 10,
+      "level": 6
     },
     {
       "id": "mutton-pulao",
@@ -623,11 +635,12 @@
       "price": 9.99,
       "sizes": null,
       "choices": [],
-      "photo": null,
+      "photo": "img/dishes/mutton-pulao.webp",
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 11
+      "order": 11,
+      "level": 5
     },
     {
       "id": "chana-tadka",
@@ -664,7 +677,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 12
+      "order": 12,
+      "level": 5
     },
     {
       "id": "chana-masala",
@@ -700,7 +714,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 13
+      "order": 13,
+      "level": 5
     },
     {
       "id": "paneer-butter-masala",
@@ -740,7 +755,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 14
+      "order": 14,
+      "level": 4
     },
     {
       "id": "pani-puri",
@@ -762,7 +778,8 @@
       "opens_build": false,
       "sold_out": false,
       "order": 15,
-      "note": "Pani packed separately."
+      "note": "Pani packed separately.",
+      "level": 5
     },
     {
       "id": "samosa-chaat",
@@ -783,7 +800,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 16
+      "order": 16,
+      "level": 5
     },
     {
       "id": "papdi-chaat",
@@ -804,7 +822,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 17
+      "order": 17,
+      "level": 4
     },
     {
       "id": "chicken-65",
@@ -826,7 +845,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 18
+      "order": 18,
+      "level": 7
     },
     {
       "id": "chicken-pakoda",
@@ -848,7 +868,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 19
+      "order": 19,
+      "level": 6
     },
     {
       "id": "masala-fries",
@@ -866,7 +887,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 20
+      "order": 20,
+      "level": 5
     },
     {
       "id": "warm-gulab-jamun",
@@ -887,7 +909,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 21
+      "order": 21,
+      "level": 4
     },
     {
       "id": "gulab-jamun-ice-cream",
@@ -909,7 +932,8 @@
       "opens_build": false,
       "sold_out": false,
       "order": 22,
-      "note": "Packed separately."
+      "note": "Packed separately.",
+      "level": 4
     },
     {
       "id": "vanilla-shake",
@@ -929,7 +953,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 23
+      "order": 23,
+      "level": 1
     },
     {
       "id": "chocolate-shake",
@@ -949,7 +974,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 24
+      "order": 24,
+      "level": 1
     },
     {
       "id": "nutella-shake",
@@ -972,7 +998,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 25
+      "order": 25,
+      "level": 1
     },
     {
       "id": "biscoff-shake",
@@ -994,7 +1021,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 26
+      "order": 26,
+      "level": 1
     },
     {
       "id": "oreo-shake",
@@ -1016,7 +1044,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 27
+      "order": 27,
+      "level": 1
     },
     {
       "id": "banana-smoothie",
@@ -1048,7 +1077,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 28
+      "order": 28,
+      "level": 1
     },
     {
       "id": "avocado-smoothie",
@@ -1080,7 +1110,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 29
+      "order": 29,
+      "level": 1
     },
     {
       "id": "mango-lassi",
@@ -1100,7 +1131,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 30
+      "order": 30,
+      "level": 1
     },
     {
       "id": "soft-drink",
@@ -1119,7 +1151,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 31
+      "order": 31,
+      "level": 1
     },
     {
       "id": "water",
@@ -1138,7 +1171,8 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 32
+      "order": 32,
+      "level": 1
     },
     {
       "id": "masala-chai",
@@ -1167,7 +1201,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 33
+      "order": 33,
+      "level": 4
     },
     {
       "id": "filter-coffee",
@@ -1187,7 +1222,8 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 34
+      "order": 34,
+      "level": 4
     },
     {
       "id": "glacier",
@@ -1250,7 +1286,8 @@
           "qty": 1,
           "size": 0
         }
-      ]
+      ],
+      "level": 2
     },
     {
       "id": "volcano",
@@ -1325,7 +1362,8 @@
           "qty": 1,
           "size": 1
         }
-      ]
+      ],
+      "level": 6
     },
     {
       "id": "eclipse",
@@ -1440,7 +1478,8 @@
           "qty": 1,
           "size": 0
         }
-      ]
+      ],
+      "level": 4
     },
     {
       "id": "fire-and-ice-for-two",
@@ -1604,7 +1643,8 @@
           "qty": 1,
           "size": 1
         }
-      ]
+      ],
+      "level": 4
     },
     {
       "id": "chaat-and-chai",
@@ -1660,7 +1700,540 @@
           "qty": 1,
           "size": 1
         }
+      ],
+      "level": 4
+    },
+    {
+      "id": "upma-pesarattu",
+      "name": "Upma Pesarattu",
+      "category": "street",
+      "description": "Crispy green moong dal pesarattu, Andhra-style, filled with savoury tomato upma, served with two house chutneys.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [],
+      "price": 8.99,
+      "sizes": null,
+      "choices": [],
+      "photo": "img/dishes/upma-pesarattu.webp",
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 20.5
+    }
+  ],
+  "clips": {
+    "create-your-own-stone": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/create-your-own-stone/create-your-own-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/create-your-own-stone/create-your-own-stone-loop.mp4"
+    },
+    "signature-stone": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/signature-stone/signature-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/signature-stone/signature-stone-loop.mp4"
+    },
+    "desi-stone": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/desi-stone/desi-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/desi-stone/desi-stone-loop.mp4"
+    },
+    "gongura-chicken-pulao": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gongura-chicken-pulao/gongura-chicken-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gongura-chicken-pulao/gongura-chicken-pulao-loop.mp4"
+    },
+    "gongura-mutton-pulao": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gongura-mutton-pulao/gongura-mutton-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gongura-mutton-pulao/gongura-mutton-pulao-loop.mp4"
+    },
+    "masala-chai-stone": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-chai-stone/masala-chai-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-chai-stone/masala-chai-stone-loop.mp4"
+    },
+    "chilli-mango-stone": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chilli-mango-stone/chilli-mango-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chilli-mango-stone/chilli-mango-stone-loop.mp4"
+    },
+    "veg-pulao": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/veg-pulao/veg-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/veg-pulao/veg-pulao-loop.mp4"
+    },
+    "paneer-pulao": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/paneer-pulao/paneer-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/paneer-pulao/paneer-pulao-loop.mp4"
+    },
+    "chicken-pulao": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pulao/chicken-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pulao/chicken-pulao-loop.mp4"
+    },
+    "chana-masala": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chana-masala/chana-masala-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chana-masala/chana-masala-loop.mp4"
+    },
+    "pani-puri": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/pani-puri/pani-puri-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/pani-puri/pani-puri-loop.mp4"
+    },
+    "samosa-chaat": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/samosa-chaat/samosa-chaat-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/samosa-chaat/samosa-chaat-loop.mp4"
+    },
+    "papdi-chaat": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/papdi-chaat/papdi-chaat-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/papdi-chaat/papdi-chaat-loop.mp4"
+    },
+    "chicken-65": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-65/chicken-65-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-65/chicken-65-loop.mp4"
+    },
+    "chicken-pakoda": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pakoda/chicken-pakoda-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pakoda/chicken-pakoda-loop.mp4"
+    },
+    "masala-fries": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-fries/masala-fries-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-fries/masala-fries-loop.mp4"
+    },
+    "warm-gulab-jamun": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/warm-gulab-jamun/warm-gulab-jamun-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/warm-gulab-jamun/warm-gulab-jamun-loop.mp4"
+    },
+    "gulab-jamun-ice-cream": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gulab-jamun-ice-cream/gulab-jamun-ice-cream-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/gulab-jamun-ice-cream/gulab-jamun-ice-cream-loop.mp4"
+    },
+    "vanilla-shake": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/vanilla-shake/vanilla-shake-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/vanilla-shake/vanilla-shake-loop.mp4"
+    },
+    "chocolate-shake": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chocolate-shake/chocolate-shake-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chocolate-shake/chocolate-shake-loop.mp4"
+    },
+    "nutella-shake": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/nutella-shake/nutella-shake-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/nutella-shake/nutella-shake-loop.mp4"
+    },
+    "oreo-shake": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/oreo-shake/oreo-shake-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/oreo-shake/oreo-shake-loop.mp4"
+    },
+    "avocado-smoothie": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/avocado-smoothie/avocado-smoothie-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/avocado-smoothie/avocado-smoothie-loop.mp4"
+    },
+    "mango-lassi": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/mango-lassi/mango-lassi-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/mango-lassi/mango-lassi-loop.mp4"
+    },
+    "masala-chai": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-chai/masala-chai-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/masala-chai/masala-chai-loop.mp4"
+    },
+    "glacier": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/signature-stone/signature-stone-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/signature-stone/signature-stone-loop.mp4"
+    },
+    "eclipse": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pulao/chicken-pulao-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/chicken-pulao/chicken-pulao-loop.mp4"
+    },
+    "chaat-and-chai": {
+      "poster": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/samosa-chaat/samosa-chaat-poster.webp",
+      "mp4": "https://raw.githubusercontent.com/karimullashaik0389-cloud/frostflame-assets/main/dish/samosa-chaat/samosa-chaat-loop.mp4"
+    }
+  },
+  "levels": {
+    "1": "Arctic",
+    "2": "Frost",
+    "3": "Chill",
+    "4": "Meeting point",
+    "5": "Warm",
+    "6": "Ember",
+    "7": "Inferno"
+  },
+  "mix": {
+    "frost_defaults": [
+      "signature-stone",
+      "mango-lassi",
+      "biscoff-shake"
+    ],
+    "flame_defaults": [
+      "samosa-chaat",
+      "masala-fries",
+      "chicken-65-pulao"
+    ]
+  },
+  "themes": [
+    {
+      "id": "solo_m",
+      "label": "Just you",
+      "sublabel": "For him · refined",
+      "title": "Table for one",
+      "greeting": "Quiet confidence. Order well.",
+      "mood": "Charcoal & amber ember — bar-seat polish.",
+      "vars": {
+        "--bg": "#0e1012",
+        "--bg-elev": "#171a1e",
+        "--bg-frost": "#12161c",
+        "--bg-flame": "#16110e",
+        "--frost": "#8eb8c9",
+        "--flame": "#e08a3c",
+        "--silver": "#f4efe8",
+        "--muted": "#b7aaa0",
+        "--ember": "#c9a227"
+      }
+    },
+    {
+      "id": "solo_f",
+      "label": "Just you",
+      "sublabel": "For her · elegant",
+      "title": "Just for you",
+      "greeting": "Soft light. Your pace.",
+      "mood": "Champagne blush & rose gold — treat-yourself calm.",
+      "vars": {
+        "--bg": "#161018",
+        "--bg-elev": "#221a22",
+        "--bg-frost": "#1c1420",
+        "--bg-flame": "#1e1620",
+        "--frost": "#c9b8d4",
+        "--flame": "#d4a0b5",
+        "--silver": "#fbf5f8",
+        "--muted": "#d4bbc8",
+        "--ember": "#c4a574"
+      }
+    },
+    {
+      "id": "friends",
+      "label": "Two friends",
+      "sublabel": "Bright & easy",
+      "title": "Friends night",
+      "greeting": "Two spoons. Easy laughs.",
+      "mood": "Sea-glass teal & soft gold — social, never loud.",
+      "vars": {
+        "--bg": "#0c1c1f",
+        "--bg-elev": "#132428",
+        "--bg-frost": "#0e282c",
+        "--bg-flame": "#1a2420",
+        "--frost": "#6ec9c0",
+        "--flame": "#d4a86a",
+        "--silver": "#f3fffb",
+        "--muted": "#9fc4bc",
+        "--ember": "#d4c07a"
+      }
+    },
+    {
+      "id": "couple",
+      "label": "Couple",
+      "sublabel": "Date night",
+      "title": "For two",
+      "greeting": "Low light. Two spoons.",
+      "mood": "Burgundy velvet & champagne — intimate dining.",
+      "vars": {
+        "--bg": "#14080c",
+        "--bg-elev": "#1e1016",
+        "--bg-frost": "#160c14",
+        "--bg-flame": "#1a0a10",
+        "--frost": "#c9a0b0",
+        "--flame": "#c44a5e",
+        "--silver": "#fff6f8",
+        "--muted": "#d4aeb8",
+        "--ember": "#d4b87a"
+      }
+    },
+    {
+      "id": "gang",
+      "label": "The Gang's Night Out",
+      "sublabel": "City night",
+      "title": "Night out",
+      "greeting": "The table’s full. Let’s eat.",
+      "mood": "Midnight navy & muted teal — city-night polish.",
+      "vars": {
+        "--bg": "#070b14",
+        "--bg-elev": "#0e1424",
+        "--bg-frost": "#0a1424",
+        "--bg-flame": "#0c1018",
+        "--frost": "#5ec8c0",
+        "--flame": "#d4955a",
+        "--silver": "#e8f7f4",
+        "--muted": "#8aadb0",
+        "--ember": "#c9a06a"
+      }
+    },
+    {
+      "id": "family",
+      "label": "Big Family Feast",
+      "sublabel": "Warm table",
+      "title": "Family feast",
+      "greeting": "Everyone’s here — fill the table.",
+      "mood": "Walnut & marigold — generous, warm, gathered.",
+      "vars": {
+        "--bg": "#14100a",
+        "--bg-elev": "#1e1810",
+        "--bg-frost": "#14140c",
+        "--bg-flame": "#1a140c",
+        "--frost": "#a8c4b0",
+        "--flame": "#d4a024",
+        "--silver": "#fff8ec",
+        "--muted": "#c9b896",
+        "--ember": "#c9a040"
+      }
+    },
+    {
+      "id": "family_kids",
+      "label": "Family with kids",
+      "sublabel": "Calm & colourful",
+      "title": "Family table",
+      "greeting": "Grown-ups and little legends welcome.",
+      "mood": "Soft sky & sage — playful without the circus.",
+      "vars": {
+        "--bg": "#0c1e30",
+        "--bg-elev": "#142838",
+        "--bg-frost": "#0c2438",
+        "--bg-flame": "#123028",
+        "--frost": "#7ec8e8",
+        "--flame": "#e09a78",
+        "--silver": "#f3f9ff",
+        "--muted": "#9ab8cc",
+        "--ember": "#e0b060"
+      }
+    }
+  ],
+  "assist": {
+    "api": "https://hackney-stone.emergent.host/api/assist",
+    "matchmaker_api": "https://hackney-stone.emergent.host/api/matchmaker",
+    "names": {
+      "frosty": "Frosty",
+      "flamey": "Flamey"
+    },
+    "prompts": [
+      "Are you open tonight?",
+      "Do you deliver to my postcode?",
+      "How does WhatsApp ordering work?",
+      "Which dishes contain nuts?",
+      "I fancy something spicy and vegetarian",
+      "Something cold and chocolatey"
+    ],
+    "disclaimer": "Frosty and Flamey are menu assistants, not people. They use our menu to suggest dishes and answer practical questions."
+  },
+  "matchmaker": {
+    "title": "Don't know what you want? Tell us what you fancy.",
+    "label": "Describe it in your own words",
+    "placeholder": "e.g. Something spicy, then something cold to calm it down",
+    "chips": [
+      "Vegan and spicy under £10",
+      "Nut-free dessert for two",
+      "Never tried Andhra food – surprise me",
+      "Feed 3 of us for about £30",
+      "Something cold and chocolatey"
+    ],
+    "toggles": [
+      [
+        "vegetarian",
+        "Vegetarian"
+      ],
+      [
+        "vegan",
+        "Vegan"
+      ],
+      [
+        "no_nuts",
+        "No nuts"
+      ],
+      [
+        "no_gluten",
+        "No gluten"
+      ],
+      [
+        "no_milk",
+        "No milk"
+      ]
+    ],
+    "surprise": "Surprise me with something I'd love",
+    "disclaimer": "Suggestions use our allergen tags. If you have an allergy, check the allergen list and message us before ordering."
+  },
+  "plans": {
+    "title": "Weekly & monthly meal plans",
+    "lead": "Frost & Flame meal plans: regular Andhra pulao, curry and stone ice cream, requested on WhatsApp.",
+    "empty": "New meal plans are coming soon. Message us on WhatsApp if you'd like one.",
+    "note": "We'll confirm the details — no payment is taken on this site.",
+    "wa_intro": "Hi Frost & Flame, I'd like to request a meal plan.",
+    "items": []
+  },
+  "play": {
+    "note": "A few light puzzles and a quiz you can play while you decide what to order.",
+    "puzzles": [
+      {
+        "id": "p1",
+        "title": "The mixed-up jars",
+        "question": "Three jars are labelled TEA, COFFEE and MIXED. Every label is wrong. You may draw one bean or leaf from one jar without looking inside. Which jar do you choose, and how do you relabel all three? Assume you can recognise tea from coffee.",
+        "hints": [
+          "Start with the jar whose current label says MIXED.",
+          "Because that label is wrong, it must hold only one ingredient."
+        ],
+        "answer": "Draw from MIXED. If it is tea, that jar is TEA. The jar labelled COFFEE cannot be coffee (wrong label) or tea (already found), so it is MIXED. The jar labelled TEA is COFFEE. Reverse tea/coffee for a coffee draw.",
+        "tags": [
+          "logic",
+          "kids"
+        ]
+      },
+      {
+        "id": "p2",
+        "title": "Four dessert orders",
+        "question": "Asha, Ben, Cara and Dev each chose one different dessert: cone, brownie, mango or jamun. Asha chose neither cone nor mango. Ben chose mango. Cara did not choose cone or jamun. Who chose what? Write a little grid before revealing.",
+        "hints": [
+          "Cross out mango for everyone except Ben.",
+          "Cara has only brownie left."
+        ],
+        "answer": "Ben: mango. Cara: brownie (not cone or jamun, and mango is taken). Asha: jamun (not cone/mango, brownie taken). Dev: cone. There is exactly one solution.",
+        "tags": [
+          "logic",
+          "kids"
+        ]
+      },
+      {
+        "id": "p3",
+        "title": "The missing pound",
+        "question": "Three friends pay £30 for dinner. The correct bill is £25. A helper returns £1 to each friend and keeps £2. Each friend has paid £9: 3 × £9 = £27. Add the helper’s £2 and you get £29. Where is the missing pound?",
+        "hints": [
+          "What is already included in the £27?",
+          "Separate money kept from money returned."
+        ],
+        "answer": "No pound is missing. £27 = £25 restaurant + £2 helper. Add the £3 returned, not the £2 again: £27 + £3 = £30.",
+        "tags": [
+          "friends",
+          "number"
+        ]
+      },
+      {
+        "id": "p4",
+        "title": "The nine-scoop balance",
+        "question": "Nine sealed scoop pots look identical. Eight weigh the same; one is heavier. You have a balance scale and only TWO weighings. How can you always identify the heavier pot?",
+        "hints": [
+          "Split into three groups of three.",
+          "The first weighing identifies a group, not a single pot."
+        ],
+        "answer": "Weigh three against three. If balanced, the heavy pot is in the untouched three; otherwise it is in the heavier group. From those three weigh one against one. A heavier side wins; if balanced, the third is heavy.",
+        "tags": [
+          "logic"
+        ]
+      }
+    ],
+    "quiz": {
+      "id": "spice",
+      "title": "Spice & food discoveries",
+      "questions": [
+        {
+          "q": "What makes chillies feel hot?",
+          "options": [
+            "Capsaicin",
+            "Chlorophyll",
+            "Starch"
+          ],
+          "correct": 0,
+          "fact": "Capsaicin activates heat-sensitive TRPV1 receptors."
+        },
+        {
+          "q": "What does the Scoville scale describe?",
+          "options": [
+            "Chilli pungency",
+            "Sugar content",
+            "Food temperature"
+          ],
+          "correct": 0,
+          "fact": "The original Scoville test used dilution and human tasters."
+        },
+        {
+          "q": "Who devised the Scoville test?",
+          "options": [
+            "Wilbur Scoville",
+            "Isaac Newton",
+            "Louis Pasteur"
+          ],
+          "correct": 0,
+          "fact": "Wilbur Scoville introduced his test in 1912."
+        },
+        {
+          "q": "Which protein in dairy milk helps disperse capsaicin?",
+          "options": [
+            "Casein",
+            "Keratin",
+            "Collagen"
+          ],
+          "correct": 0,
+          "fact": "Casein can help make capsaicin easier to wash away."
+        },
+        {
+          "q": "What is saffron harvested from?",
+          "options": [
+            "Flower stigmas",
+            "Tree bark",
+            "Roots"
+          ],
+          "correct": 0,
+          "fact": "Saffron is the dried stigma of Crocus sativus."
+        },
+        {
+          "q": "Which spice is made from bark?",
+          "options": [
+            "Cinnamon",
+            "Cumin",
+            "Mustard"
+          ],
+          "correct": 0,
+          "fact": "Cinnamon comes from the inner bark of Cinnamomum trees."
+        },
+        {
+          "q": "Vanilla comes from which plant family?",
+          "options": [
+            "Orchids",
+            "Grasses",
+            "Cacti"
+          ],
+          "correct": 0,
+          "fact": "Vanilla pods are fruits of orchids."
+        },
+        {
+          "q": "Black, green and white peppercorns commonly come from what plant?",
+          "options": [
+            "Piper nigrum",
+            "Capsicum annuum",
+            "Camellia sinensis"
+          ],
+          "correct": 0,
+          "fact": "Processing and ripeness create different peppercorn products."
+        },
+        {
+          "q": "Cloves are dried what?",
+          "options": [
+            "Flower buds",
+            "Leaves",
+            "Roots"
+          ],
+          "correct": 0,
+          "fact": "The unopened flower buds of Syzygium aromaticum become cloves."
+        },
+        {
+          "q": "Tea leaves come from which plant?",
+          "options": [
+            "Camellia sinensis",
+            "Coffea arabica",
+            "Piper nigrum"
+          ],
+          "correct": 0,
+          "fact": "Black and green teas can come from the same species, processed differently."
+        }
+      ],
+      "tags": [
+        "gang",
+        "friends"
       ]
     }
-  ]
+  },
+  "visit": {
+    "postcode_areas": [
+      "E1",
+      "E1W",
+      "E2",
+      "E8",
+      "E9"
+    ]
+  }
 }

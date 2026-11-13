@@ -27,6 +27,7 @@
   <link rel="preload" as="image" href="img/frost-poster.webp" type="image/webp" media="(min-width: 768px)">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/features.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -65,6 +66,7 @@
 </head>
 <body>
   <a class="skip" href="#menu">Skip to menu</a>
+  <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
 
   <header class="header">
     <a class="logo" href="#top" aria-label="Frost &amp; Flame home">
@@ -72,7 +74,14 @@
     </a>
     <nav class="nav" aria-label="Primary">
       <a class="nav-link" href="#menu">Menu</a>
+      <a class="nav-link" href="#matchmaker">Match</a>
+      <a class="nav-link" href="#build">Build</a>
       <a class="nav-link" href="#story">Our story</a>
+      <div class="mode-toggle" role="group" aria-label="Frost or Flame look">
+        <button type="button" data-mode="frost" data-testid="mode-frost" aria-pressed="true">Frost</button>
+        <button type="button" data-mode="flame" data-testid="mode-flame" aria-pressed="false">Flame</button>
+      </div>
+      <button class="mood-btn" type="button" data-open-mood>Mood</button>
       <button class="btn btn-ghost cart-btn" type="button" data-open-cart>
         Order <span class="cart-count" data-cart-count hidden>0</span>
       </button>
@@ -94,7 +103,7 @@
       <div class="hero-dim" aria-hidden="true"></div>
       <div class="hero-copy">
         <p class="eyebrow" data-launch>Opening 26 November 2026<br>Hackney Road E2</p>
-        <h1 class="wordmark"><span class="frost">Frost</span><span class="line2"><span class="amp">&amp;</span><span class="flame">Flame</span></span></h1>
+        <h1 class="wordmark" aria-label="Frost &amp; Flame"><span class="frost" aria-hidden="true"><span style="--i:0">F</span><span style="--i:1">R</span><span style="--i:2">O</span><span style="--i:3">S</span><span style="--i:4">T</span></span><span class="line2" aria-hidden="true"><span class="amp" style="--i:5">&amp;</span><span class="flame"><span style="--i:6">F</span><span style="--i:7">L</span><span style="--i:8">A</span><span style="--i:9">M</span><span style="--i:10">E</span></span></span></h1>
         <p class="hero-tag">One kitchen. Two temperatures.</p>
         <p class="hero-lead">Stone ice cream mixed to order. Andhra pulao and street food, fired fresh. Delivered around Hackney Road, E2.</p>
         <div class="hero-actions">
@@ -116,6 +125,18 @@
       </div>
     </section>
 
+
+    <section class="section section-frost" id="matchmaker" aria-labelledby="mm-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Flavour Matchmaker</p>
+          <h2 id="mm-title">Don't know what you want? Tell us what you fancy.</h2>
+        </div>
+      </div>
+      <form id="mm-form" class="feature-card reveal" style="max-width:40rem;margin:0 auto"></form>
+      <div id="mm-results" class="mm-results" data-testid="mm-results" style="max-width:40rem;margin:0 auto"></div>
+      <p class="note reveal" style="max-width:40rem;margin:1rem auto 0" data-testid="mm-disclaimer">Suggestions use our allergen tags. If you have an allergy, check the allergen list and message us before ordering.</p>
+    </section>
     <section class="section menu" id="menu" data-tone="frost" aria-labelledby="menu-title">
       <div class="section-head reveal">
         <div>
@@ -127,6 +148,48 @@
         <div class="tabs" id="menu-tabs" role="tablist" aria-label="Menu categories"></div>
       </div>
       <div class="menu-grid" id="menu-grid"></div>
+    </section>
+
+
+    <section class="section section-frost" id="build" aria-labelledby="build-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Create Your Own Stone</p>
+          <h2 id="build-title">Build your stone</h2>
+        </div>
+      </div>
+      <div id="builder-root" class="reveal"></div>
+    </section>
+
+    <section class="section section-dark" id="dial" aria-labelledby="dial-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Ice-to-Fire</p>
+          <h2 id="dial-title">Turn the heat up, or down</h2>
+        </div>
+      </div>
+      <p class="reveal" style="max-width:36rem;margin:0 auto 1.2rem;color:var(--muted)">Every dish has a temperature from Arctic to Inferno. Slide to see what sits at each step.</p>
+      <div id="dial-root" class="reveal" data-level="4"></div>
+    </section>
+
+    <section class="section section-flame" id="play" aria-labelledby="play-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Play</p>
+          <h2 id="play-title">Mix one of each, or play a little</h2>
+        </div>
+      </div>
+      <div id="play-root" class="reveal" style="max-width:40rem;margin:0 auto"></div>
+    </section>
+
+    <section class="section section-dark" id="plans" aria-labelledby="plans-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Meal plans</p>
+          <h2 id="plans-title">Weekly &amp; monthly meal plans</h2>
+        </div>
+      </div>
+      <div id="plans-root" class="reveal" style="max-width:44rem;margin:0 auto"></div>
     </section>
 
     <section class="section section-dark" id="story" aria-labelledby="story-title" data-editable="story">
@@ -161,6 +224,11 @@
           <div class="areas" id="delivery-areas">
             <span class="area">E1</span><span class="area">E1W</span><span class="area">E2</span><span class="area">E8</span><span class="area">E9</span>
           </div>
+          <form class="pc-row" id="postcode-form">
+            <input name="postcode" type="text" autocomplete="postal-code" aria-label="Postcode" placeholder="e.g. E2 7QL">
+            <button class="btn btn-ghost" type="submit">Check</button>
+          </form>
+          <p class="pc-msg" id="postcode-msg" role="status"></p>
         </div>
         <div class="visit-card">
           <h3>Collection</h3>
@@ -174,8 +242,8 @@
 
   <footer class="footer">
     <div class="footer-inner">
-      <p>© <span id="year">2026</span> Frost &amp; Flame · 194 Hackney Road, London E2 7QL</p>
-      <p><a data-wa-direct href="https://wa.me/447587596490">WhatsApp</a> · Opening 26 November 2026</p>
+      <p>© <span id="year">2026</span> Tark Limited · 194 Hackney Road, London E2 7QL</p>
+      <p><a href="#matchmaker">Matchmaker</a> · <a href="#build">Build</a> · <a href="#play">Play</a> · <a href="#plans">Plans</a> · <a data-wa-direct href="https://wa.me/447587596490">WhatsApp</a></p>
     </div>
   </footer>
 
@@ -194,6 +262,33 @@
 
   <dialog class="dialog" id="item-dialog" aria-labelledby="item-dialog-title"></dialog>
 
+
+  <button class="chat-fab" type="button" data-testid="frosty-open-btn" aria-label="Ask Frosty">Fr</button>
+  <div class="chat-panel" id="chat-panel" hidden role="dialog" aria-labelledby="chat-name">
+    <div class="sheet-head">
+      <h2 id="chat-name">Frosty</h2>
+      <button class="icon-close" type="button" data-close-chat aria-label="Close chat">&times;</button>
+    </div>
+    <p class="note" id="chat-disclaimer" style="margin:0;padding:0.4rem 1rem 0"></p>
+    <div class="chat-log" id="chat-log"></div>
+    <p class="note" id="chat-typing" hidden style="padding:0 1rem">typing…</p>
+    <div class="chat-hints" id="chat-hints"></div>
+    <form class="chat-form" id="chat-form">
+      <input id="chat-input" data-testid="chat-input" maxlength="300" autocomplete="off" placeholder="Tell us what you fancy">
+      <button class="btn btn-frost" type="submit" data-testid="chat-send">Send</button>
+    </form>
+  </div>
+
+  <dialog class="mood-sheet" id="mood-sheet" aria-labelledby="mood-title">
+    <div class="sheet-head">
+      <h2 id="mood-title">Dining mood</h2>
+      <button class="icon-close" type="button" data-close-mood aria-label="Close">&times;</button>
+    </div>
+    <div class="mood-grid" id="mood-grid"></div>
+  </dialog>
+
   <script src="js/app.js" defer></script>
+  <script src="js/effects.js" defer></script>
+  <script src="js/features.js" defer></script>
 </body>
 </html>
