@@ -9,6 +9,7 @@
   const COMMIT_MESSAGE = "Admin: update menu";
 
   const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const app = $("#app");
 
   const escapeHtml = (s) =>
@@ -22,11 +23,16 @@
     token: null,
     menu: null,
     sha: null,
+    baseline: "",
     query: "",
+    view: "list", // list | category
+    activeCat: null,
     busy: false,
-    notice: "",
-    noticeType: "",
     loginError: "",
+    toast: "",
+    toastType: "",
+    pendingDeleteId: null,
+    pendingDeleteCat: null,
   };
 
   const apiHeaders = (token) => ({
@@ -53,15 +59,15 @@
   };
 
   const friendlyHttpError = (status, forWrite) => {
-    if (status === 401) return "That token was not accepted. Check you copied it in full.";
+    if (status === 401) return "That sign-in code was not accepted. Check you copied it in full.";
     if (status === 403) {
       return forWrite
-        ? "This token cannot save the menu. It needs Contents set to Read and write on the frost-flame-themes repo only."
-        : "This token does not have permission to read the menu. It needs Contents set to Read and write on the frost-flame-themes repo only.";
+        ? "This sign-in code cannot save the menu. Make a new one that can change the frost-flame-themes files."
+        : "This sign-in code cannot read the menu. Make a new one that can change the frost-flame-themes files.";
     }
-    if (status === 404) return "This token cannot see the Frost & Flame menu. Make sure it is for the frost-flame-themes repository only.";
-    if (status === 409) return "The menu was changed elsewhere. Refresh and try again.";
-    return "GitHub returned an error (" + status + "). Please try again.";
+    if (status === 404) return "This sign-in code cannot see the Frost & Flame menu. Check it is only for the frost-flame-themes project.";
+    if (status === 409) return "The menu was changed somewhere else. Close this page, open it again, and try once more.";
+    return "Something went wrong (" + status + "). Please try again.";
   };
 
   const loadFile = async (token) => {
@@ -70,11 +76,11 @@
     try {
       res = await fetch(url, { headers: apiHeaders(token) });
     } catch (_) {
-      throw new Error("Could not reach GitHub. Check your connection and try again.");
+      throw new Error("Could not reach the internet. Check your connection and try again.");
     }
     if (!res.ok) throw new Error(friendlyHttpError(res.status, false));
     const data = await res.json();
-    if (!data || !data.content || !data.sha) throw new Error("The menu file could not be read. Please try again.");
+    if (!data || !data.content || !data.sha) throw new Error("The menu could not be read. Please try again.");
     let parsed;
     try {
       parsed = JSON.parse(decodeBase64(data.content));
@@ -101,6 +107,8 @@
     return false;
   };
 
+  const priceShown = (v) => (v == null || v === "" ? "" : String(v));
+
   const visibleCategories = () =>
     (state.menu.categories || []).filter((c) => !c.hidden).sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -109,136 +117,164 @@
       .filter((i) => i.category === catId)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  const catById = (id) => (state.menu.categories || []).find((c) => c.id === id);
+
+  const catLabel = (cat) => (cat && (cat.heading || cat.name)) || "Section";
+
   const matchesQuery = (item, cat) => {
     const q = state.query.trim().toLowerCase();
     if (!q) return true;
-    const hay = [item.name, item.description, cat && cat.name, cat && cat.heading, item.id]
+    const hay = [item.name, item.description, cat && cat.name, cat && cat.heading]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
     return hay.includes(q);
   };
 
-  const slugify = (name) => {
-    const base = String(name || "dish")
-      .toLowerCase()
-      .replace(/&/g, " and ")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "dish";
-    const ids = new Set((state.menu.items || []).map((i) => i.id));
+  const slugify = (name, existing) => {
+    const base =
+      String(name || "new")
+        .toLowerCase()
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "new";
+    const ids = new Set(existing);
     if (!ids.has(base)) return base;
     let n = 2;
     while (ids.has(base + "-" + n)) n += 1;
     return base + "-" + n;
   };
 
-  const collectPricesFromRow = (row) => {
-    const errors = [];
-    const main = parsePrice($("[data-price]", row)?.value);
-    if (!main.ok) errors.push("price");
-    const sizes = [...$$("[data-size-price]", row)].map((el) => {
-      const parsed = parsePrice(el.value);
-      if (!parsed.ok) errors.push(el.dataset.sizePrice);
-      return { index: Number(el.dataset.sizePrice), value: parsed.value };
+  const cleanMenu = (menu) => {
+    const copy = JSON.parse(JSON.stringify(menu));
+    (copy.items || []).forEach((it) => {
+      delete it._new;
     });
-    const adds = [...$$("[data-add-price]", row)].map((el) => {
-      const parsed = parsePrice(el.value);
-      if (!parsed.ok) errors.push("option");
-      return { ci: Number(el.dataset.choice), oi: Number(el.dataset.option), value: parsed.value };
-    });
-    return { ok: errors.length === 0, main: main.value, sizes, adds, errors };
+    return copy;
   };
 
-  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-  const applyDomToMenu = () => {
-    if (!state.menu) return { ok: true };
-    const problems = [];
-    $$(".dish-row[data-id]").forEach((row) => {
-      const item = state.menu.items.find((i) => i.id === row.dataset.id);
-      if (!item) return;
-      const name = ($("[data-name]", row)?.value || "").trim();
-      if (!name) problems.push((item.name || "A dish") + " needs a name.");
-      else item.name = name;
-      const desc = $("[data-desc]", row);
-      if (desc) item.description = desc.value;
-      const sold = $("[data-sold]", row);
-      if (sold) item.sold_out = !!sold.checked;
-      const prices = collectPricesFromRow(row);
-      if (!prices.ok) {
-        problems.push((item.name || "A dish") + " has a price that is not a number of 0 or more. Leave it blank for “Price coming soon”.");
-        return;
-      }
-      if (item.sizes && item.sizes.length) {
-        prices.sizes.forEach((s) => {
-          if (item.sizes[s.index]) item.sizes[s.index].price = s.value;
-        });
-      } else {
-        item.price = prices.main;
-        if (prices.main != null) delete item.price_review;
-        else item.price_review = true;
-      }
-      prices.adds.forEach((a) => {
-        const opt = item.choices?.[a.ci]?.options?.[a.oi];
-        if (opt) opt.add = a.value == null ? 0 : a.value;
-      });
-    });
-    return { ok: problems.length === 0, problems };
+  const markClean = () => {
+    state.baseline = JSON.stringify(cleanMenu(state.menu));
   };
 
-  const rowHTML = (item) => {
+  const changeCount = () => {
+    if (!state.menu || !state.baseline) return 0;
+    let a;
+    try {
+      a = JSON.parse(state.baseline);
+    } catch (_) {
+      return 0;
+    }
+    const b = cleanMenu(state.menu);
+    let n = 0;
+    const aItems = new Map((a.items || []).map((i) => [i.id, i]));
+    const bItems = new Map((b.items || []).map((i) => [i.id, i]));
+    for (const id of bItems.keys()) if (!aItems.has(id)) n += 1;
+    for (const id of aItems.keys()) if (!bItems.has(id)) n += 1;
+    for (const [id, item] of bItems) {
+      const old = aItems.get(id);
+      if (old && JSON.stringify(old) !== JSON.stringify(item)) n += 1;
+    }
+    const aCats = new Map((a.categories || []).map((c) => [c.id, c]));
+    const bCats = new Map((b.categories || []).map((c) => [c.id, c]));
+    for (const id of bCats.keys()) if (!aCats.has(id)) n += 1;
+    for (const id of aCats.keys()) if (!bCats.has(id)) n += 1;
+    for (const [id, cat] of bCats) {
+      const old = aCats.get(id);
+      if (old && JSON.stringify(old) !== JSON.stringify(cat)) n += 1;
+    }
+    return n;
+  };
+
+  const isDirty = () => changeCount() > 0;
+
+  const isVegItem = (item) => {
+    const diet = item.diet || [];
+    return diet.includes("V") || diet.includes("VG");
+  };
+
+  const setVeg = (item, veg) => {
+    const extra = (item.diet || []).filter((d) => d !== "V" && d !== "VG" && d !== "NV");
+    item.diet = veg ? ["V", ...extra] : ["NV", ...extra];
+  };
+
+  /* ---------- render ---------- */
+
+  const headerHTML = () => `
+    <header class="header">
+      <div class="logo">
+        <img src="../img/logo-800.webp" alt="">
+        <div class="logo-text">
+          <strong>Frost &amp; Flame</strong>
+          <span>Change the menu</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-pill btn-small" type="button" data-logout>Log out</button>
+    </header>`;
+
+  const saveBarHTML = () => {
+    const n = changeCount();
+    if (state.toast) {
+      const cls = state.toastType === "error" ? "toast error-toast" : "toast";
+      return `<div class="${cls}" role="status" data-toast>${escapeHtml(state.toast)}</div>`;
+    }
+    if (!n) return "";
+    const label = n === 1 ? "Save changes (1)" : "Save changes (" + n + ")";
+    return `<div class="save-bar">
+      <button class="btn btn-frost" type="button" data-save ${state.busy ? "disabled" : ""} data-testid="save-bar">
+        ${state.busy ? "Saving…" : escapeHtml(label)}
+      </button>
+    </div>`;
+  };
+
+  const priceBox = (label, value, attrs) => `
+    <div class="price-box">
+      <span class="lbl">${escapeHtml(label)}</span>
+      <div class="price-wrap">
+        <span class="pound">£</span>
+        <input class="field" ${attrs} inputmode="decimal" placeholder="Not set yet" value="${escapeHtml(priceShown(value))}" aria-label="${escapeHtml(label)}">
+      </div>
+    </div>`;
+
+  const cardHTML = (item, cat) => {
     const pending = !hasPrice(item);
     const sizes = item.sizes && item.sizes.length ? item.sizes : null;
-    const priceFields = [];
-    if (!sizes) {
-      priceFields.push(priceInput("Price", item.price, "data-price"));
+    let prices = "";
+    if (sizes) {
+      prices = `<div class="option-grid">${sizes
+        .map((s, i) => priceBox(s.name, s.price, 'data-size-price="' + i + '"'))
+        .join("")}</div>`;
+    } else {
+      prices = priceBox("Price", item.price, "data-price");
     }
-    (sizes || []).forEach((s, i) => {
-      priceFields.push(priceInput(s.name, s.price, 'data-size-price="' + i + '"'));
-    });
-    const choiceFields = [];
+    const extras = [];
     (item.choices || []).forEach((c, ci) => {
       const useful = (c.options || []).some((o) => Number(o.add || 0) !== 0);
       if (!useful) return;
       (c.options || []).forEach((o, oi) => {
-        choiceFields.push(priceInput((c.label ? c.label + " · " : "") + o.name, o.add ?? 0, 'data-add-price data-choice="' + ci + '" data-option="' + oi + '"'));
+        extras.push(priceBox((c.label ? c.label + " · " : "") + o.name, o.add ?? 0, 'data-add-price data-choice="' + ci + '" data-option="' + oi + '"'));
       });
     });
-    const cls = ["dish-row", pending ? "is-pending" : "", item.sold_out ? "is-sold" : "", item._new ? "is-new" : ""]
-      .filter(Boolean)
-      .join(" ");
+    const section = cat ? `<span class="pending-tag">${escapeHtml(catLabel(cat))}</span>` : "";
     return `
-      <article class="${cls}" data-id="${escapeHtml(item.id)}" data-testid="dish-row">
-        <div class="row-head">
-          <label>
-            <span class="lbl">Name</span>
-            <input class="field" data-name type="text" value="${escapeHtml(item.name)}" aria-label="Name of ${escapeHtml(item.name)}">
-          </label>
-          <button class="btn btn-danger" type="button" data-delete="${escapeHtml(item.id)}">Delete</button>
-        </div>
-        <label>
-          <span class="lbl">Description</span>
-          <textarea class="field" data-desc aria-label="Description of ${escapeHtml(item.name)}">${escapeHtml(item.description)}</textarea>
-        </label>
-        <div class="prices">
-          ${priceFields.join("")}
-          ${choiceFields.join("")}
-        </div>
+      <article class="card${pending ? " is-pending" : ""}${item.sold_out ? " is-sold" : ""}" data-id="${escapeHtml(item.id)}" data-testid="dish-card">
+        <h2 class="card-name">${escapeHtml(item.name)}</h2>
         ${pending ? `<span class="pending-tag">Price coming soon</span>` : ""}
-        <label class="toggle">
-          <input data-sold type="checkbox" ${item.sold_out ? "checked" : ""}>
-          <span>Sold out (hidden from orders)</span>
-        </label>
+        ${state.query && cat ? section : ""}
+        ${prices}
+        ${extras.length ? `<div class="option-grid">${extras.join("")}</div>` : ""}
+        <div class="switch-row">
+          <span>Sold out</span>
+          <label class="switch">
+            <input data-sold type="checkbox" ${item.sold_out ? "checked" : ""} aria-label="Sold out">
+            <span></span>
+          </label>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-ghost btn-small" type="button" data-edit="${escapeHtml(item.id)}">Edit</button>
+          <button class="btn btn-danger-solid btn-small" type="button" data-delete="${escapeHtml(item.id)}">Delete</button>
+        </div>
       </article>`;
-  };
-
-  const priceInput = (label, value, attrs) => {
-    const shown = value == null || value === "" ? "" : String(value);
-    return `<label class="price-field">
-      <span class="lbl">${escapeHtml(label)}</span>
-      <span class="pound">£</span>
-      <input class="field" ${attrs} inputmode="decimal" placeholder="Coming soon" value="${escapeHtml(shown)}" aria-label="${escapeHtml(label)} price">
-    </label>`;
   };
 
   const renderLogin = () => {
@@ -247,112 +283,241 @@
         <div class="logo">
           <img src="../img/logo-800.webp" alt="Frost &amp; Flame">
         </div>
-        <h1>Menu admin</h1>
-        <p>Sign in with a GitHub token that can only change the Frost &amp; Flame menu.</p>
+        <h1>Change the menu</h1>
+        <p>Paste the sign-in code you made on GitHub, then you can change prices, add dishes or take them off.</p>
         ${state.loginError ? `<p class="error" role="alert">${escapeHtml(state.loginError)}</p>` : ""}
         <form id="login-form">
           <div class="field-row">
-            <label for="token">GitHub token</label>
+            <label for="token">Sign-in code</label>
             <input class="field" id="token" name="token" type="password" autocomplete="off" spellcheck="false" required>
           </div>
           <button class="btn btn-frost btn-wide" type="submit" ${state.busy ? "disabled" : ""}>${state.busy ? "Checking…" : "Sign in"}</button>
         </form>
-        <p class="hint"><a href="HOW-TO.md">How to make the token</a></p>
+        <p class="hint"><a href="HOW-TO.md">How to make the sign-in code</a></p>
       </main>`;
     $("#login-form").addEventListener("submit", onLogin);
   };
 
-  const renderEditor = () => {
-    const cats = visibleCategories();
-    const groups = cats
-      .map((cat) => {
-        const items = itemsIn(cat.id).filter((i) => matchesQuery(i, cat));
-        if (!items.length) return "";
-        return `<section class="group" data-group="${escapeHtml(cat.id)}">
-          <p class="kicker">Menu</p>
-          <h2>${escapeHtml(cat.heading || cat.name)}</h2>
-          ${items.map(rowHTML).join("")}
-        </section>`;
-      })
-      .join("");
+  const renderList = () => {
+    const q = state.query.trim();
+    let body;
+    if (q) {
+      const cards = [];
+      visibleCategories().forEach((cat) => {
+        itemsIn(cat.id)
+          .filter((i) => matchesQuery(i, cat))
+          .forEach((i) => cards.push(cardHTML(i, cat)));
+      });
+      body = cards.length
+        ? `<div class="cards">${cards.join("")}</div>`
+        : `<p class="empty">No dishes match that search.</p>`;
+    } else {
+      const buttons = visibleCategories()
+        .map((cat) => {
+          const n = itemsIn(cat.id).length;
+          const count = n === 1 ? "1 dish" : n + " dishes";
+          return `<button class="cat-btn" type="button" data-open-cat="${escapeHtml(cat.id)}">
+            <strong>${escapeHtml(catLabel(cat))}</strong>
+            <span>${count}</span>
+          </button>`;
+        })
+        .join("");
+      body = `<div class="cat-list" data-testid="cat-list">
+        <button class="cat-btn cat-add" type="button" data-add-cat>+ Add category</button>
+        ${buttons}
+      </div>`;
+    }
     app.innerHTML = `
-      <header class="header">
-        <div class="logo">
-          <img src="../img/logo-800.webp" alt="">
-          <div class="logo-text">
-            <strong>Frost &amp; Flame</strong>
-            <span>Menu admin</span>
-          </div>
-        </div>
-        <button class="btn btn-ghost" type="button" data-logout>Log out</button>
-      </header>
+      ${headerHTML()}
       <main class="wrap">
-        <div class="toolbar">
-          <input class="field search" type="search" placeholder="Search dishes" value="${escapeHtml(state.query)}" data-search aria-label="Search dishes">
-          <button class="btn btn-ghost" type="button" data-add>Add a dish</button>
-        </div>
-        ${groups || `<p class="empty">No dishes match that search.</p>`}
+        <input class="field search" type="search" placeholder="Search dishes" value="${escapeHtml(state.query)}" data-search aria-label="Search dishes">
+        ${body}
       </main>
-      <div class="save-bar">
-        <p class="msg ${state.noticeType}" data-save-msg>${escapeHtml(state.notice || "Changes are saved to the website when you tap Save.")}</p>
-        <button class="btn btn-frost" type="button" data-save ${state.busy ? "disabled" : ""}>${state.busy ? "Saving…" : "Save"}</button>
-      </div>
-      <dialog class="modal" id="add-dialog">
-        <form class="modal-inner" id="add-form" method="dialog">
-          <h2>Add a dish</h2>
-          <div class="field-row">
-            <span class="lbl">Category</span>
-            <select class="field" name="category" required>
-              ${cats.map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.heading || c.name)}</option>`).join("")}
-            </select>
+      ${dialogsHTML()}
+      ${saveBarHTML()}`;
+  };
+
+  const renderCategory = () => {
+    const cat = catById(state.activeCat);
+    if (!cat) {
+      state.view = "list";
+      renderList();
+      return;
+    }
+    const items = itemsIn(cat.id);
+    const cards = items.map((i) => cardHTML(i, null)).join("");
+    app.innerHTML = `
+      ${headerHTML()}
+      <main class="wrap">
+        <button class="back" type="button" data-back>← All sections</button>
+        <div class="cat-title">
+          <h1>${escapeHtml(catLabel(cat))}</h1>
+          <div class="cat-actions">
+            <button class="btn btn-ghost btn-small" type="button" data-rename-cat="${escapeHtml(cat.id)}">Rename</button>
+            <button class="btn btn-danger-solid btn-small" type="button" data-delete-cat="${escapeHtml(cat.id)}">Delete</button>
           </div>
+        </div>
+        <input class="field search" type="search" placeholder="Search dishes" value="${escapeHtml(state.query)}" data-search aria-label="Search dishes">
+        <button class="btn btn-frost add-dish" type="button" data-add-dish>+ Add dish</button>
+        <div class="cards">
+          ${cards || `<p class="empty">No dishes in this section yet.</p>`}
+        </div>
+      </main>
+      ${dialogsHTML(cat.id)}
+      ${saveBarHTML()}`;
+  };
+
+  const dialogsHTML = (preselectCat) => {
+    const cats = visibleCategories();
+    const catOpts = cats
+      .map(
+        (c) =>
+          `<option value="${escapeHtml(c.id)}" ${c.id === preselectCat ? "selected" : ""}>${escapeHtml(catLabel(c))}</option>`
+      )
+      .join("");
+    return `
+      <dialog class="modal" id="add-dish-dialog">
+        <form class="modal-inner" id="add-dish-form" method="dialog">
+          <h2>Add a dish</h2>
           <div class="field-row">
             <span class="lbl">Name</span>
             <input class="field" name="name" type="text" required>
           </div>
           <div class="field-row">
-            <span class="lbl">Description</span>
+            <span class="lbl">Price</span>
+            <div class="price-wrap">
+              <span class="pound">£</span>
+              <input class="field" name="price" inputmode="decimal" placeholder="Not set yet" style="min-height:3.2rem;font-size:1.4rem;padding-left:2.15rem">
+            </div>
+          </div>
+          <div class="field-row">
+            <span class="lbl">Section</span>
+            <select class="field" name="category" required>${catOpts}</select>
+          </div>
+          <span class="lbl">Veg or non-veg</span>
+          <div class="radio-row">
+            <label><input type="radio" name="veg" value="yes" checked> Veg</label>
+            <label><input type="radio" name="veg" value="no"> Non-veg</label>
+          </div>
+          <div class="field-row">
+            <span class="lbl">Short description</span>
             <textarea class="field" name="description"></textarea>
           </div>
           <div class="field-row">
-            <span class="lbl">Price</span>
-            <label class="price-field">
-              <span class="pound">£</span>
-              <input class="field" name="price" inputmode="decimal" placeholder="Coming soon">
-            </label>
+            <span class="lbl">Photo link (optional)</span>
+            <input class="field" name="photo" type="text" inputmode="url" placeholder="https://">
           </div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-close-add>Cancel</button>
+            <button class="btn btn-ghost" type="button" data-close="add-dish-dialog">Cancel</button>
             <button class="btn btn-frost" type="submit">Add</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog class="modal" id="edit-dish-dialog">
+        <form class="modal-inner" id="edit-dish-form" method="dialog">
+          <h2>Edit dish</h2>
+          <input type="hidden" name="id">
+          <div class="field-row">
+            <span class="lbl">Name</span>
+            <input class="field" name="name" type="text" required>
+          </div>
+          <div class="field-row">
+            <span class="lbl">Section</span>
+            <select class="field" name="category" required>${catOpts}</select>
+          </div>
+          <span class="lbl">Veg or non-veg</span>
+          <div class="radio-row">
+            <label><input type="radio" name="veg" value="yes"> Veg</label>
+            <label><input type="radio" name="veg" value="no"> Non-veg</label>
+          </div>
+          <div class="field-row">
+            <span class="lbl">Short description</span>
+            <textarea class="field" name="description"></textarea>
+          </div>
+          <div class="field-row">
+            <span class="lbl">Photo link (optional)</span>
+            <input class="field" name="photo" type="text" inputmode="url" placeholder="https://">
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" type="button" data-close="edit-dish-dialog">Cancel</button>
+            <button class="btn btn-frost" type="submit">Save</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog class="modal" id="add-cat-dialog">
+        <form class="modal-inner" id="add-cat-form" method="dialog">
+          <h2>Add a category</h2>
+          <div class="field-row">
+            <span class="lbl">Name</span>
+            <input class="field" name="name" type="text" required placeholder="e.g. Kids menu">
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" type="button" data-close="add-cat-dialog">Cancel</button>
+            <button class="btn btn-frost" type="submit">Add</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog class="modal" id="rename-cat-dialog">
+        <form class="modal-inner" id="rename-cat-form" method="dialog">
+          <h2>Rename this section</h2>
+          <input type="hidden" name="id">
+          <div class="field-row">
+            <span class="lbl">Name</span>
+            <input class="field" name="name" type="text" required>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" type="button" data-close="rename-cat-dialog">Cancel</button>
+            <button class="btn btn-frost" type="submit">Save</button>
           </div>
         </form>
       </dialog>
       <dialog class="modal" id="confirm-dialog">
         <div class="modal-inner">
-          <h2>Remove this dish?</h2>
+          <h2 data-confirm-title>Please confirm</h2>
           <p data-confirm-text></p>
+          <div data-confirm-extra></div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-cancel-del>Cancel</button>
-            <button class="btn btn-danger" type="button" data-confirm-del>Remove</button>
+            <button class="btn btn-ghost" type="button" data-confirm-no>No</button>
+            <button class="btn btn-danger-solid" type="button" data-confirm-yes>Yes</button>
           </div>
         </div>
       </dialog>`;
   };
 
-  const syncNotice = (text, type) => {
-    state.notice = text || "";
-    state.noticeType = type || "";
-    const el = $("[data-save-msg]");
-    if (el) {
-      el.textContent = state.notice || "Changes are saved to the website when you tap Save.";
-      el.className = "msg " + (type || "");
+  const render = () => {
+    if (!state.token || !state.menu) {
+      renderLogin();
+      return;
+    }
+    if (state.view === "category" && !state.query.trim()) renderCategory();
+    else renderList();
+  };
+
+  const refreshChrome = () => {
+    $$(".save-bar, [data-toast]").forEach((el) => el.remove());
+    app.insertAdjacentHTML("beforeend", saveBarHTML());
+  };
+
+  const showToast = (text, type, ms) => {
+    state.toast = text;
+    state.toastType = type || "";
+    refreshChrome();
+    if (ms) {
+      setTimeout(() => {
+        if (state.toast === text) {
+          state.toast = "";
+          state.toastType = "";
+          refreshChrome();
+        }
+      }, ms);
     }
   };
 
+  /* ---------- actions ---------- */
+
   const onLogin = async (e) => {
     e.preventDefault();
-    const input = $("#token");
-    const token = (input && input.value || "").trim();
+    const token = ($("#token") && $("#token").value || "").trim();
     if (!token) return;
     state.busy = true;
     state.loginError = "";
@@ -361,14 +526,14 @@
       const { menu, sha } = await loadFile(token);
       try {
         localStorage.setItem(TOKEN_KEY, token);
-      } catch (_) {
-        /* still usable this session */
-      }
+      } catch (_) {}
       state.token = token;
       state.menu = menu;
       state.sha = sha;
       state.busy = false;
-      renderEditor();
+      state.view = "list";
+      markClean();
+      render();
     } catch (err) {
       state.busy = false;
       state.loginError = err.message || "Could not sign in.";
@@ -377,71 +542,102 @@
   };
 
   const logout = () => {
+    if (isDirty() && !window.confirm("You have unsaved changes. Log out anyway?")) return;
     try {
       localStorage.removeItem(TOKEN_KEY);
     } catch (_) {}
     state.token = null;
     state.menu = null;
     state.sha = null;
+    state.baseline = "";
     state.loginError = "";
-    state.notice = "";
+    state.toast = "";
+    state.query = "";
+    state.view = "list";
     renderLogin();
   };
 
-  const pendingDelete = { id: null };
-
-  const askDelete = (id) => {
-    const item = state.menu.items.find((i) => i.id === id);
-    if (!item) return;
-    pendingDelete.id = id;
-    const dialog = $("#confirm-dialog");
-    $("[data-confirm-text]", dialog).textContent =
-      "Remove “" + item.name + "” from the menu? It will come off the website when you Save.";
-    dialog.showModal();
+  const applyCardInputs = (root = document) => {
+    const problems = [];
+    $$(".card[data-id]", root).forEach((card) => {
+      const item = state.menu.items.find((i) => i.id === card.dataset.id);
+      if (!item) return;
+      const sold = $("[data-sold]", card);
+      if (sold) item.sold_out = !!sold.checked;
+      const main = $("[data-price]", card);
+      if (main) {
+        const parsed = parsePrice(main.value);
+        if (!parsed.ok) {
+          main.classList.add("is-bad");
+          problems.push(item.name + " needs a valid price, or leave it empty.");
+        } else {
+          main.classList.remove("is-bad");
+          item.price = parsed.value;
+          if (parsed.value != null) delete item.price_review;
+          else item.price_review = true;
+        }
+      }
+      $$("[data-size-price]", card).forEach((el) => {
+        const parsed = parsePrice(el.value);
+        const i = Number(el.dataset.sizePrice);
+        if (!parsed.ok) {
+          el.classList.add("is-bad");
+          problems.push(item.name + " has a price that is not a number.");
+        } else if (item.sizes && item.sizes[i]) {
+          el.classList.remove("is-bad");
+          item.sizes[i].price = parsed.value;
+        }
+      });
+      $$("[data-add-price]", card).forEach((el) => {
+        const parsed = parsePrice(el.value);
+        if (!parsed.ok) {
+          el.classList.add("is-bad");
+          problems.push(item.name + " has a price that is not a number.");
+        } else {
+          el.classList.remove("is-bad");
+          const opt = item.choices?.[Number(el.dataset.choice)]?.options?.[Number(el.dataset.option)];
+          if (opt) opt.add = parsed.value == null ? 0 : parsed.value;
+        }
+      });
+    });
+    return { ok: problems.length === 0, problems };
   };
 
-  const doDelete = () => {
-    const id = pendingDelete.id;
-    pendingDelete.id = null;
-    $("#confirm-dialog")?.close();
-    if (!id) return;
-    applyDomToMenu();
-    state.menu.items = state.menu.items.filter((i) => i.id !== id);
-    if (Array.isArray(state.menu.signature_ids)) {
-      state.menu.signature_ids = state.menu.signature_ids.filter((x) => x !== id);
-    }
-    syncNotice("Removed. Tap Save to update the website.", "");
-    const q = state.query;
-    renderEditor();
-    state.query = q;
+  const openAddDish = () => {
+    const d = $("#add-dish-dialog");
+    if (!d) return;
+    const form = $("#add-dish-form");
+    form.reset();
+    if (state.activeCat && form.category) form.category.value = state.activeCat;
+    d.showModal();
   };
 
-  const onAddSubmit = (e) => {
+  const addDish = (e) => {
     e.preventDefault();
     const form = e.target;
     const name = String(form.name.value || "").trim();
     if (!name) return;
     const parsed = parsePrice(form.price.value);
     if (!parsed.ok) {
-      syncNotice("The price must be a number of 0 or more, or left blank.", "error");
+      showToast("Price must be a number, or left empty if you have not set it yet.", "error", 4000);
       return;
     }
-    applyDomToMenu();
     const catId = form.category.value;
-    const cat = (state.menu.categories || []).find((c) => c.id === catId);
+    const cat = catById(catId);
     const siblings = itemsIn(catId);
     const order = siblings.length ? Math.max(...siblings.map((i) => i.order || 0)) + 1 : (cat?.order || 0) * 100;
+    const photo = String(form.photo.value || "").trim();
     const item = {
-      id: slugify(name),
+      id: slugify(name, (state.menu.items || []).map((i) => i.id)),
       name,
       category: catId,
       description: String(form.description.value || "").trim(),
-      diet: [],
+      diet: form.veg.value === "yes" ? ["V"] : ["NV"],
       allergens: [],
       price: parsed.value,
       sizes: null,
       choices: [],
-      photo: null,
+      photo: photo || null,
       tone: (cat && cat.tone) || "both",
       opens_build: false,
       sold_out: false,
@@ -449,52 +645,207 @@
       level: null,
       ingredients: [],
       ingredients_review: true,
-      _new: true,
     };
     if (parsed.value == null) item.price_review = true;
     state.menu.items.push(item);
-    $("#add-dialog")?.close();
-    renderEditor();
-    const row = document.querySelector('.dish-row[data-id="' + item.id + '"]');
-    if (row) row.scrollIntoView({ block: "center" });
-    syncNotice("Added “" + name + "”. Tap Save to update the website.", "");
+    $("#add-dish-dialog")?.close();
+    state.view = "category";
+    state.activeCat = catId;
+    state.query = "";
+    render();
   };
 
-  const save = async () => {
-    const applied = applyDomToMenu();
-    if (!applied.ok) {
-      syncNotice(applied.problems[0], "error");
+  const openEdit = (id) => {
+    const item = state.menu.items.find((i) => i.id === id);
+    if (!item) return;
+    const form = $("#edit-dish-form");
+    form.id.value = item.id;
+    form.name.value = item.name;
+    form.category.value = item.category;
+    form.description.value = item.description || "";
+    form.photo.value = item.photo && /^https?:/i.test(item.photo) ? item.photo : item.photo || "";
+    form.veg.value = isVegItem(item) ? "yes" : "no";
+    $("#edit-dish-dialog").showModal();
+  };
+
+  const saveEdit = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const item = state.menu.items.find((i) => i.id === form.id.value);
+    if (!item) return;
+    const name = String(form.name.value || "").trim();
+    if (!name) return;
+    item.name = name;
+    item.description = String(form.description.value || "").trim();
+    item.category = form.category.value;
+    setVeg(item, form.veg.value === "yes");
+    const photo = String(form.photo.value || "").trim();
+    if (photo) item.photo = photo;
+    else if (form.photo.value === "") {
+      // leave existing relative photos unless the box was cleared from a URL edit; if it was a path, keep it
+      if (item.photo && /^https?:/i.test(item.photo)) item.photo = null;
+    }
+    $("#edit-dish-dialog")?.close();
+    render();
+  };
+
+  const askDeleteDish = (id) => {
+    const item = state.menu.items.find((i) => i.id === id);
+    if (!item) return;
+    state.pendingDeleteId = id;
+    state.pendingDeleteCat = null;
+    $("[data-confirm-title]").textContent = "Delete this dish?";
+    $("[data-confirm-text]").textContent = "Delete " + item.name + "?";
+    $("[data-confirm-extra]").innerHTML = "";
+    $("#confirm-dialog").showModal();
+  };
+
+  const addCategory = (e) => {
+    e.preventDefault();
+    const name = String(e.target.name.value || "").trim();
+    if (!name) return;
+    const ids = (state.menu.categories || []).map((c) => c.id);
+    const id = slugify(name, ids);
+    const order = (state.menu.categories || []).reduce((m, c) => Math.max(m, c.order || 0), 0) + 1;
+    state.menu.categories.push({
+      id,
+      name,
+      heading: name,
+      course: "main",
+      order,
+      hidden: false,
+      tone: "both",
+      split_diet: false,
+    });
+    $("#add-cat-dialog")?.close();
+    state.view = "category";
+    state.activeCat = id;
+    state.query = "";
+    render();
+  };
+
+  const openRenameCat = (id) => {
+    const cat = catById(id);
+    if (!cat) return;
+    const form = $("#rename-cat-form");
+    form.id.value = id;
+    form.name.value = catLabel(cat);
+    $("#rename-cat-dialog").showModal();
+  };
+
+  const renameCat = (e) => {
+    e.preventDefault();
+    const cat = catById(e.target.id.value);
+    const name = String(e.target.name.value || "").trim();
+    if (!cat || !name) return;
+    cat.name = name;
+    cat.heading = name;
+    $("#rename-cat-dialog")?.close();
+    render();
+  };
+
+  const askDeleteCat = (id) => {
+    const cat = catById(id);
+    if (!cat) return;
+    const n = itemsIn(id).length;
+    state.pendingDeleteId = null;
+    state.pendingDeleteCat = id;
+    $("[data-confirm-title]").textContent = "Delete this section?";
+    if (!n) {
+      $("[data-confirm-text]").textContent = "Delete " + catLabel(cat) + "?";
+      $("[data-confirm-extra]").innerHTML = "";
+    } else {
+      $("[data-confirm-text]").textContent =
+        catLabel(cat) + " still has " + n + " dish" + (n === 1 ? "" : "es") + ". Move them to another section, then delete this one?";
+      const others = visibleCategories()
+        .filter((c) => c.id !== id)
+        .map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(catLabel(c))}</option>`)
+        .join("");
+      $("[data-confirm-extra]").innerHTML = others
+        ? `<div class="field-row"><span class="lbl">Move dishes to</span><select class="field" id="move-cat">${others}</select></div>`
+        : `<p>There is no other section to move them to. Add one first, or delete the dishes.</p>`;
+    }
+    $("#confirm-dialog").showModal();
+  };
+
+  const confirmYes = () => {
+    if (state.pendingDeleteId) {
+      const id = state.pendingDeleteId;
+      state.pendingDeleteId = null;
+      $("#confirm-dialog")?.close();
+      state.menu.items = state.menu.items.filter((i) => i.id !== id);
+      if (Array.isArray(state.menu.signature_ids)) {
+        state.menu.signature_ids = state.menu.signature_ids.filter((x) => x !== id);
+      }
+      render();
       return;
     }
-    // Validate every item price still in memory (including those filtered out of the search).
+    if (state.pendingDeleteCat) {
+      const id = state.pendingDeleteCat;
+      const dishes = itemsIn(id);
+      if (dishes.length) {
+        const moveTo = $("#move-cat") && $("#move-cat").value;
+        if (!moveTo) return;
+        const dest = catById(moveTo);
+        const start = itemsIn(moveTo).reduce((m, i) => Math.max(m, i.order || 0), (dest?.order || 0) * 100);
+        dishes.forEach((item, idx) => {
+          item.category = moveTo;
+          item.order = start + idx + 1;
+        });
+      }
+      state.pendingDeleteCat = null;
+      $("#confirm-dialog")?.close();
+      state.menu.categories = state.menu.categories.filter((c) => c.id !== id);
+      if (state.activeCat === id) {
+        state.view = "list";
+        state.activeCat = null;
+      }
+      render();
+    }
+  };
+
+  const confirmNo = () => {
+    state.pendingDeleteId = null;
+    state.pendingDeleteCat = null;
+    $("#confirm-dialog")?.close();
+  };
+
+  const validateAll = () => {
+    const problems = [];
     for (const item of state.menu.items) {
+      if (!item.name || !String(item.name).trim()) problems.push("A dish needs a name.");
       if (item.price != null && item.price !== "" && !(Number.isFinite(Number(item.price)) && Number(item.price) >= 0)) {
-        syncNotice((item.name || "A dish") + " has an invalid price.", "error");
-        return;
+        problems.push((item.name || "A dish") + " has a price that is not a number.");
       }
       if (item.sizes) {
         for (const s of item.sizes) {
           if (s.price != null && s.price !== "" && !(Number.isFinite(Number(s.price)) && Number(s.price) >= 0)) {
-            syncNotice((item.name || "A dish") + " has an invalid " + (s.name || "option") + " price.", "error");
-            return;
+            problems.push((item.name || "A dish") + " has a price that is not a number.");
           }
         }
       }
     }
+    return problems;
+  };
+
+  const save = async () => {
+    const applied = applyCardInputs();
+    if (!applied.ok) {
+      showToast(applied.problems[0], "error", 4500);
+      return;
+    }
+    const problems = validateAll();
+    if (problems.length) {
+      showToast(problems[0], "error", 4500);
+      return;
+    }
     if (!state.token) {
-      syncNotice("Please sign in again.", "error");
+      showToast("Please sign in again.", "error", 4000);
       return;
     }
     state.busy = true;
-    syncNotice("Saving…", "");
-    const saveBtn = $("[data-save]");
-    if (saveBtn) saveBtn.disabled = true, (saveBtn.textContent = "Saving…");
-
-    // Clean temp flags and undefined fields we shouldn't persist.
-    const payload = JSON.parse(JSON.stringify(state.menu));
-    (payload.items || []).forEach((it) => {
-      delete it._new;
-    });
+    refreshChrome();
+    const payload = cleanMenu(state.menu);
     const body = JSON.stringify(payload, null, 2) + "\n";
 
     const putOnce = async (sha) => {
@@ -512,7 +863,7 @@
           }),
         });
       } catch (_) {
-        throw new Error("Could not reach GitHub. Check your connection and try again.");
+        throw new Error("Could not reach the internet. Check your connection and try again.");
       }
       return res;
     };
@@ -528,68 +879,82 @@
       const result = await res.json();
       if (result && result.content && result.content.sha) state.sha = result.content.sha;
       state.busy = false;
-      syncNotice("Saved, live in about 1 minute", "ok");
-      if (saveBtn) saveBtn.disabled = false, (saveBtn.textContent = "Save");
+      markClean();
+      showToast("Saved! Live in about 1 minute", "ok", 6000);
     } catch (err) {
       state.busy = false;
-      syncNotice(err.message || "Could not save.", "error");
-      if (saveBtn) saveBtn.disabled = false, (saveBtn.textContent = "Save");
+      showToast(err.message || "Could not save.", "error", 5000);
     }
   };
 
   const bind = () => {
     document.addEventListener("click", (e) => {
-      if (e.target.closest("[data-logout]")) {
-        logout();
-        return;
+      if (e.target.closest("[data-logout]")) return logout();
+      if (e.target.closest("[data-save]")) return save();
+      if (e.target.closest("[data-back]")) {
+        applyCardInputs();
+        state.view = "list";
+        state.activeCat = null;
+        state.query = "";
+        return render();
       }
-      if (e.target.closest("[data-save]")) {
-        save();
-        return;
+      const open = e.target.closest("[data-open-cat]");
+      if (open) {
+        state.view = "category";
+        state.activeCat = open.dataset.openCat;
+        state.query = "";
+        return render();
       }
-      if (e.target.closest("[data-add]")) {
-        applyDomToMenu();
-        $("#add-dialog")?.showModal();
-        return;
-      }
-      if (e.target.closest("[data-close-add]")) {
-        $("#add-dialog")?.close();
-        return;
-      }
+      if (e.target.closest("[data-add-dish]")) return openAddDish();
+      if (e.target.closest("[data-add-cat]")) return $("#add-cat-dialog")?.showModal();
+      const rename = e.target.closest("[data-rename-cat]");
+      if (rename) return openRenameCat(rename.dataset.renameCat);
+      const delCat = e.target.closest("[data-delete-cat]");
+      if (delCat) return askDeleteCat(delCat.dataset.deleteCat);
+      const edit = e.target.closest("[data-edit]");
+      if (edit) return openEdit(edit.dataset.edit);
       const del = e.target.closest("[data-delete]");
-      if (del) {
-        applyDomToMenu();
-        askDelete(del.dataset.delete);
-        return;
-      }
-      if (e.target.closest("[data-cancel-del]")) {
-        pendingDelete.id = null;
-        $("#confirm-dialog")?.close();
-        return;
-      }
-      if (e.target.closest("[data-confirm-del]")) {
-        doDelete();
-      }
+      if (del) return askDeleteDish(del.dataset.delete);
+      const close = e.target.closest("[data-close]");
+      if (close) return document.getElementById(close.dataset.close)?.close();
+      if (e.target.closest("[data-confirm-yes]")) return confirmYes();
+      if (e.target.closest("[data-confirm-no]")) return confirmNo();
     });
+
     document.addEventListener("input", (e) => {
       if (e.target.matches("[data-search]")) {
-        applyDomToMenu();
+        applyCardInputs();
         state.query = e.target.value;
         const pos = e.target.selectionStart;
-        renderEditor();
+        render();
         const search = $("[data-search]");
         if (search) {
           search.focus();
-          try { search.setSelectionRange(pos, pos); } catch (_) {}
+          try {
+            search.setSelectionRange(pos, pos);
+          } catch (_) {}
         }
+        return;
       }
-      if (e.target.matches("[data-sold]")) {
-        const row = e.target.closest(".dish-row");
-        if (row) row.classList.toggle("is-sold", e.target.checked);
+      if (e.target.matches("[data-price], [data-size-price], [data-add-price], [data-sold]")) {
+        applyCardInputs();
+        const card = e.target.closest(".card");
+        if (card && e.target.matches("[data-sold]")) card.classList.toggle("is-sold", e.target.checked);
+        refreshChrome();
       }
     });
+
     document.addEventListener("submit", (e) => {
-      if (e.target.id === "add-form") onAddSubmit(e);
+      if (e.target.id === "add-dish-form") addDish(e);
+      if (e.target.id === "edit-dish-form") saveEdit(e);
+      if (e.target.id === "add-cat-form") addCategory(e);
+      if (e.target.id === "rename-cat-form") renameCat(e);
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      if (!isDirty()) return;
+      e.preventDefault();
+      e.returnValue = "";
     });
   };
 
@@ -611,9 +976,12 @@
       state.menu = menu;
       state.sha = sha;
       state.busy = false;
-      renderEditor();
+      markClean();
+      render();
     } catch (_) {
-      try { localStorage.removeItem(TOKEN_KEY); } catch (__) {}
+      try {
+        localStorage.removeItem(TOKEN_KEY);
+      } catch (__) {}
       state.busy = false;
       state.loginError = "Please sign in again.";
       renderLogin();
@@ -623,7 +991,7 @@
   window.FFAdmin = {
     parsePrice,
     hasPrice,
-    slugify: (n) => slugify(n),
+    changeCount,
     getState: () => state,
   };
 
