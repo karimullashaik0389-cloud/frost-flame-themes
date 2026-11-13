@@ -45,91 +45,116 @@
   "categories": [
     {
       "id": "stone",
-      "name": "Stone Ice Cream",
+      "name": "Stone",
+      "heading": "Stone Ice Cream",
       "course": "dessert",
       "order": 0,
       "hidden": false,
-      "tone": "frost"
+      "tone": "frost",
+      "split_diet": false
     },
     {
-      "id": "specials",
-      "name": "Specials",
-      "course": "main",
+      "id": "starters",
+      "name": "Starters",
+      "heading": "Starters",
+      "course": "starter",
       "order": 1,
       "hidden": false,
-      "tone": "both"
+      "tone": "flame",
+      "split_diet": true
     },
     {
-      "id": "pulao",
-      "name": "Pulao",
+      "id": "indo-chinese",
+      "name": "Street Food",
+      "heading": "Street Food (Indo-Chinese)",
       "course": "main",
       "order": 2,
       "hidden": false,
-      "tone": "flame"
+      "tone": "flame",
+      "split_diet": true
     },
     {
-      "id": "curry",
-      "name": "Curry Bowls",
-      "course": "main",
+      "id": "street-specials",
+      "name": "Street Specials",
+      "heading": "Indian Street Specials",
+      "course": "side",
       "order": 3,
       "hidden": false,
-      "tone": "flame"
+      "tone": "flame",
+      "split_diet": false
     },
     {
-      "id": "street",
-      "name": "Street Food",
-      "course": "side",
+      "id": "mains",
+      "name": "Main Course",
+      "heading": "Main Course",
+      "course": "main",
       "order": 4,
       "hidden": false,
-      "tone": "flame"
+      "tone": "flame",
+      "split_diet": true,
+      "note": "Pulao dishes are served with raita & salan.",
+      "note_review": true
     },
     {
-      "id": "gulab",
-      "name": "Gulab Jamun",
-      "course": "dessert",
+      "id": "breads",
+      "name": "Naans",
+      "heading": "Naans & Rotis",
+      "course": "side",
       "order": 5,
       "hidden": false,
-      "tone": "frost"
+      "tone": "flame",
+      "split_diet": false
     },
     {
-      "id": "shakes",
-      "name": "Shakes",
-      "course": "drink",
+      "id": "tiffins",
+      "name": "Tiffins",
+      "heading": "Tiffins",
+      "course": "main",
       "order": 6,
       "hidden": false,
-      "tone": "frost"
-    },
-    {
-      "id": "smoothies",
-      "name": "Smoothies",
-      "course": "drink",
-      "order": 7,
-      "hidden": false,
-      "tone": "frost"
-    },
-    {
-      "id": "cold",
-      "name": "Cold Drinks",
-      "course": "drink",
-      "order": 8,
-      "hidden": false,
-      "tone": "frost"
+      "tone": "flame",
+      "split_diet": true,
+      "note": "Served with peanut chutney."
     },
     {
       "id": "hot",
       "name": "Hot Drinks",
+      "heading": "Hot Drinks",
+      "course": "drink",
+      "order": 7,
+      "hidden": false,
+      "tone": "flame",
+      "split_diet": false
+    },
+    {
+      "id": "desserts",
+      "name": "Desserts",
+      "heading": "Desserts",
+      "course": "dessert",
+      "order": 8,
+      "hidden": false,
+      "tone": "frost",
+      "split_diet": false
+    },
+    {
+      "id": "drinks",
+      "name": "Shakes & Cold",
+      "heading": "Shakes & Cold Drinks",
       "course": "drink",
       "order": 9,
       "hidden": false,
-      "tone": "flame"
+      "tone": "frost",
+      "split_diet": false
     },
     {
       "id": "combos",
-      "name": "Element Combos",
+      "name": "Combos",
+      "heading": "Element Combos",
       "course": "combo",
       "order": 10,
       "hidden": false,
-      "tone": "both"
+      "tone": "both",
+      "split_diet": false
     }
   ],
   "signature_ids": [
@@ -468,7 +493,7 @@
     {
       "id": "gongura-chicken-pulao",
       "name": "Gongura Chicken Pulao",
-      "category": "specials",
+      "category": "mains",
       "description": "Andhra pulao with tangy gongura (sorrel) leaves and chicken. With raita.",
       "diet": [
         "S"
@@ -483,7 +508,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 3,
+      "order": 403,
       "level": 6,
       "ingredients": [
         "Basmati rice",
@@ -502,7 +527,7 @@
     {
       "id": "gongura-mutton-pulao",
       "name": "Gongura Mutton Pulao",
-      "category": "specials",
+      "category": "mains",
       "description": "Slow-cooked mutton with sour gongura leaves, Andhra style. With raita.",
       "diet": [
         "S"
@@ -517,7 +542,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 4,
+      "order": 404,
       "level": 6,
       "ingredients": [
         "Basmati rice",
@@ -536,7 +561,7 @@
     {
       "id": "masala-chai-stone",
       "name": "Masala Chai Stone",
-      "category": "specials",
+      "category": "stone",
       "description": "Spiced chai ice cream mixed on the stone. Tea-time, frozen.",
       "diet": [
         "V"
@@ -552,7 +577,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 5,
+      "order": 3,
       "course": "dessert",
       "level": 3,
       "ingredients": [
@@ -565,7 +590,7 @@
     {
       "id": "chilli-mango-stone",
       "name": "Chilli Mango Stone",
-      "category": "specials",
+      "category": "stone",
       "description": "Mango sorbet with a chilli kick. Sweet, cold, then warm.",
       "diet": [
         "V",
@@ -582,7 +607,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 6,
+      "order": 4,
       "note": "Check sorbet label – allergens none listed.",
       "course": "dessert",
       "level": 4,
@@ -597,7 +622,7 @@
     {
       "id": "veg-pulao",
       "name": "Veg Pulao",
-      "category": "pulao",
+      "category": "mains",
       "description": "Fragrant Andhra-style rice with seasonal veg. With raita.",
       "diet": [
         "V"
@@ -612,7 +637,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 7,
+      "order": 412,
       "level": 5,
       "ingredients": [
         "Basmati rice",
@@ -629,7 +654,7 @@
     {
       "id": "paneer-pulao",
       "name": "Paneer Pulao",
-      "category": "pulao",
+      "category": "mains",
       "description": "Andhra pulao with soft paneer. With raita.",
       "diet": [
         "V"
@@ -644,7 +669,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 8,
+      "order": 409,
       "level": 5,
       "ingredients": [
         "Basmati rice",
@@ -661,7 +686,7 @@
     {
       "id": "chicken-pulao",
       "name": "Chicken Pulao",
-      "category": "pulao",
+      "category": "mains",
       "description": "Andhra pulao with tender chicken. With raita.",
       "diet": [],
       "allergens": [
@@ -674,7 +699,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 9,
+      "order": 400,
       "level": 5,
       "ingredients": [
         "Basmati rice",
@@ -691,7 +716,7 @@
     {
       "id": "chicken-65-pulao",
       "name": "Chicken 65 Pulao",
-      "category": "pulao",
+      "category": "mains",
       "description": "Pulao topped with fiery Chicken 65. With raita.",
       "diet": [
         "S"
@@ -709,7 +734,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 10,
+      "order": 402,
       "level": 6,
       "ingredients": [
         "Basmati rice",
@@ -726,7 +751,7 @@
     {
       "id": "mutton-pulao",
       "name": "Mutton Pulao",
-      "category": "pulao",
+      "category": "mains",
       "description": "Andhra pulao with slow-cooked mutton. With raita.",
       "diet": [],
       "allergens": [
@@ -739,7 +764,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 11,
+      "order": 401,
       "level": 5,
       "ingredients": [
         "Basmati rice",
@@ -756,7 +781,7 @@
     {
       "id": "chana-tadka",
       "name": "Chana Tadka",
-      "category": "curry",
+      "category": "street-specials",
       "description": "Chickpeas finished with a sizzling spiced tadka.",
       "diet": [
         "V",
@@ -788,7 +813,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 12,
+      "order": 304,
       "level": 5,
       "ingredients": [
         "Chickpeas",
@@ -805,9 +830,9 @@
     },
     {
       "id": "chana-masala",
-      "name": "Chana Masala",
-      "category": "curry",
-      "description": "Classic chickpea curry, slow-simmered.",
+      "name": "Chole Masala Curry",
+      "category": "mains",
+      "description": "Chickpeas in a rich North Indian masala gravy.",
       "diet": [
         "V"
       ],
@@ -837,7 +862,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 13,
+      "order": 408,
       "level": 5,
       "ingredients": [
         "Chickpeas",
@@ -853,9 +878,9 @@
     },
     {
       "id": "paneer-butter-masala",
-      "name": "Paneer Butter Masala",
-      "category": "curry",
-      "description": "Paneer in a rich, creamy tomato and cashew gravy.",
+      "name": "Paneer Butter Masala with Pulao",
+      "category": "mains",
+      "description": "Paneer in a rich, creamy tomato and cashew gravy, served with pulao.",
       "diet": [
         "V",
         "N"
@@ -870,6 +895,11 @@
         {
           "label": "Served with",
           "options": [
+            {
+              "name": "Pulao",
+              "add": 0,
+              "allergens": []
+            },
             {
               "name": "Jeera rice",
               "add": 0,
@@ -889,7 +919,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 14,
+      "order": 413,
       "level": 4,
       "ingredients": [
         "Paneer",
@@ -907,7 +937,7 @@
     {
       "id": "pani-puri",
       "name": "Pani Puri (8 pcs)",
-      "category": "street",
+      "category": "street-specials",
       "description": "Crisp puris, spiced filling and tangy pani to pour in.",
       "diet": [
         "V",
@@ -923,7 +953,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 15,
+      "order": 300,
       "note": "Pani packed separately.",
       "level": 5,
       "ingredients": [
@@ -939,7 +969,7 @@
     {
       "id": "samosa-chaat",
       "name": "Samosa Chaat",
-      "category": "street",
+      "category": "street-specials",
       "description": "Crushed samosa, chutneys, yoghurt and sev.",
       "diet": [
         "V"
@@ -955,7 +985,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 16,
+      "order": 302,
       "level": 5,
       "ingredients": [
         "Samosa (wheat pastry, spiced potato and pea filling)",
@@ -970,7 +1000,7 @@
     {
       "id": "papdi-chaat",
       "name": "Papdi Chaat",
-      "category": "street",
+      "category": "street-specials",
       "description": "Crisp papdi with yoghurt, chutneys and chaat masala.",
       "diet": [
         "V"
@@ -986,7 +1016,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 17,
+      "order": 301,
       "level": 4,
       "ingredients": [
         "Papdi (wheat crisps)",
@@ -1002,7 +1032,7 @@
     {
       "id": "chicken-65",
       "name": "Chicken 65",
-      "category": "street",
+      "category": "starters",
       "description": "Fiery, crunchy South Indian fried chicken.",
       "diet": [
         "SS"
@@ -1019,7 +1049,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 18,
+      "order": 102,
       "level": 7,
       "ingredients": [
         "Chicken",
@@ -1038,9 +1068,9 @@
     },
     {
       "id": "chicken-pakoda",
-      "name": "Chicken Pakoda",
-      "category": "street",
-      "description": "Spiced chicken fritters, fried to order.",
+      "name": "Chicken Pakodi",
+      "category": "starters",
+      "description": "Crisp, spiced chicken pakodi, fried to order.",
       "diet": [
         "S"
       ],
@@ -1056,7 +1086,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 19,
+      "order": 100,
       "level": 6,
       "ingredients": [
         "Chicken",
@@ -1074,7 +1104,7 @@
     {
       "id": "masala-fries",
       "name": "Masala Fries",
-      "category": "street",
+      "category": "street-specials",
       "description": "Fries tossed in our house masala.",
       "diet": [
         "V"
@@ -1087,7 +1117,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 20,
+      "order": 307,
       "level": 5,
       "ingredients": [
         "Potatoes",
@@ -1099,7 +1129,7 @@
     {
       "id": "warm-gulab-jamun",
       "name": "Warm Gulab Jamun (2)",
-      "category": "gulab",
+      "category": "desserts",
       "description": "Two warm, syrup-soaked milk dumplings.",
       "diet": [
         "V"
@@ -1115,7 +1145,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 21,
+      "order": 801,
       "level": 4,
       "ingredients": [
         "Milk solids (khoya)",
@@ -1129,7 +1159,7 @@
     {
       "id": "gulab-jamun-ice-cream",
       "name": "Gulab Jamun with Ice Cream",
-      "category": "gulab",
+      "category": "desserts",
       "description": "Warm jamun meets cold ice cream.",
       "diet": [
         "V"
@@ -1145,7 +1175,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 22,
+      "order": 800,
       "note": "Packed separately.",
       "level": 4,
       "ingredients": [
@@ -1157,7 +1187,7 @@
     {
       "id": "vanilla-shake",
       "name": "Vanilla Shake (400ml)",
-      "category": "shakes",
+      "category": "drinks",
       "description": "Thick and classic.",
       "diet": [
         "V"
@@ -1172,7 +1202,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 23,
+      "order": 902,
       "level": 1,
       "ingredients": [
         "Milk",
@@ -1184,7 +1214,7 @@
     {
       "id": "chocolate-shake",
       "name": "Chocolate Shake (400ml)",
-      "category": "shakes",
+      "category": "drinks",
       "description": "Deep, cold and chocolatey.",
       "diet": [
         "V"
@@ -1199,7 +1229,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 24,
+      "order": 903,
       "level": 1,
       "ingredients": [
         "Milk",
@@ -1211,7 +1241,7 @@
     {
       "id": "nutella-shake",
       "name": "Nutella Shake (400ml)",
-      "category": "shakes",
+      "category": "drinks",
       "description": "Hazelnut chocolate, blended thick.",
       "diet": [
         "V",
@@ -1229,7 +1259,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 25,
+      "order": 904,
       "level": 1,
       "ingredients": [
         "Milk",
@@ -1241,7 +1271,7 @@
     {
       "id": "biscoff-shake",
       "name": "Biscoff Shake (400ml)",
-      "category": "shakes",
+      "category": "drinks",
       "description": "Caramelised biscuit, blended in.",
       "diet": [
         "V"
@@ -1258,7 +1288,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 26,
+      "order": 905,
       "level": 1,
       "ingredients": [
         "Milk",
@@ -1270,8 +1300,8 @@
     {
       "id": "oreo-shake",
       "name": "Oreo Shake (400ml)",
-      "category": "shakes",
-      "description": "Cookies and cream, the drinkable way.",
+      "category": "drinks",
+      "description": "Cookies and cream, blended with vanilla ice cream. Choose whole or semi-skimmed milk.",
       "diet": [
         "V"
       ],
@@ -1282,12 +1312,32 @@
       ],
       "price": 5.49,
       "sizes": null,
-      "choices": [],
+      "choices": [
+        {
+          "label": "Milk",
+          "options": [
+            {
+              "name": "Whole milk",
+              "add": 0,
+              "allergens": [
+                "milk"
+              ]
+            },
+            {
+              "name": "Semi-skimmed milk",
+              "add": 0,
+              "allergens": [
+                "milk"
+              ]
+            }
+          ]
+        }
+      ],
       "photo": null,
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 27,
+      "order": 900,
       "level": 1,
       "ingredients": [
         "Milk",
@@ -1299,7 +1349,7 @@
     {
       "id": "banana-smoothie",
       "name": "Banana Smoothie",
-      "category": "smoothies",
+      "category": "drinks",
       "description": "Banana blended smooth.",
       "diet": [
         "V"
@@ -1326,7 +1376,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 28,
+      "order": 906,
       "level": 1,
       "ingredients": [
         "Banana",
@@ -1338,7 +1388,7 @@
     {
       "id": "avocado-smoothie",
       "name": "Avocado Smoothie",
-      "category": "smoothies",
+      "category": "drinks",
       "description": "Creamy avocado, blended cold.",
       "diet": [
         "V"
@@ -1365,7 +1415,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 29,
+      "order": 907,
       "level": 1,
       "ingredients": [
         "Avocado",
@@ -1377,7 +1427,7 @@
     {
       "id": "mango-lassi",
       "name": "Mango Lassi",
-      "category": "cold",
+      "category": "drinks",
       "description": "Sweet mango and yoghurt.",
       "diet": [
         "V"
@@ -1392,7 +1442,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 30,
+      "order": 908,
       "level": 1,
       "ingredients": [
         "Mango",
@@ -1404,7 +1454,7 @@
     {
       "id": "soft-drink",
       "name": "Soft Drink (can)",
-      "category": "cold",
+      "category": "drinks",
       "description": "Ask for tonight's selection.",
       "diet": [
         "V",
@@ -1418,7 +1468,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 31,
+      "order": 910,
       "level": 1,
       "ingredients": [
         "Carbonated soft drink (tonight’s selection)"
@@ -1427,9 +1477,9 @@
     },
     {
       "id": "water",
-      "name": "Water (500ml)",
-      "category": "cold",
-      "description": "Still water.",
+      "name": "Water Bottle",
+      "category": "drinks",
+      "description": "Still water, 500ml bottle.",
       "diet": [
         "V",
         "VG"
@@ -1442,7 +1492,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 32,
+      "order": 911,
       "level": 1,
       "ingredients": [
         "Still water"
@@ -1453,7 +1503,7 @@
       "id": "masala-chai",
       "name": "Masala Chai",
       "category": "hot",
-      "description": "Spiced Indian tea brewed with milk.",
+      "description": "Spiced Indian tea brewed with milk. Add a bun, biscuits or rusk if you like.",
       "diet": [
         "V"
       ],
@@ -1471,12 +1521,45 @@
           "price": 2.99
         }
       ],
-      "choices": [],
+      "choices": [
+        {
+          "label": "Add-on",
+          "price_review": true,
+          "options": [
+            {
+              "name": "None",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Bun",
+              "add": 0,
+              "allergens": [
+                "gluten"
+              ]
+            },
+            {
+              "name": "Biscuits",
+              "add": 0,
+              "allergens": [
+                "gluten"
+              ]
+            },
+            {
+              "name": "Rusk",
+              "add": 0,
+              "allergens": [
+                "gluten"
+              ]
+            }
+          ]
+        }
+      ],
       "photo": null,
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 33,
+      "order": 701,
       "level": 4,
       "ingredients": [
         "Black tea",
@@ -1505,7 +1588,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 34,
+      "order": 700,
       "level": 4,
       "ingredients": [
         "South Indian coffee decoction",
@@ -1562,7 +1645,7 @@
       "tone": "frost",
       "opens_build": false,
       "sold_out": false,
-      "order": 35,
+      "order": 1000,
       "separately": 10.98,
       "components": [
         {
@@ -1638,7 +1721,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 36,
+      "order": 1001,
       "separately": 14.47,
       "components": [
         {
@@ -1760,7 +1843,7 @@
       "tone": "both",
       "opens_build": false,
       "sold_out": false,
-      "order": 37,
+      "order": 1002,
       "separately": 17.97,
       "components": [
         {
@@ -1931,7 +2014,7 @@
       "tone": "both",
       "opens_build": false,
       "sold_out": false,
-      "order": 38,
+      "order": 1003,
       "separately": 33.96,
       "components": [
         {
@@ -1999,7 +2082,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 39,
+      "order": 1004,
       "separately": 8.48,
       "components": [
         {
@@ -2023,12 +2106,14 @@
     {
       "id": "upma-pesarattu",
       "name": "Upma Pesarattu",
-      "category": "street",
+      "category": "tiffins",
       "description": "Crispy green moong dal pesarattu, Andhra-style, filled with savoury tomato upma, served with two house chutneys.",
       "diet": [
         "V"
       ],
-      "allergens": [],
+      "allergens": [
+        "peanuts"
+      ],
       "price": 8.99,
       "sizes": null,
       "choices": [],
@@ -2036,7 +2121,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 20.5,
+      "order": 603,
       "ingredients": [
         "Green moong dal",
         "Rice",
@@ -2048,6 +2133,1349 @@
         "Two house chutneys"
       ],
       "ingredients_review": true
+    },
+    {
+      "id": "chilli-chicken",
+      "name": "Chilli Chicken",
+      "category": "starters",
+      "description": "Crisp fried chicken tossed with peppers, onion and a chilli-garlic sauce.",
+      "diet": [
+        "S"
+      ],
+      "allergens": [
+        "gluten",
+        "soya"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 101,
+      "level": 6,
+      "ingredients": [
+        "Chicken",
+        "Cornflour or plain flour",
+        "Egg or batter",
+        "Onion",
+        "Peppers",
+        "Green chilli",
+        "Garlic",
+        "Soy sauce",
+        "Chilli sauce",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "chicken-majestic",
+      "name": "Chicken Majestic",
+      "category": "starters",
+      "description": "Hyderabadi-style fried chicken strips in a yoghurt, chilli and curry-leaf dressing.",
+      "diet": [
+        "S"
+      ],
+      "allergens": [
+        "milk",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 103,
+      "level": 6,
+      "ingredients": [
+        "Chicken",
+        "Yoghurt",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Curry leaves",
+        "Ginger-garlic",
+        "Spices",
+        "Cornflour or rice flour",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "chicken-tandoori",
+      "name": "Chicken Tandoori",
+      "category": "starters",
+      "description": "Chicken marinated in yoghurt and tandoori spices, then grilled. Choose half or full.",
+      "diet": [
+        "S"
+      ],
+      "allergens": [
+        "milk",
+        "mustard"
+      ],
+      "price": null,
+      "sizes": [
+        {
+          "name": "Half",
+          "price": null
+        },
+        {
+          "name": "Full",
+          "price": null
+        }
+      ],
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 104,
+      "level": 6,
+      "ingredients": [
+        "Chicken",
+        "Yoghurt",
+        "Ginger",
+        "Garlic",
+        "Kashmiri chilli",
+        "Garam masala",
+        "Mustard oil or oil",
+        "Lemon",
+        "Spices"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "paneer-65",
+      "name": "Paneer 65",
+      "category": "starters",
+      "description": "Crisp, fiery paneer 65 with curry leaves and chilli.",
+      "diet": [
+        "V",
+        "S"
+      ],
+      "allergens": [
+        "milk",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 105,
+      "level": 6,
+      "ingredients": [
+        "Paneer",
+        "Yoghurt or batter",
+        "Ginger",
+        "Garlic",
+        "Chilli",
+        "Curry leaves",
+        "Spices",
+        "Gram or wheat flour",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "paneer-manchurian",
+      "name": "Paneer Manchurian",
+      "category": "starters",
+      "description": "Fried paneer tossed in a sweet-spicy Manchurian sauce.",
+      "diet": [
+        "V",
+        "S"
+      ],
+      "allergens": [
+        "milk",
+        "gluten",
+        "soya"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 106,
+      "level": 5,
+      "ingredients": [
+        "Paneer",
+        "Cornflour or plain flour",
+        "Onion",
+        "Peppers",
+        "Garlic",
+        "Ginger",
+        "Soy sauce",
+        "Chilli sauce",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "veg-manchurian",
+      "name": "Veg Manchurian",
+      "category": "starters",
+      "description": "Fried vegetable dumplings in a sweet-spicy Manchurian sauce.",
+      "diet": [
+        "V",
+        "S"
+      ],
+      "allergens": [
+        "gluten",
+        "soya"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 107,
+      "level": 5,
+      "ingredients": [
+        "Cabbage",
+        "Carrot",
+        "Beans or mixed vegetables",
+        "Ginger",
+        "Garlic",
+        "Cornflour or plain flour",
+        "Soy sauce",
+        "Chilli sauce",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "paneer-tikka",
+      "name": "Paneer Tikka",
+      "category": "starters",
+      "description": "Paneer cubes marinated in yoghurt and spices, then grilled.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk",
+        "mustard"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 108,
+      "level": 5,
+      "ingredients": [
+        "Paneer",
+        "Yoghurt",
+        "Ginger",
+        "Garlic",
+        "Kashmiri chilli",
+        "Garam masala",
+        "Peppers",
+        "Onion",
+        "Spices"
+      ],
+      "ingredients_review": true,
+      "price_review": true,
+      "name_review": true,
+      "note": "Name to confirm — the handwritten starter only said “Paneer”.",
+      "note_review": true
+    },
+    {
+      "id": "chicken-fried-rice",
+      "name": "Chicken Fried Rice",
+      "category": "indo-chinese",
+      "description": "Wok-tossed rice with chicken and vegetables. Choose regular or Schezwan.",
+      "diet": [],
+      "allergens": [
+        "soya",
+        "gluten",
+        "eggs"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Style",
+          "options": [
+            {
+              "name": "Regular",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Schezwan",
+              "add": 0,
+              "allergens": []
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 200,
+      "level": 4,
+      "ingredients": [
+        "Rice",
+        "Chicken",
+        "Egg",
+        "Spring onion",
+        "Carrot",
+        "Beans or mixed vegetables",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "egg-fried-rice",
+      "name": "Egg Fried Rice",
+      "category": "indo-chinese",
+      "description": "Wok-tossed rice with egg and vegetables. Choose regular or Schezwan.",
+      "diet": [],
+      "allergens": [
+        "eggs",
+        "soya",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Style",
+          "options": [
+            {
+              "name": "Regular",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Schezwan",
+              "add": 0,
+              "allergens": []
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 201,
+      "level": 4,
+      "ingredients": [
+        "Rice",
+        "Egg",
+        "Spring onion",
+        "Carrot",
+        "Beans or mixed vegetables",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "chicken-noodles",
+      "name": "Chicken Noodles",
+      "category": "indo-chinese",
+      "description": "Stir-fried noodles with chicken and vegetables. Choose regular or Schezwan.",
+      "diet": [],
+      "allergens": [
+        "gluten",
+        "soya",
+        "eggs"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Style",
+          "options": [
+            {
+              "name": "Regular",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Schezwan",
+              "add": 0,
+              "allergens": []
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 202,
+      "level": 4,
+      "ingredients": [
+        "Wheat noodles",
+        "Chicken",
+        "Egg",
+        "Cabbage",
+        "Carrot",
+        "Peppers",
+        "Spring onion",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "egg-noodles",
+      "name": "Egg Noodles",
+      "category": "indo-chinese",
+      "description": "Stir-fried noodles with egg and vegetables.",
+      "diet": [],
+      "allergens": [
+        "gluten",
+        "eggs",
+        "soya"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 203,
+      "level": 4,
+      "ingredients": [
+        "Wheat noodles",
+        "Egg",
+        "Cabbage",
+        "Carrot",
+        "Peppers",
+        "Spring onion",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "paneer-fried-rice",
+      "name": "Paneer Fried Rice",
+      "category": "indo-chinese",
+      "description": "Wok-tossed rice with paneer and vegetables.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk",
+        "soya",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 204,
+      "level": 4,
+      "ingredients": [
+        "Rice",
+        "Paneer",
+        "Spring onion",
+        "Carrot",
+        "Beans or mixed vegetables",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "veg-fried-rice",
+      "name": "Veg Fried Rice",
+      "category": "indo-chinese",
+      "description": "Wok-tossed rice with mixed vegetables.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "soya",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 205,
+      "level": 4,
+      "ingredients": [
+        "Rice",
+        "Spring onion",
+        "Carrot",
+        "Beans or mixed vegetables",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "veg-noodles",
+      "name": "Veg Noodles",
+      "category": "indo-chinese",
+      "description": "Stir-fried noodles with mixed vegetables. Choose regular or Schezwan.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "gluten",
+        "soya"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Style",
+          "options": [
+            {
+              "name": "Regular",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Schezwan",
+              "add": 0,
+              "allergens": []
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 206,
+      "level": 4,
+      "ingredients": [
+        "Wheat noodles",
+        "Cabbage",
+        "Carrot",
+        "Peppers",
+        "Spring onion",
+        "Soy sauce",
+        "Garlic",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "spiral-potato",
+      "name": "Spiral Potato",
+      "category": "street-specials",
+      "description": "Crisp spiral-cut potato, fried and seasoned.",
+      "diet": [
+        "V",
+        "VG"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 303,
+      "level": 3,
+      "ingredients": [
+        "Potato",
+        "Oil",
+        "Chilli powder or masala salt"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "punugulu",
+      "name": "Punugulu",
+      "category": "street-specials",
+      "description": "Crisp Andhra rice-and-lentil fritters, fried to order.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 305,
+      "level": 4,
+      "ingredients": [
+        "Rice or idli batter",
+        "Urad dal",
+        "Green chilli",
+        "Ginger",
+        "Cumin",
+        "Onion",
+        "Curry leaves",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "bajji",
+      "name": "Bajji",
+      "category": "street-specials",
+      "description": "Vegetables in a spiced gram-flour batter, fried till crisp.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 306,
+      "level": 4,
+      "ingredients": [
+        "Gram flour",
+        "Potato, chilli, onion or mixed vegetables",
+        "Chilli",
+        "Spices",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "gongura-prawns-pulao",
+      "name": "Gongura Prawns Curry with Pulao",
+      "category": "mains",
+      "description": "Tangy gongura prawn curry, served with pulao, raita and salan.",
+      "diet": [
+        "S"
+      ],
+      "allergens": [
+        "crustaceans",
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 405,
+      "level": 6,
+      "ingredients": [
+        "Prawns",
+        "Gongura (sorrel) leaves",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Pulao rice",
+        "Raita",
+        "Salan"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "ragi-sankati-chicken",
+      "name": "Ragi Sankati with Chicken",
+      "category": "mains",
+      "description": "Soft millet ragi sankati served with a spiced chicken curry.",
+      "diet": [
+        "S"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 406,
+      "level": 6,
+      "ingredients": [
+        "Ragi (finger millet) flour",
+        "Water",
+        "Chicken",
+        "Onion",
+        "Tomato",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Spices",
+        "Oil"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "butter-chicken",
+      "name": "Butter Chicken",
+      "category": "mains",
+      "description": "Tender chicken in a rich, buttery tomato and cream gravy.",
+      "diet": [],
+      "allergens": [
+        "milk",
+        "nuts"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 407,
+      "level": 4,
+      "ingredients": [
+        "Chicken",
+        "Tomato",
+        "Butter",
+        "Cream",
+        "Cashew",
+        "Ginger",
+        "Garlic",
+        "Spices"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "paneer-65-pulao",
+      "name": "Paneer 65 Pulao",
+      "category": "mains",
+      "description": "Pulao topped with fiery paneer 65, served with raita and salan.",
+      "diet": [
+        "V",
+        "S"
+      ],
+      "allergens": [
+        "milk",
+        "gluten"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 410,
+      "level": 6,
+      "ingredients": [
+        "Basmati rice",
+        "Paneer 65 (paneer, yoghurt or batter, chilli, curry leaves, spices)",
+        "Oil",
+        "Raita",
+        "Salan"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "plain-pulao",
+      "name": "Plain Pulao Rice",
+      "category": "mains",
+      "description": "Fragrant plain pulao rice, served with raita and salan.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 411,
+      "level": 3,
+      "ingredients": [
+        "Basmati rice",
+        "Whole spices",
+        "Onion",
+        "Ghee or oil",
+        "Raita",
+        "Salan"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "palak-paneer",
+      "name": "Palak Paneer",
+      "category": "mains",
+      "description": "Paneer in a gently spiced spinach gravy.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 414,
+      "level": 3,
+      "ingredients": [
+        "Paneer",
+        "Spinach",
+        "Onion",
+        "Tomato",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Cream or butter",
+        "Spices"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "lemon-rice",
+      "name": "Lemon Rice",
+      "category": "mains",
+      "description": "South Indian rice tempered with mustard, curry leaves, peanuts and lemon.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts",
+        "mustard"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 415,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Lemon",
+        "Mustard seeds",
+        "Curry leaves",
+        "Green chilli",
+        "Turmeric",
+        "Peanuts",
+        "Oil or ghee"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "plain-naan",
+      "name": "Plain Naan",
+      "category": "breads",
+      "description": "Soft, plain naan, baked to order.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "gluten",
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 500,
+      "level": 1,
+      "ingredients": [
+        "Wheat flour",
+        "Yoghurt or milk",
+        "Yeast or leavening",
+        "Ghee or butter",
+        "Salt"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "garlic-naan",
+      "name": "Garlic Naan",
+      "category": "breads",
+      "description": "Naan topped with garlic and butter.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "gluten",
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 501,
+      "level": 1,
+      "ingredients": [
+        "Wheat flour",
+        "Yoghurt or milk",
+        "Yeast or leavening",
+        "Garlic",
+        "Butter or ghee",
+        "Salt"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "dosa",
+      "name": "Dosa",
+      "category": "tiffins",
+      "description": "Crisp fermented rice-and-lentil dosa, served with peanut chutney. Choose a filling.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Dosa type",
+          "options": [
+            {
+              "name": "Onion",
+              "add": 0,
+              "allergens": [
+                "peanuts"
+              ]
+            },
+            {
+              "name": "Masala",
+              "add": 0,
+              "allergens": [
+                "peanuts"
+              ]
+            },
+            {
+              "name": "Ghee Karam",
+              "add": 0,
+              "allergens": [
+                "peanuts",
+                "milk"
+              ]
+            },
+            {
+              "name": "Paneer",
+              "add": 0,
+              "allergens": [
+                "peanuts",
+                "milk"
+              ]
+            },
+            {
+              "name": "Egg",
+              "add": 0,
+              "allergens": [
+                "peanuts",
+                "eggs"
+              ]
+            },
+            {
+              "name": "Cheese",
+              "add": 0,
+              "allergens": [
+                "peanuts",
+                "milk"
+              ]
+            },
+            {
+              "name": "Upma",
+              "add": 0,
+              "allergens": [
+                "peanuts",
+                "gluten"
+              ]
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 600,
+      "level": 3,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Oil or ghee",
+        "Chosen filling",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true,
+      "price_review": true,
+      "note": "Egg dosa is non-veg."
+    },
+    {
+      "id": "idly",
+      "name": "Idly",
+      "category": "tiffins",
+      "description": "Soft steamed rice-and-lentil idlis, served with peanut chutney.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "peanuts"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": "img/dishes/idly.webp",
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 601,
+      "level": 1,
+      "ingredients": [
+        "Rice",
+        "Urad dal",
+        "Fenugreek",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "omelette",
+      "name": "Omelette",
+      "category": "tiffins",
+      "description": "A spiced omelette, served with peanut chutney.",
+      "diet": [],
+      "allergens": [
+        "eggs",
+        "peanuts"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 602,
+      "level": 3,
+      "ingredients": [
+        "Eggs",
+        "Onion",
+        "Green chilli",
+        "Tomato",
+        "Spices",
+        "Oil",
+        "Peanut chutney"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "hot-chocolate",
+      "name": "Hot Chocolate",
+      "category": "hot",
+      "description": "Rich hot chocolate made with milk.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "flame",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 702,
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Cocoa or chocolate",
+        "Sugar"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "bread-halwa",
+      "name": "Bread Halwa",
+      "category": "desserts",
+      "description": "Warm, rich bread halwa, slowly cooked in ghee and milk.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "gluten",
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 802,
+      "level": 2,
+      "ingredients": [
+        "Bread (wheat)",
+        "Milk",
+        "Ghee",
+        "Sugar",
+        "Cardamom",
+        "Nuts (if used)"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "brownie-shake",
+      "name": "Brownie Shake",
+      "category": "drinks",
+      "description": "A thick shake blended with chocolate brownie.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk",
+        "gluten",
+        "soya",
+        "eggs"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 901,
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Ice cream",
+        "Brownie (wheat, sugar, cocoa, butter, egg)"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "coke",
+      "name": "Coke",
+      "category": "drinks",
+      "description": "Chilled Coca-Cola.",
+      "diet": [
+        "V",
+        "VG"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 909,
+      "level": 1,
+      "ingredients": [
+        "Coca-Cola"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "lychee-aloe",
+      "name": "Lychee Aloe Juice",
+      "category": "drinks",
+      "description": "A chilled lychee juice with aloe.",
+      "diet": [
+        "V",
+        "VG"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 912,
+      "level": 1,
+      "ingredients": [
+        "Lychee juice",
+        "Aloe",
+        "Sugar or syrup",
+        "Ice"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "coconut-water",
+      "name": "Coconut Water",
+      "category": "drinks",
+      "description": "Chilled coconut water.",
+      "diet": [
+        "V",
+        "VG"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 913,
+      "level": 1,
+      "ingredients": [
+        "Coconut water"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "goli-soda-lemon",
+      "name": "Goli Soda Lemon",
+      "category": "drinks",
+      "description": "Classic bottled lemon goli soda. Choose sweet or salt.",
+      "diet": [
+        "V",
+        "VG"
+      ],
+      "allergens": [],
+      "price": null,
+      "sizes": null,
+      "choices": [
+        {
+          "label": "Flavour",
+          "options": [
+            {
+              "name": "Sweet",
+              "add": 0,
+              "allergens": []
+            },
+            {
+              "name": "Salt",
+              "add": 0,
+              "allergens": []
+            }
+          ]
+        }
+      ],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 914,
+      "level": 1,
+      "ingredients": [
+        "Carbonated water",
+        "Lemon",
+        "Sugar or salt"
+      ],
+      "ingredients_review": true,
+      "price_review": true
+    },
+    {
+      "id": "masala-majjiga",
+      "name": "Masala Majjiga",
+      "category": "drinks",
+      "description": "Spiced buttermilk, served chilled.",
+      "diet": [
+        "V"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "price": null,
+      "sizes": null,
+      "choices": [],
+      "photo": null,
+      "tone": "frost",
+      "opens_build": false,
+      "sold_out": false,
+      "order": 915,
+      "level": 3,
+      "ingredients": [
+        "Buttermilk or yoghurt and water",
+        "Green chilli",
+        "Ginger",
+        "Cumin",
+        "Curry leaves",
+        "Salt",
+        "Spices"
+      ],
+      "ingredients_review": true,
+      "price_review": true
     }
   ],
   "clips": {

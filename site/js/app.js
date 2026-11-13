@@ -4,6 +4,7 @@
   const DIET = {
     V: "Veg",
     VG: "Vegan",
+    NV: "Non-veg",
     S: "Spicy",
     SS: "Extra spicy",
     N: "Nuts",
@@ -40,15 +41,29 @@
     return 0;
   };
 
+  const isMoney = (n) => n != null && n !== "" && Number.isFinite(Number(n));
+
+  const hasPrice = (item) => {
+    if (!item) return false;
+    if (isMoney(item.price)) return true;
+    if (item.sizes && item.sizes.some((s) => isMoney(s.price))) return true;
+    return false;
+  };
+
   const priceLabel = (item) => {
+    if (!hasPrice(item)) return "Price coming soon";
     if (item.sizes && item.sizes.length) {
-      const prices = item.sizes.map((s) => Number(s.price)).filter(Number.isFinite);
-      if (!prices.length) return "";
+      const prices = item.sizes.map((s) => s.price).filter(isMoney).map(Number);
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       return min === max ? money(min) : `From ${money(min)}`;
     }
-    return item.price == null ? "" : money(item.price);
+    return money(item.price);
+  };
+
+  const isVeg = (item) => {
+    const diet = item.diet || [];
+    return diet.includes("V") || diet.includes("VG");
   };
 
   const itemById = (id) => state.data.items.find((i) => i.id === id);
@@ -110,6 +125,9 @@
 
   const addControlHTML = (item, { sheet = false } = {}) => {
     if (item.sold_out) return `<button class="btn btn-add" type="button" disabled>Sold out</button>`;
+    if (!hasPrice(item)) {
+      return `<button class="btn btn-add" type="button" disabled>Add</button>`;
+    }
     const q = qtyOf(item.id);
     const stepper = `<div class="qty-stepper" data-stepper="${escapeHtml(item.id)}" data-testid="stepper-${escapeHtml(item.id)}">
         <button type="button" data-step-delta="-1" data-step-id="${escapeHtml(item.id)}" aria-label="Remove one ${escapeHtml(item.name)}">−</button>
@@ -117,7 +135,7 @@
         <button type="button" data-step-delta="1" data-step-id="${escapeHtml(item.id)}" aria-label="Add one ${escapeHtml(item.name)}">+</button>
       </div>`;
     if (sheet) {
-      return `${stepper}<button class="btn btn-add" type="button" data-add="${escapeHtml(item.id)}">Add to cart</button>`;
+      return `${stepper}<button class="btn btn-add" type="button" data-sheet-add="${escapeHtml(item.id)}">Add to cart</button>`;
     }
     return q > 0
       ? stepper
@@ -176,7 +194,9 @@
   };
 
   const chipsHTML = (item) => {
-    const chips = (item.diet || [])
+    const diet = item.diet || [];
+    const tags = isVeg(item) ? diet.filter((d) => d !== "NV") : ["NV", ...diet.filter((d) => d !== "NV")];
+    const chips = tags
       .map((d) => {
         const label = DIET[d] || d;
         const cls = `chip chip-${String(d).toLowerCase()}`;
@@ -224,7 +244,7 @@
   const renderTabs = () => {
     const root = $("#menu-tabs");
     if (!root) return;
-    const cats = state.data.categories.filter((c) => !c.hidden);
+    const cats = state.data.categories.filter((c) => !c.hidden).sort((a, b) => (a.order || 0) - (b.order || 0));
     const tabs = [{ id: "all", name: "All" }, ...cats];
     root.innerHTML = tabs
       .map(
@@ -234,34 +254,84 @@
           data-filter="${c.id}">${escapeHtml(c.name)}</button>`
       )
       .join("");
+    const selected = root.querySelector('.tab[aria-selected="true"]');
+    if (selected && selected.scrollIntoView) {
+      selected.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
+  };
+
+  const dishCardHTML = (item) => {
+    const showNote = item.note && !item.name_review;
+    const note = showNote ? `<p class="note">${escapeHtml(item.note)}</p>` : "";
+    const pending = hasPrice(item) ? "" : " is-pending";
+    return `
+      <article class="dish reveal" id="dish-${escapeHtml(item.id)}" data-open-dish="${escapeHtml(item.id)}">
+        <div class="media">${mediaHTML(item, { titleSize: "0.95rem" })}</div>
+        <div class="dish-body">
+          <h3>${escapeHtml(item.name)}</h3>
+          <p>${escapeHtml(item.description)}</p>
+          ${chipsHTML(item)}
+          ${allergensHTML(item)}
+          ${note}
+          <div class="dish-foot">
+            <span class="price${pending}">${priceLabel(item)}</span>
+            <div class="add-slot" data-add-slot="${escapeHtml(item.id)}">${addControlHTML(item)}</div>
+          </div>
+        </div>
+      </article>`;
+  };
+
+  const visibleCategories = () =>
+    (state.data.categories || []).filter((c) => !c.hidden).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const itemsInCategory = (catId) =>
+    state.data.items.filter((i) => i.category === catId).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const dietBlocksHTML = (cat, items) => {
+    if (!items.length) return "";
+    if (!cat.split_diet) {
+      return `<div class="menu-cards">${items.map(dishCardHTML).join("")}</div>`;
+    }
+    const nv = items.filter((i) => !isVeg(i));
+    const vg = items.filter((i) => isVeg(i));
+    const block = (title, cls, list) =>
+      list.length
+        ? `<div class="diet-block">
+            <h4 class="diet-split ${cls}">${title}</h4>
+            <div class="menu-cards">${list.map(dishCardHTML).join("")}</div>
+          </div>`
+        : "";
+    return `${block("Non-veg", "nonveg", nv)}${block("Veg", "veg", vg)}`;
+  };
+
+  const groupHTML = (cat, items) => {
+    const heading = cat.heading || cat.name;
+    const note = cat.note ? `<p class="menu-group-note">${escapeHtml(cat.note)}</p>` : "";
+    return `
+      <section class="menu-group" id="group-${escapeHtml(cat.id)}" data-group="${escapeHtml(cat.id)}">
+        <header class="menu-group-head">
+          <h3>${escapeHtml(heading)}</h3>
+          ${note}
+        </header>
+        ${dietBlocksHTML(cat, items)}
+      </section>`;
   };
 
   const renderMenu = () => {
     const root = $("#menu-grid");
     if (!root) return;
-    const items = state.data.items
-      .filter((i) => (state.filter === "all" ? true : i.category === state.filter))
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-    root.innerHTML = items
-      .map((item) => {
-        const note = item.note ? `<p class="note">${escapeHtml(item.note)}</p>` : "";
-        return `
-          <article class="dish reveal" id="dish-${escapeHtml(item.id)}" data-open-dish="${escapeHtml(item.id)}">
-            <div class="media">${mediaHTML(item, { titleSize: "0.95rem" })}</div>
-            <div class="dish-body">
-              <h3>${escapeHtml(item.name)}</h3>
-              <p>${escapeHtml(item.description)}</p>
-              ${chipsHTML(item)}
-              ${allergensHTML(item)}
-              ${note}
-              <div class="dish-foot">
-                <span class="price">${priceLabel(item)}</span>
-                <div class="add-slot" data-add-slot="${escapeHtml(item.id)}">${addControlHTML(item)}</div>
-              </div>
-            </div>
-          </article>`;
-      })
-      .join("");
+    const cats = visibleCategories();
+    if (state.filter === "all") {
+      root.innerHTML = cats
+        .map((cat) => {
+          const items = itemsInCategory(cat.id);
+          return items.length ? groupHTML(cat, items) : "";
+        })
+        .join("");
+    } else {
+      const cat = cats.find((c) => c.id === state.filter) || { id: state.filter, name: state.filter };
+      root.innerHTML = groupHTML(cat, itemsInCategory(state.filter));
+    }
     const menu = $("#menu");
     if (menu) menu.setAttribute("data-tone", categoryTone(state.filter));
     observeReveals();
@@ -276,9 +346,16 @@
 
   const onAdd = (id) => {
     const item = itemById(id);
-    if (!item || item.sold_out) return;
-    if (lineOptionsNeedPicker(item)) openDialog(item);
-    else addLine({ id: item.id, name: item.name, unitPrice: basePrice(item), detail: "", qty: 1 });
+    if (!item || item.sold_out || !hasPrice(item)) return;
+    if (item.opens_build) {
+      openDialog(item);
+      return;
+    }
+    if (lineOptionsNeedPicker(item)) {
+      openDishSheet(item.id);
+      return;
+    }
+    addLine({ id: item.id, name: item.name, unitPrice: basePrice(item), detail: "", qty: 1 });
   };
 
   const addLine = (line) => {
@@ -298,6 +375,7 @@
   const adjustQty = (id, delta, fromEl) => {
     const item = itemById(id);
     if (!item || item.sold_out) return;
+    if (delta > 0 && !hasPrice(item)) return;
     addSourceEl = fromEl;
     if (delta > 0) {
       const lines = state.cart.filter((l) => l.id === id);
@@ -372,9 +450,111 @@
     return mediaHTML(item, { showName: false });
   };
 
+  let dishOpts = { size: 0, choices: [] };
+
+  const resetDishOpts = (item) => {
+    dishOpts = {
+      size: 0,
+      choices: (item.choices || []).map(() => 0),
+    };
+  };
+
+  const optionPrice = (item) => {
+    let price = isMoney(item.price) ? Number(item.price) : null;
+    if (item.sizes && item.sizes.length) {
+      const raw = item.sizes[dishOpts.size]?.price;
+      price = isMoney(raw) ? Number(raw) : null;
+    }
+    if (price == null) return null;
+    (item.choices || []).forEach((c, ci) => {
+      const add = Number(c.options[dishOpts.choices[ci] || 0]?.add || 0);
+      if (Number.isFinite(add)) price += add;
+    });
+    return price;
+  };
+
+  const optionDetail = (item) => {
+    const parts = [];
+    if (item.sizes && item.sizes.length) {
+      const s = item.sizes[dishOpts.size];
+      if (s && s.name) parts.push(s.name);
+    }
+    (item.choices || []).forEach((c, ci) => {
+      const o = c.options[dishOpts.choices[ci] || 0];
+      if (o && o.name && o.name !== "None") parts.push(o.name);
+    });
+    return parts.join(" · ");
+  };
+
+  const sizePriceBit = (s) => (isMoney(s.price) ? ` · ${money(s.price)}` : "");
+
+  const sheetOptionsHTML = (item) => {
+    const blocks = [];
+    if (item.sizes && item.sizes.length) {
+      blocks.push(`<div class="opt-group">
+        <h3>Size</h3>
+        <div class="opt-pills" data-sheet-group="size">
+          ${item.sizes
+            .map(
+              (s, i) =>
+                `<label><input type="radio" name="sheet-size" value="${i}" ${i === dishOpts.size ? "checked" : ""}> ${escapeHtml(s.name)}${sizePriceBit(s)}</label>`
+            )
+            .join("")}
+        </div>
+      </div>`);
+    }
+    (item.choices || []).forEach((c, ci) => {
+      const hint = c.price_review ? `<p class="opt-hint">Add-on prices to be confirmed.</p>` : "";
+      blocks.push(`<div class="opt-group">
+        <h3>${escapeHtml(c.label)}</h3>
+        ${hint}
+        <div class="opt-pills" data-sheet-group="choice" data-choice="${ci}">
+          ${c.options
+            .map(
+              (o, oi) =>
+                `<label><input type="radio" name="sheet-choice-${ci}" value="${oi}" ${oi === (dishOpts.choices[ci] || 0) ? "checked" : ""}> ${escapeHtml(o.name)}${o.add ? ` · +${money(o.add)}` : ""}</label>`
+            )
+            .join("")}
+        </div>
+      </div>`);
+    });
+    return blocks.length ? `<div class="dish-sheet-options">${blocks.join("")}</div>` : "";
+  };
+
+  const sheetPriceLabel = (item) => {
+    const p = optionPrice(item);
+    if (p == null) return "Price coming soon";
+    if (item.sizes && item.sizes.length && !item.choices?.length) {
+      // Keep "From" only on the card; in the sheet show the selected size price.
+      return money(p);
+    }
+    return money(p);
+  };
+
+  const addFromSheet = (item) => {
+    if (!item || item.sold_out || !hasPrice(item)) return;
+    if (item.opens_build) {
+      openDialog(item);
+      return;
+    }
+    const price = optionPrice(item);
+    if (price == null || !Number.isFinite(price)) return;
+    addLine({
+      id: item.id,
+      name: item.name,
+      unitPrice: price,
+      detail: optionDetail(item),
+      qty: 1,
+    });
+  };
+
   const renderDishSheet = (item) => {
     const root = $("#dish-sheet");
     if (!root || !item) return;
+    const pending = optionPrice(item) == null ? " is-pending" : "";
+    const actions = item.opens_build
+      ? `<button class="btn btn-add" type="button" data-open-builder="${escapeHtml(item.id)}">Build yours</button>`
+      : addControlHTML(item, { sheet: true });
     root.innerHTML = `
       <div class="dish-sheet-inner">
         <div class="dish-sheet-handle" aria-hidden="true"></div>
@@ -382,15 +562,16 @@
         <div class="dish-sheet-media">${dishMediaHTML(item)}</div>
         <div class="dish-sheet-body">
           <h2 id="dish-sheet-title">${escapeHtml(item.name)}</h2>
-          <p class="price">${priceLabel(item)}</p>
+          <p class="price${pending}" data-sheet-price>${sheetPriceLabel(item)}</p>
           ${chipsHTML(item)}
           ${spiceHTML(item)}
           <p class="dish-sheet-desc">${escapeHtml(item.description)}</p>
+          ${sheetOptionsHTML(item)}
           ${ingredientsHTML(item)}
           ${allergenSheetHTML(item)}
         </div>
         <div class="dish-sheet-actions add-slot" data-add-slot="${escapeHtml(item.id)}" data-sheet="1">
-          ${addControlHTML(item, { sheet: true })}
+          ${actions}
         </div>
       </div>`;
     const v = root.querySelector("[data-dish-video]");
@@ -404,9 +585,15 @@
 
   const refreshDishSheet = () => {
     if (!dishOpenId) return;
-    const slot = $("#dish-sheet [data-add-slot]");
     const item = itemById(dishOpenId);
-    if (slot && item) slot.innerHTML = addControlHTML(item, { sheet: true });
+    if (!item) return;
+    const slot = $("#dish-sheet [data-add-slot]");
+    if (slot && !item.opens_build) slot.innerHTML = addControlHTML(item, { sheet: true });
+    const priceEl = $("#dish-sheet [data-sheet-price]");
+    if (priceEl) {
+      priceEl.textContent = sheetPriceLabel(item);
+      priceEl.classList.toggle("is-pending", optionPrice(item) == null);
+    }
   };
 
   const openDishSheet = (id, { push = true } = {}) => {
@@ -414,6 +601,7 @@
     const root = $("#dish-sheet");
     if (!item || !root) return;
     dishOpenId = id;
+    resetDishOpts(item);
     renderDishSheet(item);
     if (typeof root.showModal === "function") {
       if (!root.open) root.showModal();
@@ -484,7 +672,7 @@
             ${item.sizes
               .map(
                 (s, i) =>
-                  `<label><input type="radio" name="size" value="${i}" ${i === 0 ? "checked" : ""}> ${escapeHtml(s.name)} · ${money(s.price)}</label>`
+                  `<label><input type="radio" name="size" value="${i}" ${i === 0 ? "checked" : ""}> ${escapeHtml(s.name)}${sizePriceBit(s)}</label>`
               )
               .join("")}
            </div></div>`
@@ -825,6 +1013,19 @@
         renderMenu();
         return;
       }
+      const builderBtn = e.target.closest("[data-open-builder]");
+      if (builderBtn) {
+        const item = itemById(builderBtn.dataset.openBuilder);
+        if (item) openDialog(item);
+        return;
+      }
+      const sheetAdd = e.target.closest("[data-sheet-add]");
+      if (sheetAdd) {
+        addSourceEl = sheetAdd;
+        const item = itemById(sheetAdd.dataset.sheetAdd);
+        if (item) addFromSheet(item);
+        return;
+      }
       const closeDish = e.target.closest("[data-close-dish]");
       if (closeDish) {
         closeDishSheet({ back: true });
@@ -878,6 +1079,21 @@
         state.fulfill = fulfill.dataset.fulfill;
         renderCartBody();
         return;
+      }
+    });
+
+    document.addEventListener("change", (e) => {
+      const size = e.target.closest('input[name="sheet-size"]');
+      if (size) {
+        dishOpts.size = Number(size.value);
+        refreshDishSheet();
+        return;
+      }
+      const choice = e.target.closest('input[name^="sheet-choice-"]');
+      if (choice) {
+        const ci = Number(choice.name.replace("sheet-choice-", ""));
+        dishOpts.choices[ci] = Number(choice.value);
+        refreshDishSheet();
       }
     });
 
@@ -944,7 +1160,9 @@
       data: state.data,
       money,
       itemById,
+      hasPrice,
       addLine,
+      addFromSheet,
       openCart,
       openDishSheet,
       getCart: () => state.cart,

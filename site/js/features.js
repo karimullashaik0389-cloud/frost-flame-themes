@@ -133,10 +133,19 @@
   };
 
   /* ---------- scoring / on-device brain ---------- */
+  const isMoney = (n) => n != null && n !== "" && Number.isFinite(Number(n));
+
+  const hasPrice = (it) => {
+    if (!it) return false;
+    if (isMoney(it.price)) return true;
+    if (it.sizes?.some((s) => isMoney(s.price))) return true;
+    return false;
+  };
+
   const priceOf = (it) => {
-    if (it.price != null) return Number(it.price);
-    if (it.sizes?.length) return Number(it.sizes[0].price);
-    return 0;
+    if (isMoney(it.price)) return Number(it.price);
+    if (it.sizes?.length && isMoney(it.sizes[0].price)) return Number(it.sizes[0].price);
+    return NaN;
   };
 
   const excludeAllergens = (it, blocked) => {
@@ -146,6 +155,7 @@
 
   const scoreItem = (it, want) => {
     if (it.sold_out) return -Infinity;
+    if (!hasPrice(it)) return -Infinity;
     if (want.vegan && !(it.diet || []).includes("VG")) return -Infinity;
     if (want.vegetarian && !((it.diet || []).includes("V") || (it.diet || []).includes("VG"))) return -Infinity;
     const blocked = [];
@@ -157,10 +167,10 @@
 
     let s = 0;
     const cat = it.category;
-    const frostCats = new Set(["stone","gulab","shakes","smoothies","cold"]);
-    const flameCats = new Set(["pulao","curry","street","hot","specials"]);
+    const frostCats = new Set(["stone","desserts","drinks","gulab","shakes","smoothies","cold"]);
+    const flameCats = new Set(["starters","indo-chinese","street-specials","mains","breads","tiffins","hot","pulao","curry","street","specials"]);
     if (want.spicy && ((it.diet || []).includes("S") || (it.diet || []).includes("SS") || (it.level || 0) >= 6)) s += 4;
-    if (want.sweet && ["stone","gulab","shakes"].includes(cat)) s += 4;
+    if (want.sweet && ["stone","desserts","drinks","gulab","shakes"].includes(cat)) s += 4;
     if (want.cold && (frostCats.has(cat) || it.tone === "frost")) s += 3;
     if (want.hot && (flameCats.has(cat) || it.tone === "flame")) s += 3;
     if (want.chocolate && /choco|oreo|brownie|nutella/i.test(it.name + it.description)) s += 4;
@@ -221,7 +231,7 @@
   const reasonFor = (it, want) => {
     if (want.vegan && (it.diet || []).includes("VG")) return "A vegan option from the menu.";
     if (want.spicy && ((it.diet || []).includes("S") || (it.diet || []).includes("SS"))) return "Marked spicy on our menu.";
-    if (want.sweet && ["stone","gulab","shakes"].includes(it.category)) return "A cold, sweet finish from the stone side.";
+    if (want.sweet && ["stone","desserts","drinks","gulab","shakes"].includes(it.category)) return "A cold, sweet finish from the stone side.";
     if (want.sharing && it.category === "combos") return "A set made for sharing.";
     if (want.andhra && /gongura|pulao/i.test(it.name)) return "An Andhra-style dish from the kitchen.";
     if (it.tone === "frost") return "From the cold side of the kitchen.";
