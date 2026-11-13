@@ -214,7 +214,9 @@
         return `<span class="${cls}">${escapeHtml(label)}</span>`;
       })
       .join("");
-    return chips ? `<div class="meta-row">${chips}</div>` : "";
+    const sold = item.sold_out ? `<span class="chip chip-sold">Sold out</span>` : "";
+    const all = sold + chips;
+    return all ? `<div class="meta-row">${all}</div>` : "";
   };
 
   const allergensHTML = (item) => {
@@ -231,7 +233,7 @@
       .filter(Boolean)
       .map(
         (item) => `
-        <article class="sig-card reveal" data-open-dish="${escapeHtml(item.id)}">
+        <article class="sig-card reveal${item.sold_out ? " is-sold-out" : ""}" data-open-dish="${escapeHtml(item.id)}">
           <div class="media">${mediaHTML(item, { showName: false })}</div>
           <div class="sig-body">
             <h3>${escapeHtml(item.name)}</h3>
@@ -276,7 +278,7 @@
     const note = showNote ? `<p class="note">${escapeHtml(item.note)}</p>` : "";
     const pending = hasPrice(item) ? "" : " is-pending";
     return `
-      <article class="dish reveal" id="dish-${escapeHtml(item.id)}" data-open-dish="${escapeHtml(item.id)}">
+      <article class="dish reveal${item.sold_out ? " is-sold-out" : ""}" id="dish-${escapeHtml(item.id)}" data-open-dish="${escapeHtml(item.id)}">
         <div class="media">${mediaHTML(item, { titleSize: "0.95rem" })}</div>
         <div class="dish-body">
           <h3>${escapeHtml(item.name)}</h3>
