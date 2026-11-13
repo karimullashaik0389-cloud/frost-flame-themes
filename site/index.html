@@ -90,8 +90,8 @@
         </svg>
         <span class="mood-label">Mood</span>
       </button>
-      <button class="btn btn-ghost cart-btn" type="button" data-open-cart>
-        Order <span class="cart-count" data-cart-count hidden>0</span>
+      <button class="btn btn-ghost cart-btn" type="button" data-open-cart aria-label="Order">
+        Order <span class="cart-count" data-cart-count>0</span>
       </button>
       <a class="btn btn-solid" data-wa-direct href="https://wa.me/447587596490">Order on WhatsApp</a>
     </nav>
@@ -261,9 +261,13 @@
   </footer>
 
   <div class="order-bar is-empty" data-order-bar>
-    <button class="btn btn-ghost btn-cart" type="button" data-open-cart>View order</button>
+    <button class="btn btn-ghost btn-cart" type="button" data-open-cart>
+      View order <span class="cart-count" data-cart-count>0</span>
+    </button>
     <a class="btn btn-frost" data-wa-direct href="https://wa.me/447587596490">Order on WhatsApp</a>
   </div>
+
+  <dialog class="dish-sheet" id="dish-sheet" aria-labelledby="dish-sheet-title" data-testid="dish-sheet"></dialog>
 
   <dialog class="drawer" id="cart-drawer" aria-labelledby="cart-title">
     <div class="sheet-head">

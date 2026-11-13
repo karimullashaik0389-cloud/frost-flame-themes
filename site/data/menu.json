@@ -325,7 +325,14 @@
       "opens_build": true,
       "sold_out": false,
       "order": 0,
-      "level": 2
+      "level": 2,
+      "ingredients": [
+        "Ice cream or sorbet base (your choice)",
+        "Two mix-ins (your choice)",
+        "Optional toppings (your choice)",
+        "Folded on the frozen stone"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "signature-stone",
@@ -385,7 +392,12 @@
       "opens_build": false,
       "sold_out": false,
       "order": 1,
-      "level": 2
+      "level": 2,
+      "ingredients": [
+        "Ice cream base (Biscoff, Oreo, Brownie Fudge or Sea Salt Caramel)",
+        "Folded on the frozen stone"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "desi-stone",
@@ -446,7 +458,12 @@
       "opens_build": false,
       "sold_out": false,
       "order": 2,
-      "level": 2
+      "level": 2,
+      "ingredients": [
+        "Ice cream or sorbet (Kulfi Pistachio, Gulab Jamun or Mango Sorbet)",
+        "Folded on the frozen stone"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "gongura-chicken-pulao",
@@ -467,7 +484,20 @@
       "opens_build": false,
       "sold_out": false,
       "order": 3,
-      "level": 6
+      "level": 6,
+      "ingredients": [
+        "Basmati rice",
+        "Chicken",
+        "Gongura (sorrel) leaves",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "gongura-mutton-pulao",
@@ -488,7 +518,20 @@
       "opens_build": false,
       "sold_out": false,
       "order": 4,
-      "level": 6
+      "level": 6,
+      "ingredients": [
+        "Basmati rice",
+        "Mutton",
+        "Gongura (sorrel) leaves",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "masala-chai-stone",
@@ -511,7 +554,13 @@
       "sold_out": false,
       "order": 5,
       "course": "dessert",
-      "level": 3
+      "level": 3,
+      "ingredients": [
+        "Ice cream",
+        "Masala chai (black tea, milk, ginger, cardamom, sugar)",
+        "Folded on the frozen stone"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chilli-mango-stone",
@@ -536,7 +585,14 @@
       "order": 6,
       "note": "Check sorbet label – allergens none listed.",
       "course": "dessert",
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Mango sorbet (mango, sugar)",
+        "Chilli",
+        "Milk (listed among the dish allergens)",
+        "Folded on the frozen stone"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "veg-pulao",
@@ -557,7 +613,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 7,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Basmati rice",
+        "Seasonal vegetables",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "paneer-pulao",
@@ -578,7 +645,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 8,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Basmati rice",
+        "Paneer",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chicken-pulao",
@@ -597,7 +675,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 9,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Basmati rice",
+        "Chicken",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chicken-65-pulao",
@@ -621,7 +710,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 10,
-      "level": 6
+      "level": 6,
+      "ingredients": [
+        "Basmati rice",
+        "Chicken 65 (chicken, yoghurt, egg, chilli, curry leaves, mustard, spices, gram or wheat flour)",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "mutton-pulao",
@@ -640,7 +740,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 11,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Basmati rice",
+        "Slow-cooked mutton",
+        "Onion",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Raita (yoghurt and spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chana-tadka",
@@ -678,7 +789,19 @@
       "opens_build": false,
       "sold_out": false,
       "order": 12,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Chickpeas",
+        "Onion",
+        "Tomato",
+        "Ginger",
+        "Garlic",
+        "Green chilli",
+        "Spices",
+        "Tadka (oil or ghee, cumin or mustard, curry leaves)",
+        "Jeera rice or rotis (your choice)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chana-masala",
@@ -715,7 +838,18 @@
       "opens_build": false,
       "sold_out": false,
       "order": 13,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Chickpeas",
+        "Onion",
+        "Tomato",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Oil",
+        "Jeera rice or rotis (your choice)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "paneer-butter-masala",
@@ -756,7 +890,19 @@
       "opens_build": false,
       "sold_out": false,
       "order": 14,
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Paneer",
+        "Tomato",
+        "Butter",
+        "Cream",
+        "Cashew",
+        "Ginger",
+        "Garlic",
+        "Spices",
+        "Jeera rice or rotis (your choice)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "pani-puri",
@@ -779,7 +925,16 @@
       "sold_out": false,
       "order": 15,
       "note": "Pani packed separately.",
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Puris (wheat or semolina)",
+        "Potato",
+        "Chickpeas or sprouted moong",
+        "Onion",
+        "Chutneys",
+        "Spiced pani (water, tamarind, mint, chilli, spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "samosa-chaat",
@@ -801,7 +956,16 @@
       "opens_build": false,
       "sold_out": false,
       "order": 16,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Samosa (wheat pastry, spiced potato and pea filling)",
+        "Yoghurt",
+        "Chutneys",
+        "Onion",
+        "Sev",
+        "Chaat masala"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "papdi-chaat",
@@ -823,7 +987,17 @@
       "opens_build": false,
       "sold_out": false,
       "order": 17,
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Papdi (wheat crisps)",
+        "Yoghurt",
+        "Potato",
+        "Onion",
+        "Chutneys",
+        "Sev",
+        "Chaat masala"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chicken-65",
@@ -846,7 +1020,21 @@
       "opens_build": false,
       "sold_out": false,
       "order": 18,
-      "level": 7
+      "level": 7,
+      "ingredients": [
+        "Chicken",
+        "Yoghurt",
+        "Ginger",
+        "Garlic",
+        "Chilli",
+        "Curry leaves",
+        "Mustard",
+        "Egg",
+        "Spices",
+        "Gram or wheat flour",
+        "Oil"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chicken-pakoda",
@@ -869,7 +1057,19 @@
       "opens_build": false,
       "sold_out": false,
       "order": 19,
-      "level": 6
+      "level": 6,
+      "ingredients": [
+        "Chicken",
+        "Gram or wheat flour",
+        "Egg",
+        "Ginger",
+        "Garlic",
+        "Chilli",
+        "Mustard",
+        "Spices",
+        "Oil"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "masala-fries",
@@ -888,7 +1088,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 20,
-      "level": 5
+      "level": 5,
+      "ingredients": [
+        "Potatoes",
+        "Oil",
+        "House masala (spices)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "warm-gulab-jamun",
@@ -910,7 +1116,15 @@
       "opens_build": false,
       "sold_out": false,
       "order": 21,
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Milk solids (khoya)",
+        "Flour",
+        "Sugar syrup",
+        "Cardamom",
+        "Oil or ghee"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "gulab-jamun-ice-cream",
@@ -933,7 +1147,12 @@
       "sold_out": false,
       "order": 22,
       "note": "Packed separately.",
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Gulab jamun (milk solids, flour, sugar syrup, cardamom)",
+        "Ice cream (milk, cream, sugar)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "vanilla-shake",
@@ -954,7 +1173,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 23,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Vanilla ice cream",
+        "Sugar"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chocolate-shake",
@@ -975,7 +1200,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 24,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Chocolate ice cream or cocoa",
+        "Sugar"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "nutella-shake",
@@ -999,7 +1230,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 25,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Nutella (sugar, oil, hazelnuts, cocoa, milk, soya lecithin)",
+        "Ice cream"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "biscoff-shake",
@@ -1022,7 +1259,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 26,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Ice cream",
+        "Biscoff biscuit (wheat, sugar, oils, soya)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "oreo-shake",
@@ -1045,7 +1288,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 27,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Milk",
+        "Ice cream",
+        "Oreo cookie (wheat, sugar, oils, cocoa, soya)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "banana-smoothie",
@@ -1078,7 +1327,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 28,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Banana",
+        "Milk",
+        "Optional nuts (if chosen)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "avocado-smoothie",
@@ -1111,7 +1366,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 29,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Avocado",
+        "Milk",
+        "Optional nuts (if chosen)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "mango-lassi",
@@ -1132,7 +1393,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 30,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Mango",
+        "Yoghurt",
+        "Sugar"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "soft-drink",
@@ -1152,7 +1419,11 @@
       "opens_build": false,
       "sold_out": false,
       "order": 31,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Carbonated soft drink (tonight’s selection)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "water",
@@ -1172,7 +1443,11 @@
       "opens_build": false,
       "sold_out": false,
       "order": 32,
-      "level": 1
+      "level": 1,
+      "ingredients": [
+        "Still water"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "masala-chai",
@@ -1202,7 +1477,15 @@
       "opens_build": false,
       "sold_out": false,
       "order": 33,
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Black tea",
+        "Milk",
+        "Ginger",
+        "Cardamom",
+        "Sugar"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "filter-coffee",
@@ -1223,7 +1506,13 @@
       "opens_build": false,
       "sold_out": false,
       "order": 34,
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "South Indian coffee decoction",
+        "Milk",
+        "Sugar"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "glacier",
@@ -1287,7 +1576,12 @@
           "size": 0
         }
       ],
-      "level": 2
+      "level": 2,
+      "ingredients": [
+        "Regular Signature Stone (Biscoff, Oreo, Brownie Fudge or Sea Salt Caramel ice cream)",
+        "Banana smoothie (banana, milk)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "volcano",
@@ -1363,7 +1657,13 @@
           "size": 1
         }
       ],
-      "level": 6
+      "level": 6,
+      "ingredients": [
+        "Chosen pulao (Chicken 65 Pulao, or a listed upgrade)",
+        "Masala fries (potatoes, oil, house masala)",
+        "Regular masala chai (black tea, milk, ginger, cardamom, sugar)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "eclipse",
@@ -1479,7 +1779,13 @@
           "size": 0
         }
       ],
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Chosen main (Chicken Pulao, Paneer Pulao, Chicken 65, or a listed upgrade)",
+        "Regular Signature Stone (chosen flavour)",
+        "Mango lassi (mango, yoghurt, sugar)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "fire-and-ice-for-two",
@@ -1644,7 +1950,13 @@
           "size": 1
         }
       ],
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Two chosen pulaos",
+        "Chicken 65 (chicken, yoghurt, egg, chilli, curry leaves, mustard, spices, gram or wheat flour, oil)",
+        "Large Signature Stone (chosen flavour)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "chaat-and-chai",
@@ -1701,7 +2013,12 @@
           "size": 1
         }
       ],
-      "level": 4
+      "level": 4,
+      "ingredients": [
+        "Samosa chaat or papdi chaat (yoghurt, chutneys, wheat crisps or samosa, spices)",
+        "Regular masala chai (black tea, milk, ginger, cardamom, sugar)"
+      ],
+      "ingredients_review": true
     },
     {
       "id": "upma-pesarattu",
@@ -1719,7 +2036,18 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 20.5
+      "order": 20.5,
+      "ingredients": [
+        "Green moong dal",
+        "Rice",
+        "Green chilli",
+        "Ginger",
+        "Cumin",
+        "Onion",
+        "Tomato upma (semolina, tomato, onion, spices)",
+        "Two house chutneys"
+      ],
+      "ingredients_review": true
     }
   ],
   "clips": {
@@ -2235,5 +2563,6 @@
       "E8",
       "E9"
     ]
-  }
+  },
+  "ingredients_comment": "OWNER REVIEW: ingredients arrays were filled from typical recipes based on each dish’s name and description, because the kitchen had not supplied a list. Confirm before treating them as final. An empty allergens list is not a claim that a dish is allergen-free."
 }

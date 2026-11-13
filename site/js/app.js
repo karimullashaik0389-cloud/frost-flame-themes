@@ -76,20 +76,93 @@
   const cartCount = () => state.cart.reduce((n, l) => n + l.qty, 0);
   const cartTotal = () => state.cart.reduce((n, l) => n + l.unitPrice * l.qty, 0);
 
+  /* OWNER REVIEW: ingredient lists come from menu.json. Entries with
+     ingredients_review: true are typical recipes inferred from the dish
+     name and description, not kitchen-confirmed. Never treat a missing
+     allergens list as "allergen-free". */
+
+  let addSourceEl = null;
+  let dishOpenId = null;
+  let dishSkipPop = false;
+  let dishSwipe = null;
+
+  const qtyOf = (id) => state.cart.filter((l) => l.id === id).reduce((n, l) => n + l.qty, 0);
+
+  const flyPlus = (fromEl) => {
+    const src = fromEl || addSourceEl;
+    const dest = $(".header .cart-btn") || $("[data-open-cart]");
+    if (!src || !dest) return;
+    const a = src.getBoundingClientRect();
+    const b = dest.getBoundingClientRect();
+    const el = document.createElement("div");
+    el.className = "fly-plus";
+    el.textContent = "+1";
+    el.setAttribute("data-testid", "fly-plus");
+    const x = a.left + a.width / 2;
+    const y = a.top + a.height / 2;
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.setProperty("--dx", (b.left + b.width / 2 - x) + "px");
+    el.style.setProperty("--dy", (b.top + b.height / 2 - y) + "px");
+    document.body.appendChild(el);
+    el.addEventListener("animationend", () => el.remove());
+  };
+
+  const addControlHTML = (item, { sheet = false } = {}) => {
+    if (item.sold_out) return `<button class="btn btn-add" type="button" disabled>Sold out</button>`;
+    const q = qtyOf(item.id);
+    const stepper = `<div class="qty-stepper" data-stepper="${escapeHtml(item.id)}" data-testid="stepper-${escapeHtml(item.id)}">
+        <button type="button" data-step-delta="-1" data-step-id="${escapeHtml(item.id)}" aria-label="Remove one ${escapeHtml(item.name)}">−</button>
+        <span data-step-qty aria-live="polite">${q}</span>
+        <button type="button" data-step-delta="1" data-step-id="${escapeHtml(item.id)}" aria-label="Add one ${escapeHtml(item.name)}">+</button>
+      </div>`;
+    if (sheet) {
+      return `${stepper}<button class="btn btn-add" type="button" data-add="${escapeHtml(item.id)}">Add to cart</button>`;
+    }
+    return q > 0
+      ? stepper
+      : `<button class="btn btn-add" type="button" data-add="${escapeHtml(item.id)}">Add</button>`;
+  };
+
+  const syncSteppers = () => {
+    if (!state.data) return;
+    $$("[data-add-slot]").forEach((slot) => {
+      const item = itemById(slot.dataset.addSlot);
+      if (!item) return;
+      slot.innerHTML = addControlHTML(item, { sheet: slot.dataset.sheet === "1" });
+    });
+  };
+
+
   const updateCartBadges = () => {
     const n = cartCount();
     $$("[data-cart-count]").forEach((el) => {
       el.textContent = String(n);
-      el.hidden = n === 0;
-      el.classList.toggle("is-on", n > 0);
+      el.removeAttribute("hidden");
+      const on = n > 0;
+      if (on) {
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
+      }
+      el.classList.toggle("is-on", on);
     });
     const bar = $("[data-order-bar]");
     if (bar) {
       bar.classList.toggle("is-empty", n === 0);
       const view = $(".btn-cart", bar);
-      if (view) view.textContent = n ? `View order · ${money(cartTotal())}` : "View order";
+      if (view) {
+        const label = view.childNodes[0];
+        if (label && label.nodeType === Node.TEXT_NODE) {
+          label.textContent = n ? "View order · " + money(cartTotal()) + " " : "View order ";
+        }
+      }
     }
+    const orderBtn = $(".header .cart-btn");
+    if (orderBtn) orderBtn.setAttribute("aria-label", n ? "Order, " + n + " in cart" : "Order");
+    syncSteppers();
   };
+
 
   const mediaHTML = (item, { titleSize, showName = true } = {}) => {
     const tone = item.tone === "flame" ? "flame" : item.tone === "both" ? "both" : "frost";
@@ -127,14 +200,14 @@
       .filter(Boolean)
       .map(
         (item) => `
-        <article class="sig-card reveal">
+        <article class="sig-card reveal" data-open-dish="${escapeHtml(item.id)}">
           <div class="media">${mediaHTML(item, { showName: false })}</div>
           <div class="sig-body">
             <h3>${escapeHtml(item.name)}</h3>
             <p>${escapeHtml(item.description)}</p>
             <div class="sig-row">
               <span class="price">${priceLabel(item)}</span>
-              <button class="btn btn-add" type="button" data-add="${escapeHtml(item.id)}">Add</button>
+              <div class="add-slot" data-add-slot="${escapeHtml(item.id)}">${addControlHTML(item)}</div>
             </div>
           </div>
         </article>`
@@ -171,12 +244,9 @@
       .sort((a, b) => (a.order || 0) - (b.order || 0));
     root.innerHTML = items
       .map((item) => {
-        const sold = item.sold_out
-          ? `<button class="btn btn-add" type="button" disabled>Sold out</button>`
-          : `<button class="btn btn-add" type="button" data-add="${escapeHtml(item.id)}">Add</button>`;
         const note = item.note ? `<p class="note">${escapeHtml(item.note)}</p>` : "";
         return `
-          <article class="dish reveal" id="dish-${escapeHtml(item.id)}">
+          <article class="dish reveal" id="dish-${escapeHtml(item.id)}" data-open-dish="${escapeHtml(item.id)}">
             <div class="media">${mediaHTML(item, { titleSize: "0.95rem" })}</div>
             <div class="dish-body">
               <h3>${escapeHtml(item.name)}</h3>
@@ -186,7 +256,7 @@
               ${note}
               <div class="dish-foot">
                 <span class="price">${priceLabel(item)}</span>
-                ${sold}
+                <div class="add-slot" data-add-slot="${escapeHtml(item.id)}">${addControlHTML(item)}</div>
               </div>
             </div>
           </article>`;
@@ -214,12 +284,194 @@
   const addLine = (line) => {
     const key = `${line.id}::${line.detail}`;
     const existing = state.cart.find((l) => `${l.id}::${l.detail}` === key);
-    if (existing) existing.qty += line.qty || 1;
-    else state.cart.push({ ...line, qty: line.qty || 1 });
+    const added = line.qty || 1;
+    if (existing) existing.qty += added;
+    else state.cart.push({ ...line, qty: added });
     saveCart();
     updateCartBadges();
     if ($("#cart-drawer").open) renderCartBody();
+    setDirectWaLinks();
+    if (added > 0) flyPlus(addSourceEl);
+    refreshDishSheet();
   };
+
+  const adjustQty = (id, delta, fromEl) => {
+    const item = itemById(id);
+    if (!item || item.sold_out) return;
+    addSourceEl = fromEl;
+    if (delta > 0) {
+      const lines = state.cart.filter((l) => l.id === id);
+      if (lines.length) {
+        lines[lines.length - 1].qty += delta;
+        saveCart();
+        updateCartBadges();
+        if ($("#cart-drawer").open) renderCartBody();
+        setDirectWaLinks();
+        flyPlus(fromEl);
+        refreshDishSheet();
+        return;
+      }
+      onAdd(id);
+      return;
+    }
+    const indexed = state.cart.map((l, i) => ({ l, i })).filter((x) => x.l.id === id);
+    if (!indexed.length) return;
+    const last = indexed[indexed.length - 1];
+    last.l.qty += delta;
+    if (last.l.qty <= 0) state.cart.splice(last.i, 1);
+    saveCart();
+    updateCartBadges();
+    if ($("#cart-drawer").open) renderCartBody();
+    setDirectWaLinks();
+    refreshDishSheet();
+  };
+
+  const spiceHTML = (item) => {
+    if (item.level == null || item.level === "") return "";
+    const name = (state.data.levels || {})[String(item.level)] || "";
+    const label = name ? name + " (" + item.level + " / 7)" : item.level + " / 7";
+    return `<p class="spice-level">Spice level: ${escapeHtml(label)}</p>`;
+  };
+
+  const ingredientsHTML = (item) => {
+    const list = item.ingredients || [];
+    if (!list.length) return "";
+    return `<div class="ingredients">
+        <h3>Ingredients</h3>
+        <ul>${list.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
+      </div>`;
+  };
+
+  const allergenSheetHTML = (item) => {
+    const a = item.allergens || [];
+    if (a.length) {
+      return `<p class="allergens">Contains ${a.join(", ")}. If you have an allergy, please ask us before ordering.</p>`;
+    }
+    return `<p class="allergens">Allergen details are listed where we have them. If you have an allergy, please ask us before ordering.</p>`;
+  };
+
+  const visibleClip = (item) => {
+    const clip = state.data.clips && state.data.clips[item.id];
+    if (!clip || clip.hidden || !clip.mp4) return null;
+    return clip;
+  };
+
+  const dishMediaHTML = (item) => {
+    const clip = visibleClip(item);
+    const poster = (clip && clip.poster) || item.photo || "";
+    if (clip) {
+      const fallback = item.photo
+        ? `<img src="${escapeHtml(item.photo)}" alt="" width="800" height="800">`
+        : mediaHTML(item, { showName: false });
+      return `${fallback}
+        <video muted playsinline loop autoplay preload="auto" poster="${escapeHtml(poster)}" src="${escapeHtml(clip.mp4)}" data-dish-video></video>`;
+    }
+    if (item.photo) {
+      return `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" width="800" height="800">`;
+    }
+    return mediaHTML(item, { showName: false });
+  };
+
+  const renderDishSheet = (item) => {
+    const root = $("#dish-sheet");
+    if (!root || !item) return;
+    root.innerHTML = `
+      <div class="dish-sheet-inner">
+        <div class="dish-sheet-handle" aria-hidden="true"></div>
+        <button class="icon-close" type="button" data-close-dish aria-label="Close">&times;</button>
+        <div class="dish-sheet-media">${dishMediaHTML(item)}</div>
+        <div class="dish-sheet-body">
+          <h2 id="dish-sheet-title">${escapeHtml(item.name)}</h2>
+          <p class="price">${priceLabel(item)}</p>
+          ${chipsHTML(item)}
+          ${spiceHTML(item)}
+          <p class="dish-sheet-desc">${escapeHtml(item.description)}</p>
+          ${ingredientsHTML(item)}
+          ${allergenSheetHTML(item)}
+        </div>
+        <div class="dish-sheet-actions add-slot" data-add-slot="${escapeHtml(item.id)}" data-sheet="1">
+          ${addControlHTML(item, { sheet: true })}
+        </div>
+      </div>`;
+    const v = root.querySelector("[data-dish-video]");
+    if (v) {
+      v.muted = true;
+      v.playsInline = true;
+      const play = v.play();
+      if (play && play.catch) play.catch(() => {});
+    }
+  };
+
+  const refreshDishSheet = () => {
+    if (!dishOpenId) return;
+    const slot = $("#dish-sheet [data-add-slot]");
+    const item = itemById(dishOpenId);
+    if (slot && item) slot.innerHTML = addControlHTML(item, { sheet: true });
+  };
+
+  const openDishSheet = (id, { push = true } = {}) => {
+    const item = itemById(id);
+    const root = $("#dish-sheet");
+    if (!item || !root) return;
+    dishOpenId = id;
+    renderDishSheet(item);
+    if (typeof root.showModal === "function") {
+      if (!root.open) root.showModal();
+    } else {
+      root.setAttribute("open", "");
+    }
+    if (push && (!history.state || history.state.ffDish !== id)) {
+      history.pushState({ ffDish: id }, "", "#item-" + id);
+    }
+  };
+
+  const closeDishSheet = ({ back = true } = {}) => {
+    const root = $("#dish-sheet");
+    if (!root) return;
+    const v = root.querySelector("[data-dish-video]");
+    if (v) v.pause();
+    const wasOpen = Boolean(dishOpenId);
+    dishOpenId = null;
+    if (root.open) root.close?.();
+    else root.removeAttribute("open");
+    if (back && wasOpen && history.state && history.state.ffDish) {
+      dishSkipPop = true;
+      history.back();
+    }
+  };
+
+  const bindDishSwipe = () => {
+    const root = $("#dish-sheet");
+    if (!root) return;
+    const onStart = (e) => {
+      if (!root.open && !root.hasAttribute("open")) return;
+      const t = e.touches ? e.touches[0] : e;
+      const inner = root.querySelector(".dish-sheet-inner");
+      dishSwipe = { y: t.clientY, x: t.clientX, inner };
+    };
+    const onMove = (e) => {
+      if (!dishSwipe) return;
+      const t = e.touches ? e.touches[0] : e;
+      const dy = t.clientY - dishSwipe.y;
+      const dx = t.clientX - dishSwipe.x;
+      if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
+      if (Math.abs(dy) < Math.abs(dx) || dy < 0) return;
+      if (dishSwipe.inner) dishSwipe.inner.style.transform = "translateY(" + dy + "px)";
+    };
+    const onEnd = (e) => {
+      if (!dishSwipe) return;
+      const t = (e.changedTouches && e.changedTouches[0]) || e;
+      const dy = t.clientY - dishSwipe.y;
+      const inner = dishSwipe.inner;
+      dishSwipe = null;
+      if (inner) inner.style.transform = "";
+      if (dy > 80) closeDishSheet({ back: true });
+    };
+    root.addEventListener("touchstart", onStart, { passive: true });
+    root.addEventListener("touchmove", onMove, { passive: true });
+    root.addEventListener("touchend", onEnd);
+  };
+
 
   const openDialog = (item) => {
     const dialog = $("#item-dialog");
@@ -573,9 +825,26 @@
         renderMenu();
         return;
       }
+      const closeDish = e.target.closest("[data-close-dish]");
+      if (closeDish) {
+        closeDishSheet({ back: true });
+        return;
+      }
+      const step = e.target.closest("[data-step-delta]");
+      if (step) {
+        addSourceEl = step;
+        adjustQty(step.dataset.stepId, Number(step.dataset.stepDelta), step);
+        return;
+      }
       const add = e.target.closest("[data-add]");
       if (add) {
+        addSourceEl = add;
         onAdd(add.dataset.add);
+        return;
+      }
+      const dishCard = e.target.closest("[data-open-dish]");
+      if (dishCard && !e.target.closest("[data-add], [data-step-delta], .qty-stepper, a, button")) {
+        openDishSheet(dishCard.dataset.openDish);
         return;
       }
       if (e.target.closest("[data-open-cart]")) {
@@ -650,12 +919,34 @@
     renderMenu();
     updateCartBadges();
     setDirectWaLinks();
+    bindDishSwipe();
+    window.addEventListener("popstate", (e) => {
+      if (dishSkipPop) {
+        dishSkipPop = false;
+        return;
+      }
+      const id = e.state && e.state.ffDish;
+      if (id) openDishSheet(id, { push: false });
+      else if (dishOpenId) closeDishSheet({ back: false });
+    });
+    const hash = (location.hash || "").replace(/^#/, "");
+    if (hash.startsWith("item-")) openDishSheet(hash.slice(5), { push: true });
+    const sheet = $("#dish-sheet");
+    if (sheet) {
+      sheet.addEventListener("close", () => {
+        if (dishOpenId) closeDishSheet({ back: true });
+      });
+      sheet.addEventListener("click", (e) => {
+        if (e.target === sheet) closeDishSheet({ back: true });
+      });
+    }
     window.FF = {
       data: state.data,
       money,
       itemById,
       addLine,
       openCart,
+      openDishSheet,
       getCart: () => state.cart,
     };
     document.dispatchEvent(new CustomEvent("ff:ready"));

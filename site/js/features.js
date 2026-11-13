@@ -75,8 +75,7 @@
   const bindClips = () => {
     const clips = data()?.clips || {};
     $$("#signature-slider .sig-card").forEach((card) => {
-      const btn = card.querySelector("[data-add]");
-      const id = btn?.dataset.add;
+      const id = card.dataset.openDish || card.querySelector("[data-add]")?.dataset.add;
       const clip = id && clips[id];
       const media = card.querySelector(".media");
       if (!clip?.mp4 || !media) return;
