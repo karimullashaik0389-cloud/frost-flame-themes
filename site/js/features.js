@@ -237,10 +237,10 @@
       ? new Date(meta.launch_date + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
       : "soon";
     if (/open|hours|tonight|time|when do you/.test(t)) {
-      return `We’re not open yet — opening ${launch}, then ${meta.hours_label || "11am–11pm daily"}. Messages sent outside hours are answered when the kitchen is next open.`;
+      return `We’re not open yet — opening ${launch}, then ${meta.hours_label || "11am–11pm daily"}. Messages sent outside hours are answered when we next open.`;
     }
-    if (/deliver|postcode|area|e1|e2|e8|e9/.test(t)) {
-      return `We deliver to ${ (meta.delivery_areas || []).join(", ") }. Collection is also available from ${meta.address}.`;
+    if (/deliver|postcode|area|e1|e2|e8|e9|dine|eat.?in|collection|seat|visit|caf[eé]|parlour/.test(t)) {
+      return `We’re a café and dessert parlour at ${meta.address || "194 Hackney Road, London E2 7QL"}, with eat-in (about 20 seats), collection, and delivery to ${ (meta.delivery_areas || []).join(", ") }.`;
     }
     if (/whatsapp|order|how do i|how does/.test(t)) {
       return "Add dishes to your order here, then press Send order on WhatsApp. We’ll reply with your total and a time. No payment is taken on this site.";
@@ -676,7 +676,7 @@
       const msg = $("#postcode-msg");
       if (!outward) { msg.textContent = "Enter a UK postcode, for example E2 7QL."; msg.className = "pc-msg"; return; }
       if (areas.includes(outward)) { msg.textContent = `Yes — we deliver to ${outward}.`; msg.className = "pc-msg is-ok"; }
-      else { msg.textContent = `We’re not in ${outward} yet — we deliver to ${areas.join(", ")}. Collection from 194 Hackney Road is also an option.`; msg.className = "pc-msg is-no"; }
+      else { msg.textContent = `We’re not in ${outward} yet — we deliver to ${areas.join(", ")}. Eat-in and collection at 194 Hackney Road are also options.`; msg.className = "pc-msg is-no"; }
     });
   };
 

@@ -13,7 +13,7 @@
     data: null,
     filter: "all",
     cart: [],
-    fulfill: "delivery",
+    fulfill: "eat-in",
     name: "",
     postcode: "",
   };
@@ -42,12 +42,13 @@
 
   const priceLabel = (item) => {
     if (item.sizes && item.sizes.length) {
-      const prices = item.sizes.map((s) => Number(s.price));
+      const prices = item.sizes.map((s) => Number(s.price)).filter(Number.isFinite);
+      if (!prices.length) return "";
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       return min === max ? money(min) : `From ${money(min)}`;
     }
-    return money(item.price);
+    return item.price == null ? "" : money(item.price);
   };
 
   const itemById = (id) => state.data.items.find((i) => i.id === id);
@@ -428,17 +429,18 @@
         <div>
           <span class="opt-group" style="margin:0 0 .5rem"><h3>How would you like it?</h3></span>
           <div class="fulfill">
-            <button type="button" data-fulfill="delivery" aria-pressed="${state.fulfill === "delivery"}">Delivery</button>
+            <button type="button" data-fulfill="eat-in" aria-pressed="${state.fulfill === "eat-in"}">Eat-in</button>
             <button type="button" data-fulfill="collection" aria-pressed="${state.fulfill === "collection"}">Collection</button>
+            <button type="button" data-fulfill="delivery" aria-pressed="${state.fulfill === "delivery"}">Delivery</button>
           </div>
         </div>
         <label>Your name <input type="text" name="cust-name" autocomplete="name" value="${escapeHtml(state.name)}"></label>
-        <label>${state.fulfill === "delivery" ? "Postcode" : "Collection name / notes"}
+        <label>${state.fulfill === "delivery" ? "Postcode" : state.fulfill === "collection" ? "Collection notes" : "Table notes (optional)"}
           <input type="text" name="cust-postcode" value="${escapeHtml(state.postcode)}" ${state.fulfill === "delivery" ? 'placeholder="e.g. E2 7QL"' : ""}>
         </label>
       </div>
       <div class="cart-total"><span>Total</span><span>${money(cartTotal())}</span></div>
-      <p class="cart-note">We’ll reply on WhatsApp with your total${state.data.meta.delivery_fee == null ? ", including any delivery fee," : ""} and a time. Opening ${formatLaunch(state.data.meta.launch_date)}. Outside hours, this is sent as a pre-order. Collection is from 194 Hackney Road, London E2 7QL.</p>
+      <p class="cart-note">We’ll reply on WhatsApp with your total${state.data.meta.delivery_fee == null && state.fulfill === "delivery" ? ", including any delivery fee," : ""} and a time. Opening ${formatLaunch(state.data.meta.launch_date)}. Outside hours, this is sent as a pre-order. Eat-in is at 194 Hackney Road, London E2 7QL (about 20 seats); collection is from the same address.</p>
       <a class="btn btn-frost" data-wa-send href="${buildWaHref()}">Send order on WhatsApp</a>`;
   };
 
@@ -456,7 +458,9 @@
       lines.push(`${l.qty}× ${l.name}${detail} — ${money(l.unitPrice * l.qty)}`);
     });
     lines.push("", `Total: ${money(cartTotal())}`, "");
-    if (state.fulfill === "collection") {
+    if (state.fulfill === "eat-in") {
+      lines.push("For eat-in at 194 Hackney Road, London E2 7QL.");
+    } else if (state.fulfill === "collection") {
       lines.push("For collection from 194 Hackney Road, London E2 7QL.");
     } else {
       lines.push(`For delivery${state.postcode ? ` to ${state.postcode}` : " (I'll share my address)"}.`);

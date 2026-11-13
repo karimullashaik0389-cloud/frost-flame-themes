@@ -206,11 +206,57 @@ select {
 }
 #mm-form label, .plan-form label { display: grid; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 #mm-form input[type="number"], #mm-form input[type="range"] { margin-top: 0.3rem; }
+.mood-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.mood-icon { display: block; flex-shrink: 0; }
 @media (max-width: 639px) {
-  .mood-btn { padding: 0.35rem 0.5rem; font-size: 0.72rem; }
-  .mode-toggle button { padding: 0.32rem 0.5rem; font-size: 0.7rem; }
-  .logo img { max-width: 32vw; height: 2.15rem; }
-  .header { gap: 0.4rem; }
+  :root { --pad: 0.75rem; }
+  html, body { overflow-x: hidden; }
+  .header {
+    gap: 0.3rem;
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .logo { min-width: 0; flex: 0 1 auto; }
+  .logo img { max-width: 6.9rem; height: 1.95rem; }
+  .nav { gap: 0.25rem; min-width: 0; flex-shrink: 1; }
+  .mode-toggle { padding: 0.08rem; }
+  .mode-toggle button {
+    padding: 0.26rem 0.4rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    min-height: 1.8rem;
+  }
+  .mood-btn {
+    width: 1.9rem;
+    height: 1.9rem;
+    min-height: 1.9rem;
+    padding: 0;
+  }
+  .mood-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .cart-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.76rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 }
 
 .chat-panel[hidden] { display: none !important; }
@@ -293,3 +339,17 @@ html[data-mode="frost"] .hero-dim {
 }
 
 #build.section { padding-bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px)); }
+
+.ig-link { color: var(--silver); font-weight: 600; text-decoration: none; }
+.ig-link:hover { color: var(--frost); }
+.visit-card .ig-link { display: inline-block; margin-top: 0.7rem; color: var(--frost); }
+
+html[data-mode="flame"] .hero .btn-frost {
+  background: #9ad8f0;
+  color: #06202b;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+html[data-mode="flame"] .hero .btn-ghost {
+  background: rgba(22, 8, 4, 0.88);
+  border-color: rgba(255,200,140,0.45);
+}

@@ -1,13 +1,64 @@
-/* Heavy snowfall (Frost) and rising flames + embers (Flame). GPU canvas, pauses when hidden / reduced-motion. */
+/* Heavy snowfall (Frost) and realistic rising fire + embers (Flame).
+   GPU canvas, pauses when hidden / reduced-motion. */
 (() => {
   const canvas = document.getElementById("fx-canvas");
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext("2d", { alpha: true });
-  let w = 0, h = 0, dpr = 1, flakes = [], embers = [], flames = [], raf = 0, last = 0, mode = "frost";
+  let w = 0, h = 0, dpr = 1, flakes = [], embers = [], flames = [], jets = [];
+  let raf = 0, last = 0, mode = "frost";
+  let sprCore, sprMid, sprTip, sprEmber, sprSpark;
 
   const reduced = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
     navigator.connection?.saveData;
+
+  const makeSprite = (stops, size = 96) => {
+    const c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    const x = c.getContext("2d");
+    const g = x.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    for (const [p, col] of stops) g.addColorStop(p, col);
+    x.fillStyle = g;
+    x.fillRect(0, 0, size, size);
+    return c;
+  };
+
+  const makeSprites = () => {
+    // Soft radial particles: yellow core → orange → deep red → transparent
+    sprCore = makeSprite([
+      [0, "rgba(255,252,220,0.95)"],
+      [0.12, "rgba(255,236,120,0.85)"],
+      [0.32, "rgba(255,170,40,0.55)"],
+      [0.58, "rgba(255,80,10,0.22)"],
+      [1, "rgba(80,0,0,0)"],
+    ]);
+    sprMid = makeSprite([
+      [0, "rgba(255,200,80,0.8)"],
+      [0.2, "rgba(255,130,24,0.55)"],
+      [0.5, "rgba(210,40,0,0.28)"],
+      [0.78, "rgba(120,8,0,0.1)"],
+      [1, "rgba(40,0,0,0)"],
+    ]);
+    sprTip = makeSprite([
+      [0, "rgba(255,120,40,0.55)"],
+      [0.28, "rgba(200,30,0,0.32)"],
+      [0.6, "rgba(90,0,0,0.12)"],
+      [1, "rgba(20,0,0,0)"],
+    ]);
+    sprEmber = makeSprite([
+      [0, "rgba(255,240,180,1)"],
+      [0.18, "rgba(255,180,60,0.85)"],
+      [0.45, "rgba(255,90,16,0.35)"],
+      [1, "rgba(80,0,0,0)"],
+    ], 64);
+    sprSpark = makeSprite([
+      [0, "rgba(255,250,230,1)"],
+      [0.25, "rgba(255,200,90,0.7)"],
+      [0.6, "rgba(255,120,30,0.2)"],
+      [1, "rgba(0,0,0,0)"],
+    ], 48);
+  };
 
   const resize = () => {
     dpr = Math.min(window.devicePixelRatio || 1, 1.75);
@@ -24,7 +75,7 @@
     const n = w < 500 ? 110 : w < 900 ? 150 : 200;
     flakes = [];
     for (let i = 0; i < n; i++) {
-      const layer = Math.random(); // 0 back, 1 front
+      const layer = Math.random();
       flakes.push({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -42,35 +93,61 @@
     }
   };
 
+  const resetFlameParticle = (p, scatter) => {
+    const jet = jets[(Math.random() * jets.length) | 0] || { x: Math.random() * w, h: h * 0.3, spread: 30 };
+    const spread = jet.spread || 30;
+    p.x = jet.x + (Math.random() - 0.5) * spread;
+    p.ox = jet.x;
+    p.maxH = jet.h * (0.7 + Math.random() * 0.45);
+    p.y = scatter ? h - Math.random() * p.maxH : h + Math.random() * 16;
+    p.vy = -(0.9 + Math.random() * 2.6);
+    p.r = 18 + Math.random() * 34;
+    p.life = 0.7 + Math.random() * 0.9;
+    p.age = scatter ? Math.random() * p.life * 0.85 : 0;
+    p.t1 = Math.random() * Math.PI * 2;
+    p.t2 = Math.random() * Math.PI * 2;
+    p.t1s = 0.004 + Math.random() * 0.012;
+    p.t2s = 0.009 + Math.random() * 0.02;
+    p.kind = Math.random(); // 0 tip, 1 core
+    return p;
+  };
+
+  const resetEmber = (p, scatter) => {
+    p.x = Math.random() * w;
+    p.y = scatter ? Math.random() * h : h - Math.random() * 50;
+    p.r = 1.6 + Math.random() * 4.2;
+    p.vy = -(0.35 + Math.random() * 1.55);
+    p.vx = (Math.random() - 0.5) * 0.5;
+    p.a = 0.55 + Math.random() * 0.45;
+    p.life = 0.55 + Math.random() * 0.7;
+    p.age = scatter ? Math.random() * p.life : 0;
+    p.wob = Math.random() * Math.PI * 2;
+    p.wobS = 0.006 + Math.random() * 0.014;
+    p.spark = Math.random() < 0.35;
+    p.tw = Math.random() * Math.PI * 2;
+    return p;
+  };
+
   const spawnFlame = () => {
-    const tongue = Math.min(20, Math.max(10, Math.floor(w / 32)));
-    flames = [];
-    for (let i = 0; i < tongue; i++) {
-      flames.push({
-        x: ((i + 0.5) / tongue) * w,
-        w: 18 + Math.random() * 28,
-        h: 90 + Math.random() * 110,
+    const jetCount = Math.max(8, Math.round(w / 40));
+    jets = [];
+    for (let i = 0; i < jetCount; i++) {
+      const tall = i % 3 === 0;
+      jets.push({
+        x: ((i + 0.25 + Math.random() * 0.5) / jetCount) * w,
+        h: h * (0.36 + Math.random() * 0.26 + (tall ? 0.14 : 0)),
+        spread: 22 + Math.random() * 36,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.0025 + Math.random() * 0.0035,
-        hue: 18 + Math.random() * 22,
+        speed: 0.002 + Math.random() * 0.0035,
       });
     }
-    const n = w < 500 ? 90 : w < 900 ? 130 : 170;
+    const nFire = w < 500 ? 220 : w < 900 ? 300 : 380;
+    flames = [];
+    for (let i = 0; i < nFire; i++) flames.push(resetFlameParticle({}, true));
+
+    const nEmber = w < 500 ? 200 : w < 900 ? 280 : 360;
     embers = [];
-    for (let i = 0; i < n; i++) {
-      embers.push({
-        x: Math.random() * w,
-        y: h * (0.45 + Math.random() * 0.6),
-        r: 0.7 + Math.random() * 2.6,
-        vy: -(0.35 + Math.random() * 1.15),
-        vx: (Math.random() - 0.5) * 0.45,
-        a: 0.25 + Math.random() * 0.6,
-        life: Math.random(),
-        decay: 0.0015 + Math.random() * 0.003,
-        wob: Math.random() * Math.PI * 2,
-        glow: Math.random() < 0.5,
-      });
-    }
+    for (let i = 0; i < nEmber; i++) embers.push(resetEmber({}, true));
   };
 
   const drawCrystal = (x, y, r, rot, a) => {
@@ -97,7 +174,6 @@
     ctx.clearRect(0, 0, w, h);
 
     if (mode === "frost") {
-      // icy wash so the whole screen reads as cold stone
       const wash = ctx.createLinearGradient(0, 0, 0, h);
       wash.addColorStop(0, "rgba(150,210,240,0.07)");
       wash.addColorStop(0.5, "rgba(80,160,200,0.03)");
@@ -128,55 +204,88 @@
       }
       ctx.shadowBlur = 0;
     } else if (mode === "flame") {
-      // warm ember wash
+      // Warm ember wash, stronger near the fire bed
       const wash = ctx.createLinearGradient(0, 0, 0, h);
       wash.addColorStop(0, "rgba(40,8,0,0.08)");
-      wash.addColorStop(0.55, "rgba(80,20,0,0.05)");
-      wash.addColorStop(1, "rgba(255,80,16,0.14)");
+      wash.addColorStop(0.5, "rgba(80,18,0,0.06)");
+      wash.addColorStop(0.78, "rgba(160,40,0,0.1)");
+      wash.addColorStop(1, "rgba(255,70,8,0.2)");
+      ctx.globalCompositeOperation = "source-over";
       ctx.fillStyle = wash;
       ctx.fillRect(0, 0, w, h);
 
-      // rising flame tongues along the bottom
-      for (const f of flames) {
-        f.phase += f.speed * dt;
-        const flicker = 0.82 + Math.sin(f.phase) * 0.18 + Math.sin(f.phase * 2.3) * 0.08;
-        const fh = f.h * flicker;
-        const fw = f.w * (0.85 + Math.sin(f.phase * 1.6) * 0.18);
-        const x = f.x + Math.sin(f.phase * 0.9) * 10;
-        const y = h + 8;
-        const g = ctx.createLinearGradient(x, y, x, y - fh);
-        g.addColorStop(0, `hsla(${f.hue}, 100%, 52%, 0.0)`);
-        g.addColorStop(0.15, `hsla(${f.hue}, 100%, 50%, 0.55)`);
-        g.addColorStop(0.45, `hsla(${f.hue + 12}, 100%, 58%, 0.4)`);
-        g.addColorStop(1, `hsla(${f.hue + 28}, 100%, 72%, 0)`);
+      // Soft heat bed along the bottom (not a hard shape)
+      ctx.globalCompositeOperation = "lighter";
+      const bedH = Math.min(h * 0.28, 260);
+      const bed = ctx.createRadialGradient(w * 0.5, h + 10, 10, w * 0.5, h + 10, Math.max(w * 0.75, bedH * 2.2));
+      bed.addColorStop(0, "rgba(255,190,50,0.45)");
+      bed.addColorStop(0.35, "rgba(255,90,12,0.28)");
+      bed.addColorStop(0.7, "rgba(180,20,0,0.1)");
+      bed.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = bed;
+      ctx.fillRect(0, h - bedH * 1.4, w, bedH * 1.4);
+
+      for (const j of jets) {
+        j.phase += j.speed * dt;
+        const flicker = 0.86 + Math.sin(j.phase) * 0.12 + Math.sin(j.phase * 2.4) * 0.08;
+        const jh = j.h * flicker;
+        const jw = j.spread * (1.1 + Math.sin(j.phase * 1.3) * 0.15);
+        const jx = j.x + Math.sin(j.phase * 0.8) * 8;
+        const g = ctx.createRadialGradient(jx, h, 4, jx, h - jh * 0.15, jh * 0.55);
+        g.addColorStop(0, "rgba(255,210,80,0.38)");
+        g.addColorStop(0.4, "rgba(255,90,16,0.18)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.moveTo(x - fw, y);
-        ctx.bezierCurveTo(x - fw * 0.7, y - fh * 0.35, x - fw * 0.25, y - fh * 0.7, x, y - fh);
-        ctx.bezierCurveTo(x + fw * 0.25, y - fh * 0.7, x + fw * 0.7, y - fh * 0.35, x + fw, y);
-        ctx.closePath();
+        ctx.ellipse(jx, h - jh * 0.08, jw, jh * 0.55, 0, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      for (const p of embers) {
-        p.wob += 0.01 * dt;
-        p.x += (p.vx + Math.sin(p.wob) * 0.5) * (dt / 16);
-        p.y += p.vy * (dt / 16);
-        p.life -= p.decay * dt;
-        if (p.y < -10 || p.life <= 0) {
-          p.y = h - Math.random() * 40;
-          p.x = Math.random() * w;
-          p.life = 0.6 + Math.random() * 0.4;
+      // Particle flames — additive soft orbs, yellow core to deep red
+      for (const p of flames) {
+        p.t1 += p.t1s * dt;
+        p.t2 += p.t2s * dt;
+        p.age += dt / 1000;
+        const flicker = 0.78 + Math.sin(p.t1 * 3.1) * 0.14 + Math.sin(p.t2 * 5.2) * 0.1;
+        const turb = Math.sin(p.t1) * 0.85 + Math.sin(p.t2) * 0.55;
+        p.x += turb * (dt / 16);
+        p.y += p.vy * flicker * (dt / 16);
+        const progress = Math.max(0, Math.min(1, p.age / p.life));
+        const risen = h - p.y;
+        if (progress >= 1 || risen > p.maxH || p.y < h - p.maxH - 20) {
+          resetFlameParticle(p, false);
+          continue;
         }
-        const a = Math.max(0, p.a * p.life);
-        ctx.shadowColor = p.glow ? "rgba(255,170,60,0.9)" : "rgba(255,120,40,0.55)";
-        ctx.shadowBlur = p.glow ? 14 : 7;
-        ctx.fillStyle = `rgba(255,${140 + ((p.x * 3) % 80) | 0},50,${a})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+        const r = p.r * (1.15 - progress * 0.62) * flicker;
+        let a = (1 - progress * 0.55) * 0.95 * flicker;
+        if (risen < 16) a *= risen / 16;
+        const spr = progress < 0.28 || p.kind > 0.72 ? sprCore : progress < 0.62 ? sprMid : sprTip;
+        ctx.globalAlpha = a;
+        ctx.drawImage(spr, p.x - r, p.y - r, r * 2, r * 2);
       }
-      ctx.shadowBlur = 0;
+
+      // Glowing embers drifting up across the full screen
+      for (const p of embers) {
+        p.wob += p.wobS * dt;
+        p.tw += 0.012 * dt;
+        p.age += dt / 1000;
+        p.x += (p.vx + Math.sin(p.wob) * 0.55) * (dt / 16);
+        p.y += p.vy * (dt / 16);
+        if (p.x < -8) p.x = w + 8;
+        if (p.x > w + 8) p.x = -8;
+        const progress = p.age / p.life;
+        if (p.y < -12 || progress >= 1) {
+          resetEmber(p, false);
+          continue;
+        }
+        const twinkle = 0.55 + Math.sin(p.tw) * 0.45;
+        const a = Math.max(0, p.a * (1 - progress * 0.75) * twinkle);
+        const r = p.r * (p.spark ? 2.8 : 4.2) * (0.9 + twinkle * 0.25);
+        ctx.globalAlpha = a;
+        ctx.drawImage(p.spark ? sprSpark : sprEmber, p.x - r, p.y - r, r * 2, r * 2);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
     }
   };
 
@@ -193,6 +302,7 @@
     },
   };
 
+  makeSprites();
   resize();
   window.addEventListener("resize", () => {
     resize();

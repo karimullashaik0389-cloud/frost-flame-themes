@@ -2,9 +2,9 @@
   "meta": {
     "name": "Frost & Flame",
     "tagline": "One kitchen. Two temperatures.",
-    "description": "Stone ice cream mixed to order, Andhra pulao and Indian street food, delivered around Hackney Road, E2. Order on WhatsApp.",
+    "description": "Stone ice cream mixed to order, Andhra pulao and Indian street food. A café and dessert parlour at 194 Hackney Road — eat-in, collection and delivery. Order on WhatsApp.",
     "address": "194 Hackney Road, London E2 7QL",
-    "address_note": "Delivery-only kitchen. Collection available. No dine-in.",
+    "address_note": "Café and dessert parlour. Eat-in (about 20 seats), collection and delivery.",
     "whatsapp": "447587596490",
     "hours_label": "11am–11pm daily",
     "open_time": "11:00",
@@ -26,7 +26,7 @@
       "E9"
     ],
     "launch_date": "2026-11-26",
-    "instagram": "",
+    "instagram": "https://www.instagram.com/frostandflame.london/",
     "tiktok": "",
     "maps_url": "https://maps.google.com/?q=194+Hackney+Road+London+E2+7QL",
     "allergens_verified": true,
@@ -37,8 +37,8 @@
     "editable": true,
     "title": "Andhra to Hackney",
     "text": [
-      "Frost & Flame is a delivery-only kitchen at 194 Hackney Road, London E2 7QL.",
-      "Stone ice cream is mixed to order on a frozen slab. Andhra pulao, chaats, curry bowls and drinks are made fresh for delivery across E1, E1W, E2, E8 and E9, or for collection from the kitchen.",
+      "Frost & Flame is a café and dessert parlour at 194 Hackney Road, London E2 7QL.",
+      "Stone ice cream is mixed to order on a frozen slab. Andhra pulao, chaats, curry bowls and drinks are made fresh.",
       "One kitchen. Two temperatures."
     ]
   },

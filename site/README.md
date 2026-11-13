@@ -38,7 +38,7 @@ When the site is ready, point the domain at GitHub Pages for this repository, an
 ## What this site does not include yet
 
 - Real owner dish photos (placeholders are used until those arrive)
-- Reviews (the kitchen is not open yet — none are invented)
+- Reviews (the café is not open yet — none are invented)
 - Instagram or TikTok links (those fields are empty in the source data)
 - An admin or CMS page — edits are made in `data/menu.json`
 

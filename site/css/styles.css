@@ -39,6 +39,7 @@ html {
   background: var(--bg);
   color: var(--text);
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -111,8 +112,10 @@ a { color: inherit; }
 .nav {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.55rem;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .nav .btn-solid { display: none; }
@@ -205,7 +208,7 @@ a { color: inherit; }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: calc(var(--header-h) + 2rem) var(--pad) calc(6.25rem + env(safe-area-inset-bottom, 0px));
+  padding: calc(var(--header-h) + 2rem) var(--pad) calc(8.25rem + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   isolation: isolate;
 }
@@ -564,6 +567,7 @@ a { color: inherit; }
   font-weight: 500;
 }
 .visit-card p, .visit-card address { margin: 0; font-style: normal; color: var(--muted); }
+.visit-card p + p, .visit-card address + p, .visit-card p + address { margin-top: 0.55rem; }
 .areas { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
 .area {
   border: 1px solid var(--line-strong);
@@ -780,7 +784,10 @@ a { color: inherit; }
   }
   .dish .media, .dish .ph { min-height: 8.5rem; }
   .menu-grid { grid-template-columns: 1fr 1fr; }
-  .visit-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .visit-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1100px) {
+  .visit-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
   .sig-card { flex-basis: 20rem; }
 }
 
