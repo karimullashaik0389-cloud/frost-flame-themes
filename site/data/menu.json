@@ -2111,7 +2111,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 609,
+      "order": 611,
       "ingredients": [
         "Green moong dal",
         "Rice",
@@ -2701,13 +2701,15 @@
     },
     {
       "id": "punugulu",
-      "name": "Punugulu",
-      "category": "street-specials",
-      "description": "Crisp Andhra rice-and-lentil fritters, fried to order.",
+      "name": "Punugulu with Chutney",
+      "category": "tiffins",
+      "description": "Crisp Andhra rice-and-lentil fritters, fried to order and served with peanut chutney.",
       "diet": [
         "V"
       ],
-      "allergens": [],
+      "allergens": [
+        "peanuts"
+      ],
       "price": 4.99,
       "sizes": null,
       "choices": [],
@@ -2715,7 +2717,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 305,
+      "order": 609,
       "level": 4,
       "ingredients": [
         "Rice or idli batter",
@@ -2725,19 +2727,22 @@
         "Cumin",
         "Onion",
         "Curry leaves",
-        "Oil"
+        "Oil",
+        "Peanut chutney"
       ],
       "ingredients_review": true
     },
     {
       "id": "bajji",
-      "name": "Bajji",
-      "category": "street-specials",
-      "description": "Vegetables in a spiced gram-flour batter, fried till crisp.",
+      "name": "Bajji with Chutney",
+      "category": "tiffins",
+      "description": "Vegetables in a spiced gram-flour batter, fried till crisp and served with peanut chutney.",
       "diet": [
         "V"
       ],
-      "allergens": [],
+      "allergens": [
+        "peanuts"
+      ],
       "price": 3.99,
       "sizes": null,
       "choices": [],
@@ -2745,14 +2750,15 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 306,
+      "order": 610,
       "level": 4,
       "ingredients": [
         "Gram flour",
         "Potato, chilli, onion or mixed vegetables",
         "Chilli",
         "Spices",
-        "Oil"
+        "Oil",
+        "Peanut chutney"
       ],
       "ingredients_review": true
     },
@@ -3089,7 +3095,7 @@
       "tone": "flame",
       "opens_build": false,
       "sold_out": false,
-      "order": 610,
+      "order": 612,
       "level": 3,
       "ingredients": [
         "Eggs",
