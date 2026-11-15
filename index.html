@@ -337,7 +337,7 @@ if ('serviceWorker' in navigator) {
       return XS.call(this, body);
     };
   })();
-  var ffAssetV = '202611121230';
+  var ffAssetV = '202611150200';
   function ffBust(u) {
     u = String(u || '');
     if (!u || /[?&]v=/.test(u)) return u;
@@ -430,4 +430,45 @@ if ('serviceWorker' in navigator) {
   });
 })();
 </script>
-</head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<script>
+(function(){
+  try {
+    var force=/(?:^|[?&])intro=1(?:&|$)/.test(location.search);
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var path=(location.pathname||'/').replace(/\/index\.html$/,'').replace(/\/+$/,'')||'/';
+    var isHome=(path==='/'||path==='/frost-flame-themes');
+    if(!force&&(reduce||sessionStorage.getItem('ff_intro_seen')==='1'||!isHome))document.documentElement.classList.add('ff-intro-skip');
+  } catch(e){}
+})();
+</script></head><body><link rel="stylesheet" href="site/css/ff-intro.css?v=20261115e"/>
+<div id="ffIntro" class="ff-intro" role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('site/video/intro-poster.webp')">
+  <video id="ffIntroVideo" muted playsinline webkit-playsinline preload="auto" data-poster="/site/video/intro-poster.webp" poster="site/video/intro-poster.webp" aria-hidden="true">
+    <source data-src="/site/video/intro.webm" type="video/webm">
+    <source data-src="/site/video/intro.mp4" type="video/mp4">
+  </video>
+  <button type="button" class="ff-intro-skip" id="ffIntroSkip">Skip</button>
+</div>
+<script src="site/js/ff-intro.js?v=20261115e"></script>
+<script>
+(function(){
+  var abs = window.__FF_ABS__ || function(p){ return p; };
+  var el = document.getElementById('ffIntro');
+  if (!el) return;
+  var path = (location.pathname || '/').replace(/\/+$/,'') || '/';
+  var base = (window.__FF_BASE__ || '').replace(/\/+$/,'');
+  var rest = path.slice(base.length) || '/';
+  rest = rest.replace(/\/index\.html$/,'') || '/';
+  var isHome = (rest === '/' || rest === '');
+  if (!isHome) {
+    try { el.hidden = true; document.documentElement.classList.add('ff-intro-skip'); } catch(e){}
+    return;
+  }
+  var v = el.querySelector('video');
+  if (v) {
+    v.poster = abs('/site/video/intro-poster.webp');
+    el.style.setProperty('--ff-intro-poster', "url('" + abs('/site/video/intro-poster.webp') + "')");
+  }
+  el.querySelectorAll('source[data-src]').forEach(function(s){ s.src = abs(s.getAttribute('data-src')); });
+  if (window.FFIntro) FFIntro.run();
+})();
+</script><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>

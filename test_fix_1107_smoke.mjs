@@ -41,6 +41,7 @@ async function run(engine, name, origin, vp) {
     isMobile:!!vp.phone, hasTouch:!!vp.phone,
     userAgent: vp.phone ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' : undefined
   });
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page = await ctx.newPage();
   const tag = `${name}_${vp.name}`;
   const out = { tag, checks:[], timings:[] };

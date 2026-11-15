@@ -75,6 +75,7 @@ async function runEngine(browserType, engineName, origin) {
         ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
         : undefined
     });
+  await context.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
     const page = await context.newPage();
     const tag = `${engineName}_${vp.name}`;
     const log = (msg) => results.push({ tag, msg });

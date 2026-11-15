@@ -28,6 +28,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/features.css">
+  <link rel="stylesheet" href="css/ff-intro.css?v=20261115e">
+  <script>
+    (function () {
+      try {
+        var force = /(?:^|[?&])intro=1(?:&|$)/.test(location.search);
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!force && (reduce || sessionStorage.getItem('ff_intro_seen') === '1')) {
+          document.documentElement.classList.add('ff-intro-skip');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -66,6 +78,13 @@
   </script>
 </head>
 <body>
+  <div id="ffIntro" class="ff-intro" data-autorun role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('video/intro-poster.webp')">
+    <video id="ffIntroVideo" muted playsinline webkit-playsinline preload="auto" poster="video/intro-poster.webp" aria-hidden="true">
+      <source src="video/intro.webm" type="video/webm">
+      <source src="video/intro.mp4" type="video/mp4">
+    </video>
+    <button type="button" class="ff-intro-skip" id="ffIntroSkip">Skip</button>
+  </div>
   <a class="skip" href="#menu">Skip to menu</a>
   <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
 
@@ -304,6 +323,7 @@
     <div class="mood-grid" id="mood-grid"></div>
   </dialog>
 
+  <script src="js/ff-intro.js?v=20261115e" defer></script>
   <script src="js/ff-config.js" defer></script>
   <script src="js/ff-live.js" defer></script>
   <script src="js/app.js" defer></script>

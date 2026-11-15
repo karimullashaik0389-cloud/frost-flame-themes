@@ -1,6 +1,6 @@
 /* Same worker as ff-sw.js so an older registration of /sw.js updates in place.
    No fetch intercept, no forced reload. */
-var FF_SW_VERSION = '2026-11-08-menu-ready';
+var FF_SW_VERSION = '2026-11-15-intro';
 
 self.addEventListener('install', function () {
   self.skipWaiting();

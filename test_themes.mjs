@@ -14,6 +14,7 @@ const browser = await chromium.launch({ headless: true });
 
 async function runViewport(name, size) {
   const context = await browser.newContext({ viewport: size, deviceScaleFactor: 1 });
+  await context.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page = await context.newPage();
   page.on('pageerror', e => report.pageErrors.push({ view: name, message: String(e) }));
   page.on('console', m => { if (m.type() === 'error') report.consoleErrors.push({ view: name, text: m.text() }); });

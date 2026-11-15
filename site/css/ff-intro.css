@@ -1,0 +1,61 @@
+/* Full-screen welcome intro. Does not change site theme tokens. */
+.ff-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #07080a;
+  background-image: var(--ff-intro-poster, none);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 1;
+  transition: opacity .45s ease;
+}
+.ff-intro[hidden],
+html.ff-intro-skip .ff-intro {
+  display: none !important;
+}
+.ff-intro.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+.ff-intro video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  background: #07080a;
+}
+@media (min-width: 800px) and (orientation: landscape) {
+  .ff-intro { background-size: contain; }
+  .ff-intro video { object-fit: contain; }
+}
+.ff-intro-skip {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 2;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+  font-family: Outfit, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.ff-intro-skip:hover,
+.ff-intro-skip:focus-visible { background: rgba(0, 0, 0, 0.7); }
+.ff-intro-skip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }

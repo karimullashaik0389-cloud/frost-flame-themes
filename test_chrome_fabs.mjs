@@ -36,6 +36,7 @@ async function measure(page){
 // Mobile no-theme fresh — tree open, dock hidden
 {
   const ctx=await browser.newContext({viewport:{width:390,height:844}});
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page=await ctx.newPage();
   page.on('pageerror',e=>report.pageErrors.push(String(e)));
   await page.goto(BASE+'/?fresh=1',{waitUntil:'networkidle'});
@@ -50,6 +51,7 @@ async function measure(page){
 // Mobile each theme
 for(const t of THEMES){
   const ctx=await browser.newContext({viewport:{width:390,height:844}});
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page=await ctx.newPage();
   page.on('pageerror',e=>report.pageErrors.push(String(e)));
   await page.goto(BASE+'/menu?group='+t,{waitUntil:'networkidle'});
@@ -97,6 +99,7 @@ for(const t of THEMES){
 // Desktop gang
 {
   const ctx=await browser.newContext({viewport:{width:1280,height:800}});
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page=await ctx.newPage();
   await page.goto(BASE+'/menu?group=gang',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.FFChrome);
@@ -114,6 +117,7 @@ for(const t of THEMES){
 // Cart tuck flow
 {
   const ctx=await browser.newContext({viewport:{width:390,height:844}});
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   const page=await ctx.newPage();
   await page.goto(BASE+'/menu?group=friends',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.FFChrome&&window.FFPlay);

@@ -64,6 +64,7 @@ async function run(browserType, engine, origin) {
     hasTouch: true,
     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
   });
+  await context.addInitScript(() => { try { sessionStorage.setItem('ff_intro_seen', '1'); } catch (e) {} });
   await context.addInitScript(() => {
     try { localStorage.setItem('ff_entry_theme_old', 'friends-night-chip'); } catch (e) {}
   });
