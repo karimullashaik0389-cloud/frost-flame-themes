@@ -1,1269 +1,474 @@
-(() => {
-  "use strict";
-
-  const OWNER = "karimullashaik0389-cloud";
-  const REPO = "frost-flame-themes";
-  const FILE_PATH = "site/data/menu.json";
-  const TOKEN_KEY = "ff-admin-gh-token";
-  const API = "https://api.github.com";
-  const COMMIT_MESSAGE = "Admin: update menu";
-
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-  const app = $("#app");
-
-  const escapeHtml = (s) =>
-    String(s ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-
-  const state = {
-    token: null,
-    menu: null,
-    sha: null,
-    baseline: "",
-    query: "",
-    view: "list", // list | category
-    activeCat: null,
-    busy: false,
-    loginError: "",
-    toast: "",
-    toastType: "",
-    pendingDeleteId: null,
-    pendingDeleteCat: null,
-    pendingPhotos: {},
-    photoTarget: null,
-    busyLabel: "",
+/* Frost & Flame website admin v2 – UI only. Every permission is checked again on the server (Code.gs). */
+(function () {
+  var TK = 'ff-site-admin-token', UK = 'ff-site-admin-user';
+  var token = localStorage.getItem(TK) || '';
+  var me = null, menuItems = [], categories = [], textRows = [], people = [], lastLoginPassword = '', toastTimer;
+  try { me = JSON.parse(localStorage.getItem(UK) || 'null'); } catch (e) { me = null; }
+  var TABS = [
+    { id: 'menu', label: 'Menu', perm: 'menu.view' },
+    { id: 'texts', label: 'Site text', perm: 'texts.view' },
+    { id: 'people', label: 'People', perm: 'people.manage' },
+    { id: 'activity', label: 'Activity', perm: 'activity.view' },
+    { id: 'me', label: 'Me' }
+  ];
+  var PERM_TEXT = {
+    'menu.availability': 'mark dishes available / out of stock', 'menu.edit': 'edit dish details and photos',
+    'menu.price': 'change prices', 'menu.add': 'add dishes', 'menu.delete': 'delete dishes',
+    'texts.view': 'see site texts', 'texts.edit': 'edit names, greetings and hero text',
+    'activity.view': 'read the activity log'
   };
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function money(n) { return '£' + Number(n || 0).toFixed(2); }
+  function can(p) { return !!(me && me.perms && me.perms[p]); }
+  function photoSrc(p) {
+    if (!p) return '';
+    if (/^(https?:|data:|blob:)/i.test(p)) return p;
+    if (p.indexOf('../') === 0) return p;
+    return '../' + String(p).replace(/^\//, '');
+  }
+  function priceLabel(it) {
+    if (it.sizes && it.sizes.length) {
+      var prices = it.sizes.map(function (s) { return Number(s.price); }).filter(function (n) { return isFinite(n); });
+      if (!prices.length) return '—';
+      var min = Math.min.apply(null, prices), max = Math.max.apply(null, prices);
+      return min === max ? money(min) : 'from ' + money(min);
+    }
+    if (it.price == null || it.price === '') return '—';
+    return money(it.price);
+  }
+  function shrinkPhoto(file, done, fail) {
+    if (!file) { fail('Please choose a photo'); return; }
+    if (!file.type || file.type.indexOf('image/') !== 0) { fail('Please choose a photo'); return; }
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.width, h = img.height, max = 1200;
+      if (w > max || h > max) { var s = Math.min(max / w, max / h); w = Math.round(w * s); h = Math.round(h * s); }
+      var canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      try {
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        done(dataUrl, dataUrl);
+      } catch (e) { fail('That photo could not be read'); }
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); fail('That photo could not be read'); };
+    img.src = url;
+  }
+  function show(id, on) { $(id).classList.toggle('hidden', !on); }
+  function toast(msg, err) {
+    var el = $('toast'); el.textContent = msg; el.className = 'toast show' + (err ? ' err' : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3400);
+  }
+  function api(payload) {
+    payload = payload || {};
+    if (token) payload.token = token;
+    return FFApi.call(payload).catch(function (e) {
+      if (e.code === 'auth' || e.code === 'must_change_password') {
+        if (e.code === 'must_change_password') showChange(false);
+        else showLogin(e.message);
+      }
+      throw e;
+    });
+  }
+  function busy(btn, on) { if (btn) { btn.disabled = on; } }
+  function openSheet(html) { $('sheet').innerHTML = html; show('sheetBg', true); var f = $('sheet').querySelector('input,select,textarea'); if (f && f.focus) setTimeout(function(){ try { f.focus(); } catch (e) {} }, 50); }
+  function closeSheet() { show('sheetBg', false); $('sheet').innerHTML = ''; }
+  $('sheetBg').addEventListener('click', function (e) { if (e.target === $('sheetBg') && !$('sheet').querySelector('[data-sticky]')) closeSheet(); });
+  function confirmSheet(title, text, okLabel, danger) {
+    return new Promise(function (resolve) {
+      openSheet('<h2>' + esc(title) + '</h2><p class="hint">' + esc(text) + '</p>' +
+        '<div class="row2"><button class="btn btn-ghost" id="cfNo" type="button">Cancel</button>' +
+        '<button class="btn ' + (danger ? 'btn-danger' : 'btn-primary') + '" id="cfYes" type="button">' + esc(okLabel) + '</button></div>');
+      $('cfNo').onclick = function () { closeSheet(); resolve(false); };
+      $('cfYes').onclick = function () { closeSheet(); resolve(true); };
+    });
+  }
+  function secretSheet(title, who, username, pw) {
+    openSheet('<h2>' + esc(title) + '</h2><p class="hint">Show this to ' + esc(who) + ' in person. They must change it at first login. It will not be shown again.</p>' +
+      '<p class="muted">Username <b>' + esc(username) + '</b></p><div class="secret" id="spVal">' + esc(pw) + '</div>' +
+      '<button class="btn btn-ghost" id="spCopy" type="button">Copy</button><button class="btn btn-primary" id="spOk" type="button">I have written it down</button>');
+    $('spCopy').onclick = function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(pw).then(function () { toast('Copied'); }, function () { toast('Copy did not work – write it down', true); });
+      else toast('Copy did not work – write it down', true);
+    };
+    $('spOk').onclick = closeSheet;
+  }
+  function dropSession() { token = ''; me = null; localStorage.removeItem(TK); localStorage.removeItem(UK); }
+  function showLogin(msg) {
+    show('appView', false); show('changeView', false); show('loginView', true);
+    $('loginMsg').textContent = msg || ''; $('loginMsg').className = 'msg';
+    show('setupWarn', !FFApi.ready());
+  }
+  function showChange(knowOld) {
+    show('loginView', false); show('appView', false); show('changeView', true);
+    show('cvOldWrap', !!knowOld);
+    if (knowOld && lastLoginPassword) { $('cvOld').value = lastLoginPassword; }
+    $('cvMsg').textContent = '';
+  }
+  function showApp() {
+    show('loginView', false); show('changeView', false); show('appView', true);
+    show('setupWarn', false);
+    $('whoLine').textContent = me.displayName + ' · ' + (me.role === 'owner' ? 'Owner' : 'Employee');
+    var nav = $('tabs');
+    nav.innerHTML = TABS.filter(function (t) { return !t.perm || can(t.perm); }).map(function (t) {
+      return '<button type="button" class="tab" data-tab="' + t.id + '">' + t.label + '</button>';
+    }).join('');
+    nav.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { openTab(b.getAttribute('data-tab')); }; });
+    show('addDishBtn', can('menu.add'));
+    $('meLine').innerHTML = '<b>' + esc(me.displayName) + '</b> · @' + esc(me.username) + ' · ' + (me.role === 'owner' ? 'Owner' : 'Employee');
+    var allowed = Object.keys(PERM_TEXT).filter(function (k) { return can(k); }).map(function (k) { return PERM_TEXT[k]; });
+    $('mePerms').textContent = allowed.length ? 'You can ' + allowed.join(', ') + '.' : '';
+    openTab('menu');
+  }
+  function openTab(id) {
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-tab') === id); });
+    document.querySelectorAll('.panel').forEach(function (x) { x.classList.toggle('on', x.id === 'panel-' + id); });
+    if (id === 'menu') loadMenu();
+    if (id === 'texts') loadTexts();
+    if (id === 'people') loadPeople();
+    if (id === 'activity') loadActivity();
+  }
 
-  const apiHeaders = (token) => ({
-    Accept: "application/vnd.github+json",
-    Authorization: "Bearer " + token,
-    "X-GitHub-Api-Version": "2022-11-28",
+  document.querySelectorAll('[data-eye]').forEach(function (b) {
+    b.onclick = function () { var i = $(b.getAttribute('data-eye')); var t = i.type === 'password'; i.type = t ? 'text' : 'password'; b.textContent = t ? 'Hide' : 'Show'; };
   });
 
-  const decodeBase64 = (b64) => {
-    const clean = String(b64 || "").replace(/\s/g, "");
-    const bin = atob(clean);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
+  $('loginForm').onsubmit = function (ev) {
+    ev.preventDefault();
+    var btn = $('loginBtn'), pw = $('loginPass').value;
+    busy(btn, true); $('loginMsg').textContent = '';
+    lastLoginPassword = pw;
+    FFApi.call({ action: 'login', username: $('loginUser').value, password: pw }).then(function (r) {
+      token = r.token; me = r.user; localStorage.setItem(TK, token); localStorage.setItem(UK, JSON.stringify(me));
+      $('loginPass').value = '';
+      if (r.mustChangePassword) showChange(!lastLoginPassword); else { lastLoginPassword = ''; showApp(); toast('Welcome, ' + me.displayName); }
+    }).catch(function (e) {
+      lastLoginPassword = '';
+      var msg = e.message || 'Wrong username or password';
+      var left = e.data && e.data.remaining;
+      if (typeof left === 'number') msg += '. ' + left + ' tries left';
+      $('loginMsg').textContent = msg;
+    }).then(function () { busy(btn, false); });
+  };
+  $('changeForm').onsubmit = function (ev) {
+    ev.preventDefault();
+    var a = $('cvNew').value, b = $('cvNew2').value, oldPw = $('cvOldWrap').classList.contains('hidden') ? lastLoginPassword : $('cvOld').value;
+    if (a !== b) { $('cvMsg').textContent = 'The two new passwords are not the same'; return; }
+    busy($('cvBtn'), true); $('cvMsg').textContent = '';
+    api({ action: 'changePassword', oldPassword: oldPw, newPassword: a }).then(function () {
+      lastLoginPassword = ''; ['cvOld', 'cvNew', 'cvNew2'].forEach(function (i) { $(i).value = ''; });
+      return api({ action: 'me' });
+    }).then(function (r) {
+      me = r.user; localStorage.setItem(UK, JSON.stringify(me)); showApp(); toast('Password saved. Welcome, ' + me.displayName);
+    }).catch(function (e) { $('cvMsg').textContent = e.message; if (e.code === 'bad_password') show('cvOldWrap', true); })
+      .then(function () { busy($('cvBtn'), false); });
+  };
+  function logout() { var t = token; dropSession(); if (t) FFApi.call({ action: 'logout', token: t }).catch(function () {}); showLogin('You are logged out.'); $('loginMsg').className = 'msg ok'; }
+  $('logoutBtn').onclick = logout; $('cvLogout').onclick = logout;
+
+  $('meForm').onsubmit = function (ev) {
+    ev.preventDefault();
+    var a = $('meNew').value, b = $('meNew2').value;
+    if (a !== b) { $('meMsg').textContent = 'The two new passwords are not the same'; return; }
+    busy($('meBtn'), true); $('meMsg').textContent = '';
+    api({ action: 'changePassword', oldPassword: $('meOld').value, newPassword: a }).then(function () {
+      ['meOld', 'meNew', 'meNew2'].forEach(function (i) { $(i).value = ''; });
+      $('meMsg').textContent = 'Password updated.'; $('meMsg').className = 'msg ok';
+    }).catch(function (e) { $('meMsg').textContent = e.message; $('meMsg').className = 'msg'; }).then(function () { busy($('meBtn'), false); });
   };
 
-  const encodeBase64 = (text) => {
-    const bytes = new TextEncoder().encode(text);
-    let bin = "";
-    bytes.forEach((b) => {
-      bin += String.fromCharCode(b);
+  function loadMenu() {
+    return api({ action: 'menuList' }).then(function (r) { menuItems = r.items || []; categories = r.categories || []; renderMenu(); }).catch(function (e) { toast(e.message, true); });
+  }
+  function catName(id) {
+    var c = categories.filter(function (x) { return x.id === id; })[0];
+    return c ? (c.heading || c.name || id) : id;
+  }
+  function renderMenu() {
+    var q = $('menuSearch').value.trim().toLowerCase();
+    var list = menuItems.filter(function (it) { return !q || (it.name + ' ' + (it.description || '') + ' ' + (it.note || '')).toLowerCase().indexOf(q) >= 0; });
+    var canEdit = can('menu.edit') || can('menu.price');
+    var hints = [];
+    if (canEdit) hints.push('Tap Edit to change a dish' + (can('menu.price') ? ', its photo or its price' : ' or its photo') + '.');
+    if (can('menu.availability')) hints.push('"Out of stock" keeps a dish on the menu but marks it sold out.');
+    if (canEdit && me.role !== 'owner') hints.push('Every change is saved with your name.');
+    $('menuHint').textContent = hints.join(' ');
+    var lastCat = null, html = '';
+    list.forEach(function (it) {
+      if (it.category !== lastCat) { html += '<div class="cat">' + esc(catName(it.category) || 'Other') + '</div>'; lastCat = it.category; }
+      html += '<div class="dish' + (it.sold_out ? ' off' : '') + '" data-dish="' + esc(it.id) + '">' +
+        (it.photo ? '<img src="' + esc(photoSrc(it.photo)) + '" alt="" loading="lazy" />' : '<div class="thumb-ph"></div>') +
+        '<div><div class="nm">' + esc(it.name) + '</div>' +
+        '<div class="nt">' + esc(it.description || it.note || '') + '</div>' +
+        '<div><span class="price">' + priceLabel(it) + '</span> ' + (it.sold_out ? '<span class="badge bad">Out of stock</span>' : '<span class="badge ok">Available</span>') + '</div></div>' +
+        '<div class="acts">' +
+        (can('menu.availability') ? '<button class="btn ' + (it.sold_out ? 'btn-frost' : 'btn-ghost') + ' sm" data-avail="' + esc(it.id) + '" type="button">' + (it.sold_out ? 'Available' : 'Out of stock') + '</button>' : '') +
+        (canEdit ? '<button class="btn btn-ghost sm" data-edit="' + esc(it.id) + '" type="button">Edit</button>' : '') +
+        '</div></div>';
     });
-    return btoa(bin);
-  };
-
-  const friendlyHttpError = (status, forWrite) => {
-    if (status === 401) return "That sign-in code was not accepted. Check you copied it in full.";
-    if (status === 403) {
-      return forWrite
-        ? "This sign-in code cannot save the menu. Make a new one that can change the frost-flame-themes files."
-        : "This sign-in code cannot read the menu. Make a new one that can change the frost-flame-themes files.";
-    }
-    if (status === 404) return "This sign-in code cannot see the Frost & Flame menu. Check it is only for the frost-flame-themes project.";
-    if (status === 409) return "The menu was changed somewhere else. Close this page, open it again, and try once more.";
-    return "Something went wrong (" + status + "). Please try again.";
-  };
-
-  const loadFile = async (token) => {
-    const url = API + "/repos/" + OWNER + "/" + REPO + "/contents/" + FILE_PATH;
-    let res;
-    try {
-      res = await fetch(url, { headers: apiHeaders(token) });
-    } catch (_) {
-      throw new Error("Could not reach the internet. Check your connection and try again.");
-    }
-    if (!res.ok) throw new Error(friendlyHttpError(res.status, false));
-    const data = await res.json();
-    if (!data || !data.content || !data.sha) throw new Error("The menu could not be read. Please try again.");
-    let parsed;
-    try {
-      parsed = JSON.parse(decodeBase64(data.content));
-    } catch (_) {
-      throw new Error("The menu file was not valid. Please try again.");
-    }
-    if (!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.categories)) {
-      throw new Error("The menu file was not valid. Please try again.");
-    }
-    return { menu: parsed, sha: data.sha };
-  };
-
-  const parsePrice = (raw) => {
-    const s = String(raw ?? "").trim().replace(/^£/, "").replace(/,/g, "");
-    if (s === "") return { ok: true, value: null };
-    const n = Number(s);
-    if (!Number.isFinite(n) || n < 0) return { ok: false };
-    return { ok: true, value: Math.round(n * 100) / 100 };
-  };
-
-  const hasPrice = (item) => {
-    if (item.price != null && item.price !== "" && Number.isFinite(Number(item.price))) return true;
-    if (item.sizes && item.sizes.some((s) => s.price != null && s.price !== "" && Number.isFinite(Number(s.price)))) return true;
-    return false;
-  };
-
-  const priceShown = (v) => (v == null || v === "" ? "" : String(v));
-
-  const PHOTO_MAX_WIDTH = 1200;
-  const PHOTO_MAX_BYTES = 300 * 1024;
-  const PHOTO_DIR = "site/img/dishes/";
-  const PHOTO_MENU_PREFIX = "img/dishes/";
-
-  const encodeBytes = (bytes) => {
-    let bin = "";
-    const chunk = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunk) {
-      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-    }
-    return btoa(bin);
-  };
-
-  const encodeBlob = async (blob) => {
-    const buf = await blob.arrayBuffer();
-    return encodeBytes(new Uint8Array(buf));
-  };
-
-  const photoSrc = (photo) => {
-    if (!photo) return "";
-    if (/^(https?:|blob:|data:)/i.test(photo)) return photo;
-    if (photo.startsWith("../")) return photo;
-    return "../" + photo.replace(/^\//, "");
-  };
-
-  const revokePreview = (id) => {
-    const pending = state.pendingPhotos[id];
-    if (pending && pending.preview && String(pending.preview).startsWith("blob:")) {
-      try {
-        URL.revokeObjectURL(pending.preview);
-      } catch (_) {}
-    }
-  };
-
-  const dishPhoto = (id, item) => {
-    const pending = state.pendingPhotos[id];
-    if (pending && pending.preview) return pending.preview;
-    return item && item.photo ? photoSrc(item.photo) : "";
-  };
-
-  const loadImage = (file) =>
-    new Promise((resolve, reject) => {
-      const fail = () => reject(new Error("That photo could not be read. Please try another picture."));
-      const fromUrl = (url, revoke) => {
-        const img = new Image();
-        img.onload = () => {
-          if (revoke) URL.revokeObjectURL(url);
-          resolve(img);
-        };
-        img.onerror = () => {
-          if (revoke) URL.revokeObjectURL(url);
-          fail();
-        };
-        img.src = url;
+    $('menuList').innerHTML = html || '<p class="muted">' + (q ? 'No dish matches.' : 'No dishes yet.') + '</p>';
+    $('menuList').querySelectorAll('[data-edit]').forEach(function (b) { b.onclick = function () { openDish(findDish(b.getAttribute('data-edit'))); }; });
+    $('menuList').querySelectorAll('[data-avail]').forEach(function (b) {
+      b.onclick = function () {
+        var it = findDish(b.getAttribute('data-avail')); busy(b, true);
+        api({ action: 'menuSetAvailable', id: it.id, sold_out: !it.sold_out }).then(function (r) {
+          toast(r.item.sold_out ? it.name + ' marked out of stock' : it.name + ' is available'); return loadMenu();
+        }).catch(function (e) { toast(e.message, true); busy(b, false); });
       };
-      if (typeof createImageBitmap === "function") {
-        createImageBitmap(file)
-          .then(resolve)
-          .catch(() => fromUrl(URL.createObjectURL(file), true));
+    });
+  }
+  $('menuSearch').oninput = renderMenu;
+  function findDish(id) { return menuItems.filter(function (x) { return x.id === id; })[0]; }
+  $('addDishBtn').onclick = function () { openDish(null); };
+  function sizeRowsHtml(sizes) {
+    sizes = (sizes && sizes.length) ? sizes : [{ name: '', price: '' }];
+    return sizes.map(function (s) {
+      return '<div class="size-row"><input data-sname placeholder="Size name, e.g. Regular" value="' + esc(s.name || '') + '" />' +
+        '<input data-sprice type="number" inputmode="decimal" step="0.01" min="0" max="500" placeholder="Price" value="' + (s.price == null || s.price === '' ? '' : esc(s.price)) + '" />' +
+        '<button type="button" class="btn btn-ghost sm" data-sdel aria-label="Remove size">✕</button></div>';
+    }).join('');
+  }
+  function readSizes() {
+    return Array.prototype.map.call(document.querySelectorAll('#dSizes .size-row'), function (row) {
+      return { name: row.querySelector('[data-sname]').value.trim(), price: row.querySelector('[data-sprice]').value };
+    }).filter(function (s) { return s.name || s.price !== ''; });
+  }
+  function bindSizeEditor() {
+    var box = $('dSizes');
+    box.onclick = function (e) {
+      var del = e.target.closest('[data-sdel]');
+      if (!del) return;
+      var row = del.closest('.size-row');
+      if (box.querySelectorAll('.size-row').length === 1) {
+        row.querySelector('[data-sname]').value = '';
+        row.querySelector('[data-sprice]').value = '';
         return;
       }
-      fromUrl(URL.createObjectURL(file), true);
-    });
-
-  const canvasBlob = (canvas, type, quality) =>
-    new Promise((resolve) => canvas.toBlob((b) => resolve(b || null), type, quality));
-
-  const compressImage = async (file) => {
-    if (!file) throw new Error("Please choose a photo.");
-    const kind = String(file.type || "");
-    if (kind && !kind.startsWith("image/")) throw new Error("Please choose a photo.");
-    const source = await loadImage(file);
-    let w = source.width;
-    let h = source.height;
-    if (!w || !h) throw new Error("That photo could not be read. Please try another picture.");
-    if (w > PHOTO_MAX_WIDTH) {
-      h = Math.max(1, Math.round((h * PHOTO_MAX_WIDTH) / w));
-      w = PHOTO_MAX_WIDTH;
-    }
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", { alpha: false });
-    const draw = (cw, ch) => {
-      canvas.width = cw;
-      canvas.height = ch;
-      ctx.fillStyle = "#111111";
-      ctx.fillRect(0, 0, cw, ch);
-      ctx.drawImage(source, 0, 0, cw, ch);
+      row.remove();
     };
-    draw(w, h);
-
-    const shrinkToFit = async (type) => {
-      let tw = canvas.width;
-      let th = canvas.height;
-      let quality = 0.82;
-      let blob = await canvasBlob(canvas, type, quality);
-      if (!blob) return null;
-      while (blob.size > PHOTO_MAX_BYTES && quality > 0.42) {
-        quality = Math.round((quality - 0.12) * 100) / 100;
-        blob = await canvasBlob(canvas, type, quality);
-        if (!blob) return null;
-      }
-      while (blob.size > PHOTO_MAX_BYTES && tw > 640) {
-        tw = Math.max(640, Math.round(tw * 0.85));
-        th = Math.max(1, Math.round(th * 0.85));
-        draw(tw, th);
-        blob = await canvasBlob(canvas, type, 0.7);
-        if (!blob) return null;
-      }
-      return blob;
+    $('dAddSize').onclick = function () {
+      var wrap = document.createElement('div');
+      wrap.innerHTML = sizeRowsHtml([{ name: '', price: '' }]);
+      box.appendChild(wrap.firstChild);
     };
-
-    let blob = await shrinkToFit("image/webp");
-    let ext = "webp";
-    if (!blob) {
-      blob = await shrinkToFit("image/jpeg");
-      ext = "jpg";
+  }
+  function openDish(it) {
+    var isNew = !it;
+    it = it || { id: '', name: '', description: '', note: '', price: '', sizes: [], photo: '', order: menuItems.length + 1, sold_out: false, category: (categories[0] && categories[0].id) || '' };
+    var dE = isNew ? '' : (can('menu.edit') ? '' : ' disabled'), dP = isNew || can('menu.price') ? '' : ' disabled';
+    var dA = isNew || can('menu.availability') ? '' : ' disabled';
+    var catOpts = categories.map(function (c) {
+      return '<option value="' + esc(c.id) + '"' + (c.id === it.category ? ' selected' : '') + '>' + esc(c.heading || c.name) + '</option>';
+    }).join('');
+    var hasSizes = it.sizes && it.sizes.length;
+    openSheet('<h2>' + (isNew ? 'Add a dish' : 'Edit dish') + '</h2>' +
+      (it.updatedBy ? '<p class="hint">Last changed by ' + esc(it.updatedBy) + ' · ' + esc(it.updatedAt) + '</p>' : '') +
+      '<label for="dName">Name</label><input id="dName" maxlength="80" value="' + esc(it.name) + '"' + dE + ' />' +
+      '<label for="dDesc">Description</label><textarea id="dDesc" maxlength="500"' + dE + '>' + esc(it.description || '') + '</textarea>' +
+      '<label for="dCat">Section</label><select id="dCat"' + dE + '>' + catOpts + '</select>' +
+      '<div class="row2"><div><label for="dPrice">Price (£) if no sizes</label><input id="dPrice" type="number" inputmode="decimal" step="0.01" min="0" max="500" value="' + (hasSizes || it.price == null ? '' : esc(it.price)) + '"' + dP + ' /></div>' +
+      '<div><label for="dOrder">Order on menu</label><input id="dOrder" type="number" inputmode="numeric" step="1" min="0" value="' + esc(it.order) + '"' + dE + ' /></div></div>' +
+      '<label>Sizes (optional)</label><div id="dSizes">' + sizeRowsHtml(hasSizes ? it.sizes : []) + '</div>' +
+      (dP ? '' : '<button type="button" class="btn btn-ghost sm" id="dAddSize">+ Add size</button>') +
+      (dE ? '' : '<button type="button" class="btn btn-ghost sm" id="dPick">Choose photo</button><input id="dFile" type="file" accept="image/*" class="hidden" />') +
+      '<div class="preview"><img id="dPrev" alt="" /><span class="hint" id="dPrevTxt"></span></div>' +
+      '<label for="dPhoto">or paste a link</label><input id="dPhoto" value="' + esc(it.photo || '') + '" placeholder="https://… or img/dishes/chai.jpg"' + dE + ' />' +
+      '<label for="dVisible">On the menu</label><select id="dVisible"' + dA + '><option value="false">Available</option><option value="true">Out of stock</option></select>' +
+      (!isNew && !can('menu.price') ? '<p class="hint">Your account cannot change prices.</p>' : '') +
+      '<p class="msg" id="dMsg"></p>' +
+      '<div class="row2"><button class="btn btn-ghost" id="dCancel" type="button">Cancel</button><button class="btn btn-primary" id="dSave" type="button">' + (isNew ? 'Add dish' : 'Save') + '</button></div>' +
+      (!isNew && can('menu.delete') ? '<button class="btn btn-danger" id="dDelete" type="button">Delete this dish</button>' : ''));
+    $('dVisible').value = it.sold_out ? 'true' : 'false';
+    if (dP) document.querySelectorAll('#dSizes input').forEach(function (i) { i.disabled = true; });
+    bindSizeEditor();
+    function prev() {
+      var v = $('dPhoto').value.trim();
+      $('dPrev').src = v ? photoSrc(v) : '../img/logo-800.webp'; $('dPrevTxt').textContent = v ? '' : 'No photo – the logo is shown';
     }
-    if (!blob) throw new Error("That photo could not be prepared. Please try another picture.");
-    if (blob.size > 360 * 1024) {
-      throw new Error("That photo is still too large after shrinking. Please try another picture.");
-    }
-    return { blob, ext };
-  };
-
-  const photoBlockHTML = (id, item) => {
-    const src = dishPhoto(id, item);
-    const has = !!src;
-    const label = has ? "Change photo" : "Add photo";
-    const img = has
-      ? `<img class="photo-thumb" src="${escapeHtml(src)}" alt="">`
-      : `<div class="photo-placeholder">No photo yet</div>`;
-    return `<div class="photo-block" data-photo-block="${escapeHtml(id)}">
-      ${img}
-      <div class="photo-actions${has ? " has-remove" : ""}">
-        <button class="btn btn-frost btn-small" type="button" data-pick-photo="${escapeHtml(id)}">${label}</button>
-        ${has ? `<button class="btn btn-ghost btn-small" type="button" data-remove-photo="${escapeHtml(id)}">Remove photo</button>` : ""}
-      </div>
-    </div>`;
-  };
-
-  const visibleCategories = () =>
-    (state.menu.categories || []).filter((c) => !c.hidden).sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  const itemsIn = (catId) =>
-    (state.menu.items || [])
-      .filter((i) => i.category === catId)
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  const catById = (id) => (state.menu.categories || []).find((c) => c.id === id);
-
-  const catLabel = (cat) => (cat && (cat.heading || cat.name)) || "Section";
-
-  const matchesQuery = (item, cat) => {
-    const q = state.query.trim().toLowerCase();
-    if (!q) return true;
-    const hay = [item.name, item.description, cat && cat.name, cat && cat.heading]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return hay.includes(q);
-  };
-
-  const slugify = (name, existing) => {
-    const base =
-      String(name || "new")
-        .toLowerCase()
-        .replace(/&/g, " and ")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "new";
-    const ids = new Set(existing);
-    if (!ids.has(base)) return base;
-    let n = 2;
-    while (ids.has(base + "-" + n)) n += 1;
-    return base + "-" + n;
-  };
-
-  const cleanMenu = (menu) => {
-    const copy = JSON.parse(JSON.stringify(menu));
-    (copy.items || []).forEach((it) => {
-      delete it._new;
-    });
-    return copy;
-  };
-
-  const markClean = () => {
-    state.baseline = JSON.stringify(cleanMenu(state.menu));
-  };
-
-  const changeCount = () => {
-    if (!state.menu || !state.baseline) return 0;
-    let a;
-    try {
-      a = JSON.parse(state.baseline);
-    } catch (_) {
-      return 0;
-    }
-    const b = cleanMenu(state.menu);
-    let n = 0;
-    const aItems = new Map((a.items || []).map((i) => [i.id, i]));
-    const bItems = new Map((b.items || []).map((i) => [i.id, i]));
-    for (const id of bItems.keys()) if (!aItems.has(id)) n += 1;
-    for (const id of aItems.keys()) if (!bItems.has(id)) n += 1;
-    for (const [id, item] of bItems) {
-      const old = aItems.get(id);
-      if (old && JSON.stringify(old) !== JSON.stringify(item)) n += 1;
-    }
-    const aCats = new Map((a.categories || []).map((c) => [c.id, c]));
-    const bCats = new Map((b.categories || []).map((c) => [c.id, c]));
-    for (const id of bCats.keys()) if (!aCats.has(id)) n += 1;
-    for (const id of aCats.keys()) if (!bCats.has(id)) n += 1;
-    for (const [id, cat] of bCats) {
-      const old = aCats.get(id);
-      if (old && JSON.stringify(old) !== JSON.stringify(cat)) n += 1;
-    }
-    const pending = Object.keys(state.pendingPhotos).filter((id) => id !== "__add__");
-    n += pending.length;
-    return n;
-  };
-
-  const isDirty = () => changeCount() > 0;
-
-  const isVegItem = (item) => {
-    const diet = item.diet || [];
-    return diet.includes("V") || diet.includes("VG");
-  };
-
-  const setVeg = (item, veg) => {
-    const extra = (item.diet || []).filter((d) => d !== "V" && d !== "VG" && d !== "NV");
-    item.diet = veg ? ["V", ...extra] : ["NV", ...extra];
-  };
-
-  /* ---------- render ---------- */
-
-  const headerHTML = () => `
-    <header class="header">
-      <div class="logo">
-        <img src="../img/logo-800.webp" alt="">
-        <div class="logo-text">
-          <strong>Frost &amp; Flame</strong>
-          <span>Change the menu</span>
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-pill btn-small" type="button" data-logout>Log out</button>
-    </header>`;
-
-  const saveBarHTML = () => {
-    const n = changeCount();
-    const toast = state.toast
-      ? `<div class="toast${state.toastType === "error" ? " error-toast" : ""}" role="status" data-toast>${escapeHtml(state.toast)}</div>`
-      : "";
-    let bar = "";
-    if (n || state.busy) {
-      const label = n === 1 ? "Save changes (1)" : "Save changes (" + n + ")";
-      bar = `<div class="save-bar">
-      <button class="btn btn-frost" type="button" data-save ${state.busy ? "disabled" : ""} data-testid="save-bar">
-        ${state.busy ? escapeHtml(state.busyLabel || "Saving…") : escapeHtml(label)}
-      </button>
-    </div>`;
-    }
-    if (!toast && !bar) return "";
-    return `<div class="save-stack">${toast}${bar}</div>`;
-  };
-
-  const priceBox = (label, value, attrs) => `
-    <div class="price-box">
-      <span class="lbl">${escapeHtml(label)}</span>
-      <div class="price-wrap">
-        <span class="pound">£</span>
-        <input class="field" ${attrs} inputmode="decimal" placeholder="Not set yet" value="${escapeHtml(priceShown(value))}" aria-label="${escapeHtml(label)}">
-      </div>
-    </div>`;
-
-  const cardHTML = (item, cat) => {
-    const pending = !hasPrice(item);
-    const sizes = item.sizes && item.sizes.length ? item.sizes : null;
-    let prices = "";
-    if (sizes) {
-      prices = `<div class="option-grid">${sizes
-        .map((s, i) => priceBox(s.name, s.price, 'data-size-price="' + i + '"'))
-        .join("")}</div>`;
-    } else {
-      prices = priceBox("Price", item.price, "data-price");
-    }
-    const extras = [];
-    (item.choices || []).forEach((c, ci) => {
-      const useful = (c.options || []).some((o) => Number(o.add || 0) !== 0);
-      if (!useful) return;
-      (c.options || []).forEach((o, oi) => {
-        extras.push(priceBox((c.label ? c.label + " · " : "") + o.name, o.add ?? 0, 'data-add-price data-choice="' + ci + '" data-option="' + oi + '"'));
-      });
-    });
-    const section = cat ? `<span class="pending-tag">${escapeHtml(catLabel(cat))}</span>` : "";
-    return `
-      <article class="card${pending ? " is-pending" : ""}${item.sold_out ? " is-sold" : ""}" data-id="${escapeHtml(item.id)}" data-testid="dish-card">
-        <h2 class="card-name">${escapeHtml(item.name)}</h2>
-        ${photoBlockHTML(item.id, item)}
-        ${pending ? `<span class="pending-tag">Price coming soon</span>` : ""}
-        ${state.query && cat ? section : ""}
-        ${prices}
-        ${extras.length ? `<div class="option-grid">${extras.join("")}</div>` : ""}
-        <div class="switch-row">
-          <span>Sold out</span>
-          <label class="switch">
-            <input data-sold type="checkbox" ${item.sold_out ? "checked" : ""} aria-label="Sold out">
-            <span></span>
-          </label>
-        </div>
-        <div class="card-actions">
-          <button class="btn btn-ghost btn-small" type="button" data-edit="${escapeHtml(item.id)}">Edit</button>
-          <button class="btn btn-danger-solid btn-small" type="button" data-delete="${escapeHtml(item.id)}">Delete</button>
-        </div>
-      </article>`;
-  };
-
-  const renderLogin = () => {
-    app.innerHTML = `
-      <main class="login">
-        <div class="logo">
-          <img src="../img/logo-800.webp" alt="Frost &amp; Flame">
-        </div>
-        <h1>Change the menu</h1>
-        <p>Paste the sign-in code you made on GitHub, then you can change prices, add dishes or take them off.</p>
-        ${state.loginError ? `<p class="error" role="alert">${escapeHtml(state.loginError)}</p>` : ""}
-        <form id="login-form">
-          <div class="field-row">
-            <label for="token">Sign-in code</label>
-            <input class="field" id="token" name="token" type="password" autocomplete="off" spellcheck="false" required>
-          </div>
-          <button class="btn btn-frost btn-wide" type="submit" ${state.busy ? "disabled" : ""}>${state.busy ? "Checking…" : "Sign in"}</button>
-        </form>
-        <p class="hint"><a href="HOW-TO.md">How to make the sign-in code</a></p>
-      </main>`;
-    $("#login-form").addEventListener("submit", onLogin);
-  };
-
-  const renderList = () => {
-    const q = state.query.trim();
-    let body;
-    if (q) {
-      const cards = [];
-      visibleCategories().forEach((cat) => {
-        itemsIn(cat.id)
-          .filter((i) => matchesQuery(i, cat))
-          .forEach((i) => cards.push(cardHTML(i, cat)));
-      });
-      body = cards.length
-        ? `<div class="cards">${cards.join("")}</div>`
-        : `<p class="empty">No dishes match that search.</p>`;
-    } else {
-      const buttons = visibleCategories()
-        .map((cat) => {
-          const n = itemsIn(cat.id).length;
-          const count = n === 1 ? "1 dish" : n + " dishes";
-          return `<button class="cat-btn" type="button" data-open-cat="${escapeHtml(cat.id)}">
-            <strong>${escapeHtml(catLabel(cat))}</strong>
-            <span>${count}</span>
-          </button>`;
-        })
-        .join("");
-      body = `<div class="cat-list" data-testid="cat-list">
-        <button class="cat-btn cat-add" type="button" data-add-cat>+ Add category</button>
-        ${buttons}
-      </div>`;
-    }
-    app.innerHTML = `
-      ${headerHTML()}
-      <main class="wrap">
-        <input class="field search" type="search" placeholder="Search dishes" value="${escapeHtml(state.query)}" data-search aria-label="Search dishes">
-        ${body}
-      </main>
-      ${dialogsHTML()}
-      ${saveBarHTML()}`;
-  };
-
-  const renderCategory = () => {
-    const cat = catById(state.activeCat);
-    if (!cat) {
-      state.view = "list";
-      renderList();
-      return;
-    }
-    const items = itemsIn(cat.id);
-    const cards = items.map((i) => cardHTML(i, null)).join("");
-    app.innerHTML = `
-      ${headerHTML()}
-      <main class="wrap">
-        <button class="back" type="button" data-back>← All sections</button>
-        <div class="cat-title">
-          <h1>${escapeHtml(catLabel(cat))}</h1>
-          <div class="cat-actions">
-            <button class="btn btn-ghost btn-small" type="button" data-rename-cat="${escapeHtml(cat.id)}">Rename</button>
-            <button class="btn btn-danger-solid btn-small" type="button" data-delete-cat="${escapeHtml(cat.id)}">Delete</button>
-          </div>
-        </div>
-        <input class="field search" type="search" placeholder="Search dishes" value="${escapeHtml(state.query)}" data-search aria-label="Search dishes">
-        <button class="btn btn-frost add-dish" type="button" data-add-dish>+ Add dish</button>
-        <div class="cards">
-          ${cards || `<p class="empty">No dishes in this section yet.</p>`}
-        </div>
-      </main>
-      ${dialogsHTML(cat.id)}
-      ${saveBarHTML()}`;
-  };
-
-  const dialogsHTML = (preselectCat) => {
-    const cats = visibleCategories();
-    const catOpts = cats
-      .map(
-        (c) =>
-          `<option value="${escapeHtml(c.id)}" ${c.id === preselectCat ? "selected" : ""}>${escapeHtml(catLabel(c))}</option>`
-      )
-      .join("");
-    return `
-      <dialog class="modal" id="add-dish-dialog">
-        <form class="modal-inner" id="add-dish-form" method="dialog">
-          <h2>Add a dish</h2>
-          <div class="field-row">
-            <span class="lbl">Name</span>
-            <input class="field" name="name" type="text" required>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Price</span>
-            <div class="price-wrap">
-              <span class="pound">£</span>
-              <input class="field" name="price" inputmode="decimal" placeholder="Not set yet" style="min-height:3.2rem;font-size:1.4rem;padding-left:2.15rem">
-            </div>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Section</span>
-            <select class="field" name="category" required>${catOpts}</select>
-          </div>
-          <span class="lbl">Veg or non-veg</span>
-          <div class="radio-row">
-            <label><input type="radio" name="veg" value="yes" checked> Veg</label>
-            <label><input type="radio" name="veg" value="no"> Non-veg</label>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Short description</span>
-            <textarea class="field" name="description"></textarea>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Photo</span>
-            ${photoBlockHTML("__add__", { photo: null })}
-          </div>
-          <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-close="add-dish-dialog">Cancel</button>
-            <button class="btn btn-frost" type="submit">Add</button>
-          </div>
-        </form>
-      </dialog>
-      <dialog class="modal" id="edit-dish-dialog">
-        <form class="modal-inner" id="edit-dish-form" method="dialog">
-          <h2>Edit dish</h2>
-          <input type="hidden" name="id">
-          <div class="field-row">
-            <span class="lbl">Name</span>
-            <input class="field" name="name" type="text" required>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Section</span>
-            <select class="field" name="category" required>${catOpts}</select>
-          </div>
-          <span class="lbl">Veg or non-veg</span>
-          <div class="radio-row">
-            <label><input type="radio" name="veg" value="yes"> Veg</label>
-            <label><input type="radio" name="veg" value="no"> Non-veg</label>
-          </div>
-          <div class="field-row">
-            <span class="lbl">Short description</span>
-            <textarea class="field" name="description"></textarea>
-          </div>
-          <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-close="edit-dish-dialog">Cancel</button>
-            <button class="btn btn-frost" type="submit">Save</button>
-          </div>
-        </form>
-      </dialog>
-      <dialog class="modal" id="add-cat-dialog">
-        <form class="modal-inner" id="add-cat-form" method="dialog">
-          <h2>Add a category</h2>
-          <div class="field-row">
-            <span class="lbl">Name</span>
-            <input class="field" name="name" type="text" required placeholder="e.g. Kids menu">
-          </div>
-          <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-close="add-cat-dialog">Cancel</button>
-            <button class="btn btn-frost" type="submit">Add</button>
-          </div>
-        </form>
-      </dialog>
-      <dialog class="modal" id="rename-cat-dialog">
-        <form class="modal-inner" id="rename-cat-form" method="dialog">
-          <h2>Rename this section</h2>
-          <input type="hidden" name="id">
-          <div class="field-row">
-            <span class="lbl">Name</span>
-            <input class="field" name="name" type="text" required>
-          </div>
-          <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-close="rename-cat-dialog">Cancel</button>
-            <button class="btn btn-frost" type="submit">Save</button>
-          </div>
-        </form>
-      </dialog>
-      <dialog class="modal" id="confirm-dialog">
-        <div class="modal-inner">
-          <h2 data-confirm-title>Please confirm</h2>
-          <p data-confirm-text></p>
-          <div data-confirm-extra></div>
-          <div class="modal-actions">
-            <button class="btn btn-ghost" type="button" data-confirm-no>No</button>
-            <button class="btn btn-danger-solid" type="button" data-confirm-yes>Yes</button>
-          </div>
-        </div>
-      </dialog>`;
-  };
-
-  const render = () => {
-    if (!state.token || !state.menu) {
-      renderLogin();
-      return;
-    }
-    if (state.view === "category" && !state.query.trim()) renderCategory();
-    else renderList();
-  };
-
-  const refreshChrome = () => {
-    $$(".save-stack, .save-bar, [data-toast]").forEach((el) => el.remove());
-    app.insertAdjacentHTML("beforeend", saveBarHTML());
-  };
-
-  const showToast = (text, type, ms) => {
-    state.toast = text;
-    state.toastType = type || "";
-    refreshChrome();
-    if (ms) {
-      setTimeout(() => {
-        if (state.toast === text) {
-          state.toast = "";
-          state.toastType = "";
-          refreshChrome();
-        }
-      }, ms);
-    }
-  };
-
-  /* ---------- actions ---------- */
-
-  const onLogin = async (e) => {
-    e.preventDefault();
-    const token = ($("#token") && $("#token").value || "").trim();
-    if (!token) return;
-    state.busy = true;
-    state.loginError = "";
-    renderLogin();
-    try {
-      const { menu, sha } = await loadFile(token);
-      try {
-        localStorage.setItem(TOKEN_KEY, token);
-      } catch (_) {}
-      state.token = token;
-      state.menu = menu;
-      state.sha = sha;
-      state.busy = false;
-      state.view = "list";
-      markClean();
-      render();
-    } catch (err) {
-      state.busy = false;
-      state.loginError = err.message || "Could not sign in.";
-      renderLogin();
-    }
-  };
-
-  const logout = () => {
-    if (isDirty() && !window.confirm("You have unsaved changes. Log out anyway?")) return;
-    try {
-      localStorage.removeItem(TOKEN_KEY);
-    } catch (_) {}
-    state.token = null;
-    state.menu = null;
-    state.sha = null;
-    state.baseline = "";
-    state.loginError = "";
-    state.toast = "";
-    state.query = "";
-    state.view = "list";
-    Object.keys(state.pendingPhotos).forEach((id) => revokePreview(id));
-    state.pendingPhotos = {};
-    state.photoTarget = null;
-    renderLogin();
-  };
-
-  const applyCardInputs = (root = document) => {
-    const problems = [];
-    $$(".card[data-id]", root).forEach((card) => {
-      const item = state.menu.items.find((i) => i.id === card.dataset.id);
-      if (!item) return;
-      const sold = $("[data-sold]", card);
-      if (sold) item.sold_out = !!sold.checked;
-      const main = $("[data-price]", card);
-      if (main) {
-        const parsed = parsePrice(main.value);
-        if (!parsed.ok) {
-          main.classList.add("is-bad");
-          problems.push(item.name + " needs a valid price, or leave it empty.");
-        } else {
-          main.classList.remove("is-bad");
-          item.price = parsed.value;
-          if (parsed.value != null) delete item.price_review;
-          else item.price_review = true;
-        }
-      }
-      $$("[data-size-price]", card).forEach((el) => {
-        const parsed = parsePrice(el.value);
-        const i = Number(el.dataset.sizePrice);
-        if (!parsed.ok) {
-          el.classList.add("is-bad");
-          problems.push(item.name + " has a price that is not a number.");
-        } else if (item.sizes && item.sizes[i]) {
-          el.classList.remove("is-bad");
-          item.sizes[i].price = parsed.value;
-        }
-      });
-      $$("[data-add-price]", card).forEach((el) => {
-        const parsed = parsePrice(el.value);
-        if (!parsed.ok) {
-          el.classList.add("is-bad");
-          problems.push(item.name + " has a price that is not a number.");
-        } else {
-          el.classList.remove("is-bad");
-          const opt = item.choices?.[Number(el.dataset.choice)]?.options?.[Number(el.dataset.option)];
-          if (opt) opt.add = parsed.value == null ? 0 : parsed.value;
-        }
-      });
-    });
-    return { ok: problems.length === 0, problems };
-  };
-
-  const refreshAddPhotoBlock = () => {
-    const mount = $("#add-dish-form [data-photo-block='__add__']");
-    if (!mount) return;
-    const wrap = document.createElement("div");
-    wrap.innerHTML = photoBlockHTML("__add__", { photo: null });
-    mount.replaceWith(wrap.firstElementChild);
-  };
-
-  const openAddDish = () => {
-    const d = $("#add-dish-dialog");
-    if (!d) return;
-    const form = $("#add-dish-form");
-    form.reset();
-    if (state.activeCat && form.category) form.category.value = state.activeCat;
-    revokePreview("__add__");
-    delete state.pendingPhotos["__add__"];
-    refreshAddPhotoBlock();
-    d.showModal();
-  };
-
-  const addDish = (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const name = String(form.name.value || "").trim();
-    if (!name) return;
-    const parsed = parsePrice(form.price.value);
-    if (!parsed.ok) {
-      showToast("Price must be a number, or left empty if you have not set it yet.", "error", 4000);
-      return;
-    }
-    const catId = form.category.value;
-    const cat = catById(catId);
-    const siblings = itemsIn(catId);
-    const order = siblings.length ? Math.max(...siblings.map((i) => i.order || 0)) + 1 : (cat?.order || 0) * 100;
-    const item = {
-      id: slugify(name, (state.menu.items || []).map((i) => i.id)),
-      name,
-      category: catId,
-      description: String(form.description.value || "").trim(),
-      diet: form.veg.value === "yes" ? ["V"] : ["NV"],
-      allergens: [],
-      price: parsed.value,
-      sizes: null,
-      choices: [],
-      photo: null,
-      tone: (cat && cat.tone) || "both",
-      opens_build: false,
-      sold_out: false,
-      order,
-      level: null,
-      ingredients: [],
-      ingredients_review: true,
-    };
-    if (parsed.value == null) item.price_review = true;
-    if (state.pendingPhotos["__add__"]) {
-      state.pendingPhotos[item.id] = state.pendingPhotos["__add__"];
-      delete state.pendingPhotos["__add__"];
-    }
-    state.menu.items.push(item);
-    $("#add-dish-dialog")?.close();
-    state.view = "category";
-    state.activeCat = catId;
-    state.query = "";
-    render();
-  };
-
-  const openEdit = (id) => {
-    const item = state.menu.items.find((i) => i.id === id);
-    if (!item) return;
-    const form = $("#edit-dish-form");
-    form.id.value = item.id;
-    form.name.value = item.name;
-    form.category.value = item.category;
-    form.description.value = item.description || "";
-    form.veg.value = isVegItem(item) ? "yes" : "no";
-    $("#edit-dish-dialog").showModal();
-  };
-
-  const saveEdit = (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const item = state.menu.items.find((i) => i.id === form.id.value);
-    if (!item) return;
-    const name = String(form.name.value || "").trim();
-    if (!name) return;
-    item.name = name;
-    item.description = String(form.description.value || "").trim();
-    item.category = form.category.value;
-    setVeg(item, form.veg.value === "yes");
-    $("#edit-dish-dialog")?.close();
-    render();
-  };
-
-  const askDeleteDish = (id) => {
-    const item = state.menu.items.find((i) => i.id === id);
-    if (!item) return;
-    state.pendingDeleteId = id;
-    state.pendingDeleteCat = null;
-    $("[data-confirm-title]").textContent = "Delete this dish?";
-    $("[data-confirm-text]").textContent = "Delete " + item.name + "?";
-    $("[data-confirm-extra]").innerHTML = "";
-    $("#confirm-dialog").showModal();
-  };
-
-  const addCategory = (e) => {
-    e.preventDefault();
-    const name = String(e.target.name.value || "").trim();
-    if (!name) return;
-    const ids = (state.menu.categories || []).map((c) => c.id);
-    const id = slugify(name, ids);
-    const order = (state.menu.categories || []).reduce((m, c) => Math.max(m, c.order || 0), 0) + 1;
-    state.menu.categories.push({
-      id,
-      name,
-      heading: name,
-      course: "main",
-      order,
-      hidden: false,
-      tone: "both",
-      split_diet: false,
-    });
-    $("#add-cat-dialog")?.close();
-    state.view = "category";
-    state.activeCat = id;
-    state.query = "";
-    render();
-  };
-
-  const openRenameCat = (id) => {
-    const cat = catById(id);
-    if (!cat) return;
-    const form = $("#rename-cat-form");
-    form.id.value = id;
-    form.name.value = catLabel(cat);
-    $("#rename-cat-dialog").showModal();
-  };
-
-  const renameCat = (e) => {
-    e.preventDefault();
-    const cat = catById(e.target.id.value);
-    const name = String(e.target.name.value || "").trim();
-    if (!cat || !name) return;
-    cat.name = name;
-    cat.heading = name;
-    $("#rename-cat-dialog")?.close();
-    render();
-  };
-
-  const askDeleteCat = (id) => {
-    const cat = catById(id);
-    if (!cat) return;
-    const n = itemsIn(id).length;
-    state.pendingDeleteId = null;
-    state.pendingDeleteCat = id;
-    $("[data-confirm-title]").textContent = "Delete this section?";
-    if (!n) {
-      $("[data-confirm-text]").textContent = "Delete " + catLabel(cat) + "?";
-      $("[data-confirm-extra]").innerHTML = "";
-    } else {
-      $("[data-confirm-text]").textContent =
-        catLabel(cat) + " still has " + n + " dish" + (n === 1 ? "" : "es") + ". Move them to another section, then delete this one?";
-      const others = visibleCategories()
-        .filter((c) => c.id !== id)
-        .map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(catLabel(c))}</option>`)
-        .join("");
-      $("[data-confirm-extra]").innerHTML = others
-        ? `<div class="field-row"><span class="lbl">Move dishes to</span><select class="field" id="move-cat">${others}</select></div>`
-        : `<p>There is no other section to move them to. Add one first, or delete the dishes.</p>`;
-    }
-    $("#confirm-dialog").showModal();
-  };
-
-  const confirmYes = () => {
-    if (state.pendingDeleteId) {
-      const id = state.pendingDeleteId;
-      state.pendingDeleteId = null;
-      $("#confirm-dialog")?.close();
-      revokePreview(id);
-      delete state.pendingPhotos[id];
-      state.menu.items = state.menu.items.filter((i) => i.id !== id);
-      if (Array.isArray(state.menu.signature_ids)) {
-        state.menu.signature_ids = state.menu.signature_ids.filter((x) => x !== id);
-      }
-      render();
-      return;
-    }
-    if (state.pendingDeleteCat) {
-      const id = state.pendingDeleteCat;
-      const dishes = itemsIn(id);
-      if (dishes.length) {
-        const moveTo = $("#move-cat") && $("#move-cat").value;
-        if (!moveTo) return;
-        const dest = catById(moveTo);
-        const start = itemsIn(moveTo).reduce((m, i) => Math.max(m, i.order || 0), (dest?.order || 0) * 100);
-        dishes.forEach((item, idx) => {
-          item.category = moveTo;
-          item.order = start + idx + 1;
+    $('dPhoto').oninput = prev; prev();
+    if ($('dPick')) {
+      $('dPick').onclick = function () { $('dFile').click(); };
+      $('dFile').onchange = function () {
+        var file = $('dFile').files && $('dFile').files[0];
+        $('dFile').value = '';
+        if (!file) return;
+        var btn = $('dPick');
+        busy(btn, true);
+        $('dPrevTxt').textContent = 'Preparing photo…';
+        shrinkPhoto(file, function (dataUrl, raw) {
+          $('dPrev').src = dataUrl;
+          $('dPrevTxt').textContent = 'Uploading…';
+          api({ action: 'imageUpload', data: raw, mimeType: 'image/jpeg', filename: (file.name || 'dish') + '.jpg' }).then(function (r) {
+            $('dPhoto').value = r.url; prev(); $('dPrevTxt').textContent = 'Photo ready – tap Save to keep it';
+            busy(btn, false);
+          }).catch(function (e) {
+            $('dPrevTxt').textContent = e.message || 'Upload failed';
+            busy(btn, false);
+          });
+        }, function (msg) {
+          $('dPrevTxt').textContent = msg;
+          busy(btn, false);
         });
+      };
+    }
+    $('dCancel').onclick = closeSheet;
+    $('dSave').onclick = function () {
+      var item = { id: it.id };
+      var sizes = readSizes();
+      if (isNew || can('menu.edit')) {
+        item.name = $('dName').value; item.description = $('dDesc').value; item.photo = $('dPhoto').value;
+        item.order = $('dOrder').value; item.category = $('dCat').value;
       }
-      state.pendingDeleteCat = null;
-      $("#confirm-dialog")?.close();
-      state.menu.categories = state.menu.categories.filter((c) => c.id !== id);
-      if (state.activeCat === id) {
-        state.view = "list";
-        state.activeCat = null;
+      if (isNew || can('menu.price')) { item.price = $('dPrice').value; item.sizes = sizes; }
+      if (isNew || can('menu.availability')) item.sold_out = $('dVisible').value === 'true';
+      if (('name' in item) && !String(item.name).trim()) { $('dMsg').textContent = 'Type the dish name'; return; }
+      if (('sizes' in item) && item.sizes.length) {
+        var bad = item.sizes.some(function (s) { return !s.name || s.price === '' || isNaN(Number(s.price)); });
+        if (bad) { $('dMsg').textContent = 'Each size needs a name and a price'; return; }
+      } else if (('price' in item) && !item.sizes.length && (item.price === '' || isNaN(Number(item.price)))) {
+        $('dMsg').textContent = 'Type a price, e.g. 4.50, or add sizes'; return;
       }
-      render();
-    }
-  };
-
-  const confirmNo = () => {
-    state.pendingDeleteId = null;
-    state.pendingDeleteCat = null;
-    $("#confirm-dialog")?.close();
-  };
-
-  const validateAll = () => {
-    const problems = [];
-    for (const item of state.menu.items) {
-      if (!item.name || !String(item.name).trim()) problems.push("A dish needs a name.");
-      if (item.price != null && item.price !== "" && !(Number.isFinite(Number(item.price)) && Number(item.price) >= 0)) {
-        problems.push((item.name || "A dish") + " has a price that is not a number.");
-      }
-      if (item.sizes) {
-        for (const s of item.sizes) {
-          if (s.price != null && s.price !== "" && !(Number.isFinite(Number(s.price)) && Number(s.price) >= 0)) {
-            problems.push((item.name || "A dish") + " has a price that is not a number.");
-          }
-        }
-      }
-    }
-    return problems;
-  };
-
-  const ensurePhotoInput = () => {
-    let el = document.getElementById("photo-file");
-    if (el) return el;
-    el = document.createElement("input");
-    el.id = "photo-file";
-    el.type = "file";
-    el.accept = "image/*";
-    el.hidden = true;
-    el.setAttribute("data-photo-file", "");
-    document.body.appendChild(el);
-    el.addEventListener("change", onPhotoFile);
-    return el;
-  };
-
-  const pickPhoto = (id) => {
-    state.photoTarget = id;
-    const input = ensurePhotoInput();
-    input.value = "";
-    input.click();
-  };
-
-  const onPhotoFile = async (e) => {
-    const input = e.target;
-    const file = input.files && input.files[0];
-    const target = state.photoTarget;
-    input.value = "";
-    if (!file || !target) return;
-    try {
-      const { blob, ext } = await compressImage(file);
-      revokePreview(target);
-      state.pendingPhotos[target] = { blob, ext, preview: URL.createObjectURL(blob) };
-      if (target === "__add__") {
-        refreshAddPhotoBlock();
-        return;
-      }
-      applyCardInputs();
-      render();
-    } catch (err) {
-      showToast(err.message || "That photo could not be used. Please try another picture.", "error", 4500);
-    }
-  };
-
-  const removePhoto = (id) => {
-    revokePreview(id);
-    delete state.pendingPhotos[id];
-    if (id === "__add__") {
-      refreshAddPhotoBlock();
-      return;
-    }
-    applyCardInputs();
-    const item = state.menu.items.find((i) => i.id === id);
-    if (item) item.photo = null;
-    render();
-  };
-
-  const putRepoFile = async (path, message, contentB64, sha) => {
-    const url = API + "/repos/" + OWNER + "/" + REPO + "/contents/" + path;
-    let res;
-    try {
-      const payload = { message, content: contentB64, branch: "main" };
-      if (sha) payload.sha = sha;
-      res = await fetch(url, {
-        method: "PUT",
-        headers: { ...apiHeaders(state.token), "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch (_) {
-      throw new Error("Could not reach the internet. Check your connection and try again.");
-    }
-    return res;
-  };
-
-  const uploadPendingPhotos = async () => {
-    const entries = Object.entries(state.pendingPhotos).filter(([id]) => id !== "__add__");
-    let i = 0;
-    for (const [id, pending] of entries) {
-      i += 1;
-      const item = state.menu.items.find((it) => it.id === id);
-      if (!item || !pending || !pending.blob) {
-        revokePreview(id);
-        delete state.pendingPhotos[id];
-        continue;
-      }
-      state.busyLabel = entries.length > 1 ? "Uploading photo " + i + " of " + entries.length + "…" : "Uploading photo…";
-      refreshChrome();
-      const stamp = Date.now() + "-" + i;
-      const ext = pending.ext === "jpg" ? "jpg" : "webp";
-      const repoPath = PHOTO_DIR + id + "-" + stamp + "." + ext;
-      const menuPath = PHOTO_MENU_PREFIX + id + "-" + stamp + "." + ext;
-      const content = await encodeBlob(pending.blob);
-      const res = await putRepoFile(repoPath, "Admin: add dish photo", content);
-      if (!res.ok) throw new Error(friendlyHttpError(res.status, true));
-      item.photo = menuPath;
-      revokePreview(id);
-      delete state.pendingPhotos[id];
-    }
-  };
-
-  const save = async () => {
-    const applied = applyCardInputs();
-    if (!applied.ok) {
-      showToast(applied.problems[0], "error", 4500);
-      return;
-    }
-    const problems = validateAll();
-    if (problems.length) {
-      showToast(problems[0], "error", 4500);
-      return;
-    }
-    if (!state.token) {
-      showToast("Please sign in again.", "error", 4000);
-      return;
-    }
-    state.toast = "";
-    state.toastType = "";
-    state.busy = true;
-    state.busyLabel = Object.keys(state.pendingPhotos).some((id) => id !== "__add__") ? "Uploading photo…" : "Saving…";
-    refreshChrome();
-    const putOnce = async (sha, body) => {
-      const url = API + "/repos/" + OWNER + "/" + REPO + "/contents/" + FILE_PATH;
-      let res;
-      try {
-        res = await fetch(url, {
-          method: "PUT",
-          headers: { ...apiHeaders(state.token), "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: COMMIT_MESSAGE,
-            content: encodeBase64(body),
-            sha,
-            branch: "main",
-          }),
-        });
-      } catch (_) {
-        throw new Error("Could not reach the internet. Check your connection and try again.");
-      }
-      return res;
+      busy($('dSave'), true);
+      api({ action: 'menuSave', item: item }).then(function (r) {
+        closeSheet(); toast(r.unchanged ? 'Nothing changed' : (isNew ? 'Dish added' : 'Saved')); loadMenu();
+      }).catch(function (e) { $('dMsg').textContent = e.message; busy($('dSave'), false); });
     };
+    if ($('dDelete')) $('dDelete').onclick = function () {
+      confirmSheet('Delete ' + it.name + '?', 'It disappears from the customer menu straight away. The activity log keeps a copy of its details.', 'Delete', true).then(function (ok) {
+        if (!ok) return;
+        api({ action: 'menuDelete', id: it.id }).then(function () { toast('Deleted ' + it.name); loadMenu(); }).catch(function (e) { toast(e.message, true); });
+      });
+    };
+  }
 
-    try {
-      await uploadPendingPhotos();
-      state.busyLabel = "Saving…";
-      refreshChrome();
-      const payload = cleanMenu(state.menu);
-      const body = JSON.stringify(payload, null, 2) + "\n";
-      let res = await putOnce(state.sha, body);
-      if (res.status === 409) {
-        const latest = await loadFile(state.token);
-        state.sha = latest.sha;
-        res = await putOnce(state.sha, body);
-      }
-      if (!res.ok) throw new Error(friendlyHttpError(res.status, true));
-      const result = await res.json();
-      if (result && result.content && result.content.sha) state.sha = result.content.sha;
-      state.busy = false;
-      state.busyLabel = "";
-      markClean();
-      showToast("Saved! Live in about 1 minute", "ok", 6000);
-    } catch (err) {
-      state.busy = false;
-      state.busyLabel = "";
-      showToast(err.message || "Could not save.", "error", 5000);
-    }
+  /* ---------- site texts ---------- */
+  function loadTexts() {
+    return api({ action: 'textsList' }).then(function (r) {
+      textRows = r.texts || [];
+      var groups = [];
+      textRows.forEach(function (t) { if (groups.indexOf(t.group) < 0) groups.push(t.group); });
+      var html = '';
+      groups.forEach(function (g) {
+        html += '<h3 class="tgroup">' + esc(g || 'Other') + '</h3>';
+        textRows.filter(function (t) { return t.group === g; }).forEach(function (t) {
+          var multi = t.value.indexOf('\n') >= 0 || (t.value || '').length > 80 || t.key === 'meta.description' || t.key === 'story.text' || t.key === 'hero.lead';
+          html += '<div class="tfield"><label for="t-' + esc(t.key) + '">' + esc(t.label) + '</label>';
+          if (multi) html += '<textarea id="t-' + esc(t.key) + '" data-tkey="' + esc(t.key) + '"' + (can('texts.edit') ? '' : ' disabled') + '>' + esc(t.value) + '</textarea>';
+          else html += '<input id="t-' + esc(t.key) + '" data-tkey="' + esc(t.key) + '" value="' + esc(t.value) + '"' + (can('texts.edit') ? '' : ' disabled') + ' />';
+          html += '</div>';
+        });
+      });
+      $('textsForm').innerHTML = html || '<p class="muted">No site texts yet.</p>';
+      show('textsSaveBtn', can('texts.edit'));
+      $('textsMsg').textContent = '';
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  $('textsSaveBtn').onclick = function () {
+    var texts = {};
+    document.querySelectorAll('#textsForm [data-tkey]').forEach(function (el) { texts[el.getAttribute('data-tkey')] = el.value; });
+    busy($('textsSaveBtn'), true); $('textsMsg').textContent = '';
+    api({ action: 'textsSave', texts: texts }).then(function (r) {
+      toast(r.unchanged ? 'Nothing changed' : 'Site texts saved');
+      return loadTexts();
+    }).catch(function (e) { $('textsMsg').textContent = e.message; }).then(function () { busy($('textsSaveBtn'), false); });
   };
 
-  const bind = () => {
-    document.addEventListener("click", (e) => {
-      if (e.target.closest("[data-logout]")) return logout();
-      if (e.target.closest("[data-save]")) return save();
-      if (e.target.closest("[data-back]")) {
-        applyCardInputs();
-        state.view = "list";
-        state.activeCat = null;
-        state.query = "";
-        return render();
-      }
-      const open = e.target.closest("[data-open-cat]");
-      if (open) {
-        state.view = "category";
-        state.activeCat = open.dataset.openCat;
-        state.query = "";
-        return render();
-      }
-      if (e.target.closest("[data-add-dish]")) return openAddDish();
-      const pick = e.target.closest("[data-pick-photo]");
-      if (pick) return pickPhoto(pick.dataset.pickPhoto);
-      const drop = e.target.closest("[data-remove-photo]");
-      if (drop) return removePhoto(drop.dataset.removePhoto);
-      if (e.target.closest("[data-add-cat]")) return $("#add-cat-dialog")?.showModal();
-      const rename = e.target.closest("[data-rename-cat]");
-      if (rename) return openRenameCat(rename.dataset.renameCat);
-      const delCat = e.target.closest("[data-delete-cat]");
-      if (delCat) return askDeleteCat(delCat.dataset.deleteCat);
-      const edit = e.target.closest("[data-edit]");
-      if (edit) return openEdit(edit.dataset.edit);
-      const del = e.target.closest("[data-delete]");
-      if (del) return askDeleteDish(del.dataset.delete);
-      const close = e.target.closest("[data-close]");
-      if (close) return document.getElementById(close.dataset.close)?.close();
-      if (e.target.closest("[data-confirm-yes]")) return confirmYes();
-      if (e.target.closest("[data-confirm-no]")) return confirmNo();
-    });
-
-    document.addEventListener("input", (e) => {
-      if (e.target.matches("[data-search]")) {
-        applyCardInputs();
-        state.query = e.target.value;
-        const pos = e.target.selectionStart;
-        render();
-        const search = $("[data-search]");
-        if (search) {
-          search.focus();
-          try {
-            search.setSelectionRange(pos, pos);
-          } catch (_) {}
-        }
-        return;
-      }
-      if (e.target.matches("[data-price], [data-size-price], [data-add-price], [data-sold]")) {
-        applyCardInputs();
-        const card = e.target.closest(".card");
-        if (card && e.target.matches("[data-sold]")) card.classList.toggle("is-sold", e.target.checked);
-        refreshChrome();
-      }
-    });
-
-    document.addEventListener("submit", (e) => {
-      if (e.target.id === "add-dish-form") addDish(e);
-      if (e.target.id === "edit-dish-form") saveEdit(e);
-      if (e.target.id === "add-cat-form") addCategory(e);
-      if (e.target.id === "rename-cat-form") renameCat(e);
-    });
-
-    window.addEventListener("beforeunload", (e) => {
-      if (!isDirty()) return;
-      e.preventDefault();
-      e.returnValue = "";
-    });
+  /* ---------- people (owners) ---------- */
+  function status(p) {
+    if (!p.active) return '<span class="badge bad">Off</span>';
+    if (p.locked) return '<span class="badge warn">Locked</span>';
+    if (p.mustChange) return '<span class="badge warn">First login due</span>';
+    return '<span class="badge ok">Active</span>';
+  }
+  function loadPeople() {
+    api({ action: 'usersList' }).then(function (r) {
+      people = r.users || [];
+      people.sort(function (a, b) { return (a.role === b.role ? 0 : a.role === 'owner' ? -1 : 1) || a.displayName.localeCompare(b.displayName); });
+      $('peopleList').innerHTML = people.map(function (p) {
+        return '<div class="person" data-person="' + esc(p.username) + '" role="button" tabindex="0"><div><b>' + esc(p.displayName) + '</b> ' + status(p) +
+          '<div class="muted">@' + esc(p.username) + ' · ' + (p.role === 'owner' ? 'Owner' : 'Employee') + (p.lastLogin ? ' · last in ' + esc(p.lastLogin.slice(0, 16)) : ' · never logged in') + '</div></div>' +
+          '</div>';
+      }).join('');
+      $('peopleList').querySelectorAll('[data-person]').forEach(function (el) { el.onclick = function () { openPerson(el.getAttribute('data-person')); }; });
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  $('addPersonBtn').onclick = function () {
+    openSheet('<h2>Add a person</h2>' +
+      '<label for="npName">Their name</label><input id="npName" maxlength="40" />' +
+      '<label for="npRole">Role</label><select id="npRole"><option value="staff">Employee – limited</option><option value="owner">Owner – can do everything</option></select>' +
+      '<p class="msg" id="npMsg"></p>' +
+      '<div class="row2"><button class="btn btn-ghost" id="npCancel" type="button">Cancel</button><button class="btn btn-primary" id="npSave" type="button">Create login</button></div>');
+    $('npCancel').onclick = closeSheet;
+    $('npSave').onclick = function () {
+      var name = $('npName').value.trim();
+      if (!name) { $('npMsg').textContent = 'Type the person\'s name'; return; }
+      busy($('npSave'), true);
+      api({ action: 'userAdd', user: { displayName: name, role: $('npRole').value } }).then(function (r) {
+        secretSheet('Login created', r.displayName, r.username, r.tempPassword); loadPeople();
+      }).catch(function (e) { $('npMsg').textContent = e.message; busy($('npSave'), false); });
+    };
   };
+  function openPerson(u) {
+    var p = people.filter(function (x) { return x.username === u; })[0]; if (!p) return;
+    openSheet('<h2>' + esc(p.displayName) + '</h2>' +
+      '<div class="kv"><b>Username</b><span>' + esc(p.username) + '</span><b>Role</b><span>' + (p.role === 'owner' ? 'Owner' : 'Employee') + '</span>' +
+      '<b>Status</b><span>' + status(p) + '</span></div>' +
+      '<p class="msg" id="pMsg"></p>' +
+      (u === me.username ? '<p class="hint">This is you. Use Me to change your password. You cannot switch yourself off or change your own role.</p>' :
+        '<button class="btn btn-primary" id="pReset" type="button">Reset password</button>' +
+        '<button class="btn btn-ghost" id="pRole" type="button">Make ' + (p.role === 'owner' ? 'an employee' : 'an owner') + '</button>' +
+        '<button class="btn btn-ghost" id="pActive" type="button">' + (p.active ? 'Switch off' : 'Switch on') + '</button>' +
+        '<button class="btn btn-danger" id="pRemove" type="button">Remove</button>') +
+      '<button class="btn btn-ghost" id="pClose" type="button">Close</button>');
+    $('pClose').onclick = closeSheet;
+    var fail = function (e) { if ($('pMsg')) $('pMsg').textContent = e.message; else toast(e.message, true); };
+    if ($('pReset')) $('pReset').onclick = function () {
+      confirmSheet('Reset ' + p.displayName + '\'s password?', 'They are logged out everywhere and get a new first password (also unlocks a locked account).', 'Reset').then(function (ok) {
+        if (!ok) return;
+        api({ action: 'userResetPassword', username: p.username }).then(function (r) { secretSheet('New first password', p.displayName, r.username, r.tempPassword); loadPeople(); }).catch(fail);
+      });
+    };
+    if ($('pRole')) $('pRole').onclick = function () {
+      var to = p.role === 'owner' ? 'staff' : 'owner';
+      api({ action: 'userUpdate', username: p.username, changes: { role: to } }).then(function () { closeSheet(); toast(p.displayName + ' is now ' + (to === 'owner' ? 'an owner' : 'an employee')); loadPeople(); }).catch(fail);
+    };
+    if ($('pActive')) $('pActive').onclick = function () {
+      api({ action: 'userUpdate', username: p.username, changes: { active: !p.active } }).then(function () { closeSheet(); toast(p.displayName + (p.active ? ' switched off' : ' switched on')); loadPeople(); }).catch(fail);
+    };
+    if ($('pRemove')) $('pRemove').onclick = function () {
+      confirmSheet('Remove ' + p.displayName + '?', 'Their login is deleted. Tip: "Switch off" instead keeps their name in the history.', 'Remove', true).then(function (ok) {
+        if (!ok) return;
+        api({ action: 'userRemove', username: p.username }).then(function () { toast('Removed ' + p.displayName); loadPeople(); }).catch(function (e) { toast(e.message, true); });
+      });
+    };
+  }
 
-  const boot = async () => {
-    ensurePhotoInput();
-    bind();
-    let stored = "";
-    try {
-      stored = localStorage.getItem(TOKEN_KEY) || "";
-    } catch (_) {}
-    if (!stored) {
-      renderLogin();
-      return;
-    }
-    state.busy = true;
-    renderLogin();
-    try {
-      const { menu, sha } = await loadFile(stored);
-      state.token = stored;
-      state.menu = menu;
-      state.sha = sha;
-      state.busy = false;
-      markClean();
-      render();
-    } catch (_) {
-      try {
-        localStorage.removeItem(TOKEN_KEY);
-      } catch (__) {}
-      state.busy = false;
-      state.loginError = "Please sign in again.";
-      renderLogin();
-    }
-  };
+  function loadActivity() {
+    var who = $('actWho').value;
+    api({ action: 'activity', user: who, limit: 150 }).then(function (r) {
+      var seen = {};
+      (r.entries || []).forEach(function (x) { seen[x.who] = 1; });
+      if (!$('actWho').getAttribute('data-ready')) {
+        var opts = '<option value="">Everyone</option>' + Object.keys(seen).sort().map(function (u) { return '<option value="' + esc(u) + '">' + esc(u) + '</option>'; }).join('');
+        $('actWho').innerHTML = opts; $('actWho').setAttribute('data-ready', '1');
+      }
+      $('actList').innerHTML = (r.entries || []).map(function (x) {
+        return '<div class="entry"><div class="top"><b>' + esc(x.action) + '</b><span class="muted">' + esc(x.when) + '</span></div>' +
+          '<div class="det">' + esc(x.who) + (x.role ? ' · ' + esc(x.role) : '') + (x.item ? ' · ' + esc(x.item) : '') + (x.details ? ' — ' + esc(x.details) : '') + '</div></div>';
+      }).join('') || '<p class="muted">No activity yet.</p>';
+    }).catch(function (e) { toast(e.message, true); });
+  }
+  $('actWho').onchange = loadActivity;
 
-  window.FFAdmin = {
-    parsePrice,
-    hasPrice,
-    changeCount,
-    getState: () => state,
-    compressImage,
-    photoSrc,
-  };
-
+  function boot() {
+    if (!FFApi.ready()) { showLogin(''); return; }
+    if (!token) { showLogin(''); return; }
+    api({ action: 'me' }).then(function (r) {
+      me = r.user; localStorage.setItem(UK, JSON.stringify(me));
+      if (r.user.mustChangePassword) showChange(false); else showApp();
+    }).catch(function (e) { if (e.code !== 'auth') showLogin(e.message); else showLogin(''); });
+  }
   boot();
 })();

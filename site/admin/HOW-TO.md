@@ -1,36 +1,33 @@
-# How to make your menu login
+# Frost & Flame website admin
 
-This page is only for you. It is not linked from the public website. You sign in with a GitHub token that can change the Frost & Flame menu and nothing else.
+This page is only for you and your team. It is not linked from the public website.
 
-## Make the token
+Open: https://karimullashaik0389-cloud.github.io/frost-flame-themes/site/admin/
 
-1. Sign in to GitHub in your browser.
-2. Open this page: [https://github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new)
-   (You can also go to GitHub Settings → Developer settings → Fine-grained tokens → Generate new token.)
-3. Token name: `Frost & Flame menu`.
-4. Expiration: **1 year**. If you only see short options, choose **Custom** and set a date one year from today.
-5. Resource owner: your own GitHub account.
-6. Repository access: choose **Only select repositories**, then pick **frost-flame-themes** only. Do not grant access to any other repo.
-7. Under Repository permissions, set **Contents** to **Read and write**. Leave every other permission as No access.
-8. Click **Generate token**.
-9. Copy the token now. GitHub will not show it again.
+## Log in
 
-## Sign in
+Each person has their own username and password (Karimulla, Thanmayee, Gopi). The first time you log in, you use the first password you were given, then you must choose your own. At least 8 characters, with letters and a number, and not your username.
 
-1. Open the admin page: [https://karimullashaik0389-cloud.github.io/frost-flame-themes/site/admin/](https://karimullashaik0389-cloud.github.io/frost-flame-themes/site/admin/)
-2. Paste the token and tap **Sign in**.
-3. The token stays only in this browser. It is never saved in the website files.
+Forgot a password? Ask an owner to reset it from the People tab. They will give the new first password in person.
+
+Until the backend is connected, this page will say it is not connected yet and the public website will keep using its built-in menu.
+
+## What you can change
+
+- **Menu** — dish names, descriptions, prices (including sizes), photos, and available / out of stock. Owners can also add or delete a dish.
+- **Site text** — restaurant name, tagline, hero welcome lines, our story, and the dining-mood greetings. The big Frost & Flame logo letters on the homepage stay as they are.
+- **People** (owners only) — add an employee, reset a password, switch someone off or on, or remove them.
+- **Activity** (owners only) — who changed what, in UK time. Passwords are never shown.
 
 ## Adding or changing a photo
 
-Open a section, then the dish. Tap **Add photo** or **Change photo**, and pick a picture from your camera or gallery. You will see a preview on the card. Tap **Save changes** at the bottom. The photo is sent first, then the menu is saved, and it appears on the public menu in about a minute. **Remove photo** takes the picture off that dish.
+Open the dish, tap **Choose photo**, and pick a picture from your phone or computer. Wait until it says the photo is ready, then tap **Save**. **Out of stock** keeps the dish on the public menu but marks it sold out.
 
 ## After you save
 
-Changes go live on the public menu in about a minute. If you do not see them, wait a moment and refresh.
+Changes go onto the public website once the backend is connected. If the backend is down, the website keeps showing its last built-in menu and texts, so the site never goes blank.
 
 ## Stay safe
 
-- Do not send the token in WhatsApp, email or chat.
+- Do not send passwords in WhatsApp, email or chat.
 - On a shared phone, tap **Log out** when you have finished.
-- If you think someone else has seen the token, delete it in GitHub (Settings → Developer settings → Fine-grained tokens) and make a new one.

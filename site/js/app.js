@@ -1133,9 +1133,14 @@
     observeReveals();
     updateCartBadges();
     try {
-      const res = await fetch("data/menu.json");
-      if (!res.ok) throw new Error(`menu.json ${res.status}`);
-      state.data = await res.json();
+      if (window.FFLive) {
+        const loaded = await window.FFLive.loadMenu("data/menu.json");
+        state.data = loaded.data;
+      } else {
+        const res = await fetch("data/menu.json");
+        if (!res.ok) throw new Error(`menu.json ${res.status}`);
+        state.data = await res.json();
+      }
     } catch (err) {
       console.error("Could not load menu.json", err);
       const grid = $("#menu-grid");
@@ -1143,6 +1148,7 @@
       return;
     }
     decorateFromData();
+    if (window.FFLive) window.FFLive.applyTexts(state.data);
     renderSignatures();
     renderTabs();
     renderMenu();

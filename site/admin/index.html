@@ -1,19 +1,130 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Menu admin – Frost &amp; Flame</title>
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#07080a">
-  <link rel="icon" href="../img/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#0b0706" />
+<title>Frost &amp; Flame — Admin</title>
+<link rel="icon" href="../img/favicon-32.png" />
+<link rel="apple-touch-icon" href="../img/favicon-32.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="admin.css" />
+<script src="config.js"></script>
+<script src="api.js"></script>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="admin.js"></script>
+<div class="wrap">
+  <div id="setupWarn" class="warnbox hidden">This admin is not connected to a backend yet. The website is unchanged.</div>
+
+  <!-- ===== log in ===== -->
+  <section id="loginView" class="card center hidden">
+    <img class="logo" src="../img/logo-800.webp" alt="Frost &amp; Flame" />
+    <div class="brand">Frost &amp; Flame</div>
+    <p class="sub">Admin · log in with your own account</p>
+    <form id="loginForm" autocomplete="on" novalidate>
+      <label for="loginUser">Username</label>
+      <input id="loginUser" name="username" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      <label for="loginPass">Password</label>
+      <div class="pw"><input id="loginPass" name="password" type="password" autocomplete="current-password" />
+        <button type="button" class="eye" data-eye="loginPass" aria-label="Show password">Show</button></div>
+      <button class="btn btn-primary" id="loginBtn" type="submit">Log in</button>
+    </form>
+    <p class="msg" id="loginMsg" role="alert"></p>
+    <p class="hint">Forgot your password? Ask an owner to reset it.</p>
+  </section>
+
+  <!-- ===== first login / must change ===== -->
+  <section id="changeView" class="card hidden">
+    <h1>Choose your own password</h1>
+    <p class="sub">This is your first log in (or your password was reset). Pick a password only you know.</p>
+    <form id="changeForm" novalidate>
+      <div id="cvOldWrap"><label for="cvOld">Password you were given</label>
+        <input id="cvOld" type="password" autocomplete="current-password" /></div>
+      <label for="cvNew">New password</label>
+      <div class="pw"><input id="cvNew" type="password" autocomplete="new-password" />
+        <button type="button" class="eye" data-eye="cvNew" aria-label="Show password">Show</button></div>
+      <label for="cvNew2">Type it again</label>
+      <input id="cvNew2" type="password" autocomplete="new-password" />
+      <p class="hint">At least 8 characters, with letters and a number. Not your username.</p>
+      <button class="btn btn-primary" id="cvBtn" type="submit">Save my password</button>
+    </form>
+    <p class="msg" id="cvMsg" role="alert"></p>
+    <button class="btn btn-ghost" id="cvLogout" type="button">Log out</button>
+  </section>
+
+  <!-- ===== app ===== -->
+  <section id="appView" class="hidden">
+    <div class="topbar">
+      <img class="logo sm" src="../img/logo-800.webp" alt="" />
+      <div class="grow">
+        <div class="brand sm">Frost &amp; Flame Admin</div>
+        <p class="sub" id="whoLine"></p>
+      </div>
+      <button class="btn btn-ghost sm" id="logoutBtn" type="button">Log out</button>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+
+    <div class="panel" id="panel-menu">
+      <div class="card">
+        <div class="topbar"><h2>Dishes</h2><button class="btn btn-primary sm hidden" id="addDishBtn" type="button">+ Add dish</button></div>
+        <input id="menuSearch" type="search" placeholder="Search dishes" aria-label="Search dishes" />
+        <p class="hint" id="menuHint"></p>
+        <div id="menuList"><p class="muted">Loading…</p></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-texts">
+      <div class="card">
+        <h2>Names, greetings and hero</h2>
+        <p class="hint">These appear on the public website. The logo letters stay as they are.</p>
+        <div id="textsForm"><p class="muted">Loading…</p></div>
+        <button class="btn btn-primary hidden" id="textsSaveBtn" type="button">Save texts</button>
+        <p class="msg" id="textsMsg" role="alert"></p>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-people">
+      <div class="card">
+        <div class="topbar"><h2>People</h2><button class="btn btn-primary sm" id="addPersonBtn" type="button">+ Add employee</button></div>
+        <p class="hint">Owners can do everything. Employees can only do what is allowed for staff. Tap a person to reset, switch off or remove.</p>
+        <div id="peopleList"><p class="muted">Loading…</p></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-activity">
+      <div class="card">
+        <div class="topbar"><h2>Activity</h2>
+          <select id="actWho" class="sm-select" aria-label="Filter by person"><option value="">Everyone</option></select></div>
+        <p class="hint">Every change, who made it and when (UK time). Passwords are never shown here.</p>
+        <div id="actList"><p class="muted">Loading…</p></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-me">
+      <div class="card">
+        <h2>My account</h2>
+        <p id="meLine"></p>
+        <p class="hint" id="mePerms"></p>
+      </div>
+      <div class="card">
+        <h2>Change my password</h2>
+        <form id="meForm" novalidate>
+          <label for="meOld">Current password</label><input id="meOld" type="password" autocomplete="current-password" />
+          <label for="meNew">New password</label><input id="meNew" type="password" autocomplete="new-password" />
+          <label for="meNew2">Type it again</label><input id="meNew2" type="password" autocomplete="new-password" />
+          <p class="hint">At least 8 characters, with letters and a number. Your other phones will be logged out.</p>
+          <button class="btn btn-primary" id="meBtn" type="submit">Update password</button>
+        </form>
+        <p class="msg" id="meMsg" role="alert"></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="sheet-bg hidden" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="admin.js"></script>
 </body>
 </html>
