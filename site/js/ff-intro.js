@@ -2,9 +2,10 @@
  * Frost & Flame — once-per-session welcome video overlay.
  * Call FFIntro.run(done) or set data-autorun on #ffIntro.
  * ?intro=1 forces the intro; prefers-reduced-motion skips it.
- * Sound is on by default: try unmuted play(), fall back to muted,
- * then unmute on the first touch/click/keypress. A speaker toggle
- * remembers mute preference for the session.
+ * Sound is on by default: try unmuted play() first. If the browser blocks
+ * it, play silently, show a "Tap for sound" prompt, and any tap on the
+ * intro restarts the video from the start with sound. The speaker toggle
+ * remembers a mute choice for the session. Skip always works.
  */
 (function (global) {
   var KEY = 'ff_intro_seen';
@@ -150,7 +151,7 @@
     try { document.body.style.overflow = 'hidden'; } catch (e) {}
     resetScroll();
 
-    var skip = el.querySelector('#ffIntroSkip, .ff-intro-skip');
+    var skip = el.querySelector('#ffIntroSkip, .ff-intro-skipbtn');
     if (skip) {
       skip.addEventListener('click', function (e) {
         e.preventDefault();
@@ -160,33 +161,66 @@
     }
 
     var soundBtn = el.querySelector('#ffIntroSound, .ff-intro-sound');
+    var tapBtn = el.querySelector('#ffIntroTap, .ff-intro-tap');
 
-    function unmuteFromGesture() {
+    function showTap(show) {
+      if (!tapBtn) return;
+      tapBtn.hidden = !show;
+      el.classList.toggle('needs-tap', !!show);
+    }
+    function isControl(t) {
+      return !!(t && t.closest && t.closest('#ffIntroSkip, .ff-intro-skipbtn, #ffIntroSound, .ff-intro-sound'));
+    }
+
+    // Start with sound from a real user gesture (click / touchend / keydown
+    // grant media activation on iOS WebKit; touchstart / pointerdown do not).
+    var lastGesture = 0;
+    function startWithSound(fromStart) {
       if (finished || !video) return;
+      started = true;
       applyMuted(video, false, soundBtn);
       setSoundPref('on');
-      try { video.currentTime = 0; } catch (e) {}
+      if (fromStart) { try { video.currentTime = 0; } catch (e) {} }
       bumpSafety();
       var p = video.play();
-      if (p && p.catch) p.catch(function () {});
+      if (p && typeof p.then === 'function') {
+        p.then(function () { showTap(false); disarm(); }).catch(function () {
+          // Still blocked: keep the picture playing silently and keep asking.
+          applyMuted(video, true, soundBtn);
+          showTap(true);
+          var p3 = video.play();
+          if (p3 && p3.catch) p3.catch(function () {});
+        });
+      } else {
+        showTap(false);
+        disarm();
+      }
     }
     function armAutoUnmute() {
-      if (getSoundPref() === 'off') return;
       if (armed) return;
       armedHandler = function (e) {
         if (finished) return;
-        if (e && e.target && e.target.closest) {
-          if (e.target.closest('#ffIntroSkip, .ff-intro-skip')) return;
-          if (e.target.closest('#ffIntroSound, .ff-intro-sound')) return;
-        }
-        if (getSoundPref() === 'off') return;
-        if (video && !video.muted) { disarm(); return; }
-        unmuteFromGesture();
-        disarm();
+        if (e && isControl(e.target)) return;
+        if (e && e.type === 'keydown' && e.key && !/^(Enter| |Spacebar)$/.test(e.key)) return;
+        var now = Date.now();
+        if (now - lastGesture < 450) return; // touchend + click from one tap
+        lastGesture = now;
+        if (video && !video.muted && !video.paused) { showTap(false); disarm(); return; }
+        if (e && e.type === 'click' && e.preventDefault) e.preventDefault();
+        startWithSound(true);
       };
-      armed = ['pointerdown', 'touchstart', 'click', 'keydown'];
+      armed = ['touchend', 'click', 'keydown'];
       armed.forEach(function (t) {
         document.addEventListener(t, armedHandler, true);
+      });
+    }
+
+    if (tapBtn) {
+      tapBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        lastGesture = Date.now();
+        startWithSound(true);
       });
     }
 
@@ -195,17 +229,14 @@
         e.preventDefault();
         e.stopPropagation();
         if (!video) return;
-        var nextMuted = !video.muted;
-        applyMuted(video, nextMuted, soundBtn);
-        setSoundPref(nextMuted ? 'off' : 'on');
-        if (nextMuted) {
-          disarm();
+        lastGesture = Date.now();
+        if (video.muted) {
+          startWithSound(true);
         } else {
+          applyMuted(video, true, soundBtn);
+          setSoundPref('off');
+          showTap(false);
           disarm();
-          try { video.currentTime = 0; } catch (err) {}
-          bumpSafety();
-          var p = video.play();
-          if (p && p.catch) p.catch(function () {});
         }
       });
     }
@@ -219,24 +250,50 @@
     video.playsInline = true;
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
+    video.preload = 'auto';
     video.addEventListener('ended', finish);
     video.addEventListener('error', function () { setTimeout(finish, FAIL_MS); });
 
-    if (getSoundPref() === 'off') {
-      applyMuted(video, true, soundBtn);
-      var p0 = video.play();
-      if (p0 && p0.catch) p0.catch(function () { setTimeout(finish, FAIL_MS); });
-      return;
-    }
-    applyMuted(video, false, soundBtn);
-    var play = video.play();
-    if (play && typeof play.then === 'function') {
-      play.then(function () {}).catch(function () {
+    var started = false;
+    function begin() {
+      if (started || finished) return;
+      started = true;
+      bumpSafety();
+      if (getSoundPref() === 'off') {
         applyMuted(video, true, soundBtn);
-        armAutoUnmute();
-        var p2 = video.play();
-        if (p2 && p2.catch) p2.catch(function () { setTimeout(finish, FAIL_MS); });
-      });
+        var p0 = video.play();
+        if (p0 && p0.catch) p0.catch(function () { setTimeout(finish, FAIL_MS); });
+        return;
+      }
+      // 1) Try with sound straight away.
+      applyMuted(video, false, soundBtn);
+      var play = video.play();
+      if (play && typeof play.then === 'function') {
+        play.then(function () {
+          // Some browsers start, then pause an unmuted autoplay. Re-check shortly.
+          setTimeout(function () {
+            if (!finished && video.paused && !video.ended) fallbackMuted();
+          }, 350);
+        }).catch(fallbackMuted);
+      }
+    }
+    // 2) Blocked: play silently, show "Tap for sound", any tap restarts with sound.
+    function fallbackMuted() {
+      if (finished) return;
+      applyMuted(video, true, soundBtn);
+      showTap(true);
+      armAutoUnmute();
+      var p2 = video.play();
+      if (p2 && p2.catch) p2.catch(function () { setTimeout(finish, FAIL_MS); });
+    }
+    // Let enough of the file buffer first so the voice does not stall,
+    // but never wait more than ~2.5s (the poster shows meanwhile).
+    if (getSoundPref() !== 'off') armAutoUnmute();
+    if (video.readyState >= 4) begin();
+    else {
+      video.addEventListener('canplaythrough', begin, { once: true });
+      setTimeout(begin, 2500);
+      try { video.load(); } catch (e) {}
     }
   }
 

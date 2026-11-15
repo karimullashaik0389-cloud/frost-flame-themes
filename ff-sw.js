@@ -1,7 +1,7 @@
 /* Self-updating pass-through worker for the GitHub Pages preview.
    Bump FF_SW_VERSION to replace a worker a phone already installed.
    Does not intercept fetches and does not reload the page. */
-var FF_SW_VERSION = '2026-11-15-intro-logo';
+var FF_SW_VERSION = '2026-11-15-intro-edgefix';
 
 self.addEventListener('install', function () {
   self.skipWaiting();

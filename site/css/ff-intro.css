@@ -29,7 +29,7 @@ html.ff-intro-open body {
   max-width: 100%;
   height: 100%;
   height: 100vh;
-  z-index: 10000;
+  z-index: 2147483000; /* above the mood picker and every other overlay while the intro plays */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,8 +76,9 @@ html.ff-intro-skip .ff-intro {
   .ff-intro video { object-fit: contain; }
 }
 
-.ff-intro-skip,
-.ff-intro-sound {
+.ff-intro .ff-intro-skipbtn,
+.ff-intro .ff-intro-sound,
+.ff-intro .ff-intro-tap {
   z-index: 2;
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -89,7 +90,7 @@ html.ff-intro-skip .ff-intro {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-.ff-intro-skip {
+.ff-intro .ff-intro-skipbtn {
   position: absolute;
   top: max(12px, env(safe-area-inset-top, 0px));
   right: max(12px, env(safe-area-inset-right, 0px));
@@ -99,7 +100,7 @@ html.ff-intro-skip .ff-intro {
   border-radius: 999px;
   padding: 0.55rem 1.1rem;
 }
-.ff-intro-sound {
+.ff-intro .ff-intro-sound {
   position: absolute;
   top: max(12px, env(safe-area-inset-top, 0px));
   left: max(12px, env(safe-area-inset-left, 0px));
@@ -110,7 +111,7 @@ html.ff-intro-skip .ff-intro {
   display: grid;
   place-items: center;
 }
-.ff-intro-sound svg {
+.ff-intro .ff-intro-sound svg {
   width: 1.25rem;
   height: 1.25rem;
   display: block;
@@ -120,13 +121,49 @@ html.ff-intro-skip .ff-intro {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.ff-intro-sound .ff-intro-ic-off { display: none; }
-.ff-intro-sound.is-muted .ff-intro-ic-on { display: none; }
-.ff-intro-sound.is-muted .ff-intro-ic-off { display: block; }
+.ff-intro .ff-intro-sound .ff-intro-ic-off { display: none; }
+.ff-intro .ff-intro-sound.is-muted .ff-intro-ic-on { display: none; }
+.ff-intro .ff-intro-sound.is-muted .ff-intro-ic-off { display: block; }
 
-.ff-intro-skip:hover,
-.ff-intro-skip:focus-visible,
-.ff-intro-sound:hover,
-.ff-intro-sound:focus-visible { background: rgba(0, 0, 0, 0.7); }
-.ff-intro-skip:focus-visible,
-.ff-intro-sound:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.ff-intro .ff-intro-skipbtn:hover,
+.ff-intro .ff-intro-skipbtn:focus-visible,
+.ff-intro .ff-intro-sound:hover,
+.ff-intro .ff-intro-sound:focus-visible { background: rgba(0, 0, 0, 0.7); }
+.ff-intro .ff-intro-skipbtn:focus-visible,
+.ff-intro .ff-intro-sound:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* "Tap for sound" prompt, shown only when the browser blocks sound. */
+.ff-intro .ff-intro-tap {
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top, 0px)) + 3.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  animation: ffIntroTapPulse 1.6s ease-in-out infinite;
+}
+.ff-intro .ff-intro-tap[hidden] { display: none; }
+.ff-intro .ff-intro-tap svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ff-intro.needs-tap { cursor: pointer; }
+@keyframes ffIntroTapPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-intro .ff-intro-tap { animation: none; }
+}

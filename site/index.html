@@ -28,7 +28,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/features.css">
-  <link rel="stylesheet" href="css/ff-intro.css?v=20261115g">
+  <link rel="stylesheet" href="css/ff-intro.css?v=20261115h">
   <script>
     (function () {
       try {
@@ -79,15 +79,16 @@
 </head>
 <body>
   <div id="ffIntro" class="ff-intro" data-autorun role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('video/intro-poster.webp')">
-    <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" poster="video/intro-poster.webp?v=20261115g" aria-hidden="true">
-      <source src="video/intro.webm?v=20261115g" type="video/webm">
-      <source src="video/intro.mp4?v=20261115g" type="video/mp4">
+    <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" poster="video/intro-poster.webp?v=20261115h" aria-hidden="true">
+      <source src="video/intro.mp4?v=20261115h" type="video/mp4">
+      <source src="video/intro.webm?v=20261115h" type="video/webm">
     </video>
     <button type="button" class="ff-intro-sound" id="ffIntroSound" aria-label="Mute sound" aria-pressed="false">
     <svg class="ff-intro-ic-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg>
     <svg class="ff-intro-ic-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16.2 9.2l4.6 5.6M20.8 9.2l-4.6 5.6"/></svg>
   </button>
-    <button type="button" class="ff-intro-skip" id="ffIntroSkip">Skip</button>
+    <button type="button" class="ff-intro-tap" id="ffIntroTap" hidden aria-label="Tap for sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg><span>Tap for sound</span></button>
+    <button type="button" class="ff-intro-skipbtn" id="ffIntroSkip">Skip</button>
   </div>
   <a class="skip" href="#menu">Skip to menu</a>
   <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
@@ -327,7 +328,7 @@
     <div class="mood-grid" id="mood-grid"></div>
   </dialog>
 
-  <script src="js/ff-intro.js?v=20261115g" defer></script>
+  <script src="js/ff-intro.js?v=20261115h" defer></script>
   <script src="js/ff-config.js" defer></script>
   <script src="js/ff-live.js" defer></script>
   <script src="js/app.js" defer></script>
