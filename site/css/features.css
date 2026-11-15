@@ -194,6 +194,9 @@ html[data-mode="flame"] .live-price { color: var(--flame); }
 
 .chip.is-on, .chip[aria-pressed="true"] { background: var(--text); color: #12110f; border-color: var(--text); }
 .step-pills .chip { border: 1px solid var(--line-strong); background: transparent; color: inherit; border-radius: 999px; padding: 0.45rem 0.75rem; font-size: 0.88rem; }
+.step-pills .chip { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.step-pills .chip.is-on, .step-pills .chip[aria-pressed="true"] { background: var(--text); color: #12110f; border-color: var(--text); }
+.mm-filters-note { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--muted); }
 
 select {
   width: 100%;

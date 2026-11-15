@@ -148,22 +148,33 @@
     return NaN;
   };
 
-  const excludeAllergens = (it, blocked) => {
-    if (!blocked.length) return false;
-    return (it.allergens || []).some((a) => blocked.includes(a));
+  /* Hard filters: an item is only ever shown if it passes every selected tag.
+     Allergen filters need real allergen data — items with no allergens listed
+     are left out rather than assumed safe. */
+  const ALLERGEN_BLOCK = { no_nuts: ["nuts", "peanuts"], no_gluten: ["gluten"], no_milk: ["milk"] };
+  const isSpicy = (it) => (it.diet || []).includes("S") || (it.diet || []).includes("SS");
+  const passesFilters = (it, want) => {
+    if (!it || it.sold_out) return false;
+    if (!hasPrice(it)) return false;
+    const diet = it.diet || [];
+    if (want.vegan && !diet.includes("VG")) return false;
+    if (want.vegetarian && !(diet.includes("V") || diet.includes("VG"))) return false;
+    if (want.spicyOnly && !isSpicy(it)) return false;
+    if (want.under10 && !(priceOf(it) < 10)) return false;
+    const blocked = [];
+    Object.keys(ALLERGEN_BLOCK).forEach((k) => { if (want[k]) blocked.push(...ALLERGEN_BLOCK[k]); });
+    if (blocked.length) {
+      const al = it.allergens || [];
+      if (!al.length) return false;
+      if (al.some((x) => blocked.includes(String(x).toLowerCase()))) return false;
+      if (want.no_nuts && diet.includes("N")) return false;
+    }
+    if (want.budget != null && priceOf(it) > want.budget) return false;
+    return true;
   };
 
   const scoreItem = (it, want) => {
-    if (it.sold_out) return -Infinity;
-    if (!hasPrice(it)) return -Infinity;
-    if (want.vegan && !(it.diet || []).includes("VG")) return -Infinity;
-    if (want.vegetarian && !((it.diet || []).includes("V") || (it.diet || []).includes("VG"))) return -Infinity;
-    const blocked = [];
-    if (want.no_nuts) blocked.push("nuts");
-    if (want.no_gluten) blocked.push("gluten");
-    if (want.no_milk) blocked.push("milk");
-    if (excludeAllergens(it, blocked)) return -Infinity;
-    if (want.budget != null && priceOf(it) > want.budget) return -Infinity;
+    if (!passesFilters(it, want)) return -Infinity;
 
     let s = 0;
     const cat = it.category;
@@ -188,7 +199,7 @@
     const num = t.match(/£\s*(\d+(?:\.\d+)?)/) || t.match(/\b(\d+)\s*(?:quid|pounds)?\b/);
     const party = t.match(/\b(?:for|feed)\s*(\d+)\b/) || t.match(/\b(\d+)\s*(?:of us|people|friends)\b/);
     return {
-      spicy: /spic|hot\b|fiery|chilli|chili|inferno/.test(t),
+      spicy: !!extra.spicy || /spic|hot\b|fiery|chilli|chili|inferno/.test(t),
       sweet: /sweet|dessert|ice cream|stone|chocolate|jamun/.test(t),
       cold: /cold|chill|ice|frost|cool/.test(t),
       hot: /hot|warm|fire|flame|pulao|curry|chaat/.test(t),
@@ -200,6 +211,8 @@
       no_nuts: extra.no_nuts || /no nuts|nut-free|nut free/.test(t),
       no_gluten: extra.no_gluten || /no gluten|gluten-free|gluten free/.test(t),
       no_milk: extra.no_milk || /no milk|dairy-free|dairy free/.test(t),
+      spicyOnly: !!extra.spicy,
+      under10: !!extra.under_10 || /under\s*£?\s*10\b/.test(t),
       sharing: extra.party > 1 || /shar|for two|for 2|of us|group|friends/.test(t),
       andhra: /andhra|gongura|never tried/.test(t),
       budget: extra.budget != null ? extra.budget : num ? Number(num[1]) : null,
@@ -207,13 +220,14 @@
     };
   };
 
-  const recommend = (text, extra = {}, avoid = [], n = 3) => {
-    const want = parseWant(text, extra);
-    const scored = items()
-      .filter((it) => !avoid.includes(it.id))
-      .map((it) => ({ it, s: scoreItem(it, want) }))
-      .filter((x) => x.s > -Infinity)
-      .sort((a, b) => b.s - a.s);
+  const recommend = (text, extra = {}, avoid = [], n = 3, random = false) => {
+    const want = parseWant(random ? "" : text, extra);
+    let pool = items().map((it) => ({ it, s: scoreItem(it, want) })).filter((x) => x.s > -Infinity);
+    const fresh = pool.filter((x) => !avoid.includes(x.it.id));
+    if (fresh.length) pool = fresh;
+    const scored = random
+      ? pool.map((x) => ({ ...x, r: Math.random() })).sort((a, b) => a.r - b.r)
+      : pool.sort((a, b) => b.s - a.s);
     const picks = [];
     for (const row of scored) {
       if (picks.length >= n) break;
@@ -444,6 +458,15 @@
   /* ---------- matchmaker ---------- */
   const mm = { toggles: {}, party: 1, budget: 20, noLimit: false, last: null };
 
+  const mmToggles = () => {
+    const list = (data()?.matchmaker?.toggles || []).slice();
+    const ids = list.map(([id]) => id);
+    const at = Math.min(2, list.length);
+    if (!ids.includes("under_10")) list.splice(at, 0, ["under_10", "Under £10"]);
+    if (!ids.includes("spicy")) list.splice(at, 0, ["spicy", "Spicy"]);
+    return list;
+  };
+
   const renderMatchmaker = () => {
     const root = $("#mm-form");
     const cfg = data()?.matchmaker;
@@ -455,7 +478,7 @@
         ${cfg.chips.map((c,i) => `<button type="button" data-testid="mm-chip-${i}" data-mm-chip="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("")}
       </div>
       <div class="step-pills" role="group" aria-label="Diet and allergen toggles">
-        ${cfg.toggles.map(([id,label]) => `<button type="button" class="chip" data-testid="mm-toggle-${id}" data-mm-toggle="${id}" aria-pressed="false">${escapeHtml(label)}</button>`).join("")}
+        ${mmToggles().map(([id,label]) => `<button type="button" class="chip" data-testid="mm-toggle-${id}" data-mm-toggle="${id}" aria-pressed="false">${escapeHtml(label)}</button>`).join("")}
       </div>
       <div class="fields" style="margin-top:1rem">
         <label>How many of you?
@@ -474,16 +497,26 @@
       </div>`;
   };
 
+  const mmFilterLabels = () => {
+    const cfg = mmToggles();
+    return cfg.filter(([id]) => mm.toggles[id]).map(([, label]) => label);
+  };
+
   const renderMmResults = (res) => {
     const box = $("#mm-results");
     if (!box) return;
+    const labels = mmFilterLabels();
+    const note = labels.length ? `<p class="mm-filters-note" data-testid="mm-filters-note">Filters: ${labels.map(escapeHtml).join(" · ")}</p>` : "";
     if (!res?.picks?.length) {
-      box.innerHTML = `<p class="feature-card">The Matchmaker’s on a break — try the menu, or tell me a little more about what you fancy.</p>`;
+      box.innerHTML = `<p class="feature-card" data-testid="mm-none">${labels.length
+        ? `Nothing on the menu matches all of these: ${labels.map(escapeHtml).join(" + ")}${mm.noLimit ? "" : ` within ${money(mm.budget)}`}. Try turning one off.`
+        : "Nothing on the menu matches that yet — try other words, or browse the menu."}</p>`;
+      mm.last = null;
       return;
     }
-    box.innerHTML = `<p>${escapeHtml(res.intro || "Here’s a match from the kitchen.")}</p>` +
+    box.innerHTML = `<p>${escapeHtml(res.intro || "Here’s a match from the kitchen.")}</p>` + note +
       res.picks.map((p, i) => `
-        <article class="feature-card pick-card" data-testid="mm-pick-${i}">
+        <article class="feature-card pick-card" data-testid="mm-pick-${i}" data-item-id="${escapeHtml(p.item_id)}">
           <h3>${p.qty > 1 ? `${p.qty} × ` : ""}${escapeHtml(p.name)}</h3>
           <p class="price">${money((p.unit_price || 0) * (p.qty || 1))}</p>
           ${p.why ? `<p class="why">“${escapeHtml(p.why)}”</p>` : ""}
@@ -494,34 +527,20 @@
     mm.last = res;
   };
 
-  const runMatchmaker = async (text, opts = {}) => {
-    const box = $("#mm-results");
-    if (box) box.innerHTML = `<p data-testid="mm-loader">mixing on the stone…</p>`;
-    const payload = {
-      message: text,
-      toggles: { ...mm.toggles },
-      budget: mm.noLimit ? null : mm.budget,
-      party_size: mm.party,
-      avoid_ids: opts.avoid || [],
+  /* Matching runs on this page from the menu's own diet, spice, price and allergen
+     tags, so every pick respects the selected filters. */
+  const runMatchmaker = (text, opts = {}) => {
+    const surprise = !!opts.surprise;
+    const extra = { ...mm.toggles, party: mm.party, budget: mm.noLimit ? null : mm.budget };
+    const n = Math.min(4, Math.max(2, mm.party));
+    const rec = recommend(text, extra, opts.avoid || [], n, surprise);
+    const res = {
+      surprise,
+      intro: rec.picks.length
+        ? (surprise ? "A surprise from the menu, picked at random from what matches your filters." : "A match from the menu, chosen for what you fancied.")
+        : "",
+      picks: rec.picks.map((p) => ({ item_id: p.it.id, name: p.it.name, unit_price: p.unit_price, qty: 1, why: p.why, diet: p.it.diet, allergens: p.it.allergens })),
     };
-    let res = null;
-    const api = data()?.assist?.matchmaker_api;
-    if (api) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 5000);
-      try {
-        const r = await fetch(api, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: ctrl.signal });
-        if (r.ok) res = await r.json();
-      } catch (_) {}
-      clearTimeout(timer);
-    }
-    if (!res?.picks) {
-      const rec = recommend(text, { ...mm.toggles, party: mm.party, budget: mm.noLimit ? null : mm.budget }, opts.avoid || [], Math.min(4, Math.max(2, mm.party)));
-      res = {
-        intro: rec.picks.length ? "A match from the menu, chosen for what you fancied." : "",
-        picks: rec.picks.map((p) => ({ item_id: p.it.id, name: p.it.name, unit_price: p.unit_price, qty: 1, why: p.why, diet: p.it.diet, allergens: p.it.allergens })),
-      };
-    }
     renderMmResults(res);
   };
 
@@ -754,13 +773,11 @@
         return;
       }
       if (e.target.closest("[data-testid='mm-surprise-btn']")) {
-        const s = data().matchmaker.surprise;
-        $("#mm-input").value = s;
-        runMatchmaker(s);
+        runMatchmaker(data().matchmaker.surprise, { surprise: true, avoid: mm.last ? mm.last.picks.map((p) => p.item_id) : [] });
         return;
       }
       if (e.target.closest("[data-testid='mm-different-btn']") && mm.last) {
-        runMatchmaker($("#mm-input").value || data().matchmaker.surprise, { avoid: mm.last.picks.map((p) => p.item_id) });
+        runMatchmaker(($("#mm-input").value || "").trim() || data().matchmaker.surprise, { surprise: !!mm.last.surprise, avoid: mm.last.picks.map((p) => p.item_id) });
         return;
       }
       const addOne = e.target.closest("[data-mm-add]");
