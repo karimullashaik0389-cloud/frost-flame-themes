@@ -86,3 +86,4 @@ textarea{min-height:96px;resize:vertical;line-height:1.45}
 .tgroup{margin:16px 0 8px;font-family:"Cormorant Garamond",serif;font-size:18px}
 #textsForm .tfield{margin-top:4px}
 .cat{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 0}
+.logo{width:auto;height:auto;max-width:240px;max-height:90px;border-radius:0;object-fit:contain;border:0;box-shadow:none;background:none}.logo.sm{max-width:110px;max-height:36px}
