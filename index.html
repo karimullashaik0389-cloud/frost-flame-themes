@@ -440,15 +440,19 @@ if ('serviceWorker' in navigator) {
     if(!force&&(reduce||sessionStorage.getItem('ff_intro_seen')==='1'||!isHome))document.documentElement.classList.add('ff-intro-skip');
   } catch(e){}
 })();
-</script></head><body><link rel="stylesheet" href="site/css/ff-intro.css?v=20261115e"/>
+</script></head><body><link rel="stylesheet" href="site/css/ff-intro.css?v=20261115f"/>
 <div id="ffIntro" class="ff-intro" role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('site/video/intro-poster.webp')">
-  <video id="ffIntroVideo" muted playsinline webkit-playsinline preload="auto" data-poster="/site/video/intro-poster.webp" poster="site/video/intro-poster.webp" aria-hidden="true">
-    <source data-src="/site/video/intro.webm" type="video/webm">
-    <source data-src="/site/video/intro.mp4" type="video/mp4">
+  <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" data-poster="/site/video/intro-poster.webp?v=20261115f" poster="site/video/intro-poster.webp?v=20261115f" aria-hidden="true">
+    <source data-src="/site/video/intro.webm?v=20261115f" type="video/webm">
+    <source data-src="/site/video/intro.mp4?v=20261115f" type="video/mp4">
   </video>
+  <button type="button" class="ff-intro-sound" id="ffIntroSound" aria-label="Mute sound" aria-pressed="false">
+    <svg class="ff-intro-ic-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg>
+    <svg class="ff-intro-ic-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16.2 9.2l4.6 5.6M20.8 9.2l-4.6 5.6"/></svg>
+  </button>
   <button type="button" class="ff-intro-skip" id="ffIntroSkip">Skip</button>
 </div>
-<script src="site/js/ff-intro.js?v=20261115e"></script>
+<script src="site/js/ff-intro.js?v=20261115f"></script>
 <script>
 (function(){
   var abs = window.__FF_ABS__ || function(p){ return p; };
@@ -465,8 +469,8 @@ if ('serviceWorker' in navigator) {
   }
   var v = el.querySelector('video');
   if (v) {
-    v.poster = abs('/site/video/intro-poster.webp');
-    el.style.setProperty('--ff-intro-poster', "url('" + abs('/site/video/intro-poster.webp') + "')");
+    v.poster = abs('/site/video/intro-poster.webp?v=20261115f');
+    el.style.setProperty('--ff-intro-poster', "url('" + abs('/site/video/intro-poster.webp?v=20261115f') + "')");
   }
   el.querySelectorAll('source[data-src]').forEach(function(s){ s.src = abs(s.getAttribute('data-src')); });
   if (window.FFIntro) FFIntro.run();
