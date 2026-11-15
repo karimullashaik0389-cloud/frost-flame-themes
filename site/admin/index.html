@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="../img/favicon-32.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="admin.css" />
-<script src="config.js"></script>
-<script src="api.js"></script>
+<link rel="stylesheet" href="admin.css?v=20261115d" />
+<script src="config.js?v=20261115d"></script>
+<script src="api.js?v=20261115d"></script>
 </head>
 <body>
 <div class="wrap">
@@ -29,6 +29,7 @@
       <label for="loginPass">Password</label>
       <div class="pw"><input id="loginPass" name="password" type="password" autocomplete="current-password" />
         <button type="button" class="eye" data-eye="loginPass" aria-label="Show password">Show</button></div>
+      <label class="remember" for="loginRemember"><input id="loginRemember" type="checkbox" checked /> Remember this device</label>
       <button class="btn btn-primary" id="loginBtn" type="submit">Log in</button>
     </form>
     <p class="msg" id="loginMsg" role="alert"></p>
@@ -125,6 +126,6 @@
 
 <div class="sheet-bg hidden" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script src="admin.js"></script>
+<script src="admin.js?v=20261115d"></script>
 </body>
 </html>

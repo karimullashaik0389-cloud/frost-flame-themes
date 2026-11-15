@@ -2,6 +2,44 @@
 (function () {
   var TK = 'ff-site-admin-token', UK = 'ff-site-admin-user';
   var token = localStorage.getItem(TK) || '';
+
+  var DK = 'ff-site-admin-device';
+  var deviceToken = localStorage.getItem(DK) || '';
+  var wantRemember = true;
+  function deviceLabel() {
+    var ua = navigator.userAgent || '';
+    if (/iPad/.test(ua)) return 'iPad';
+    if (/iPhone/.test(ua)) return 'iPhone';
+    if (/Android/.test(ua)) return 'Android phone';
+    if (/Mac OS X/.test(ua)) return 'Mac';
+    if (/Windows/.test(ua)) return 'Windows computer';
+    if (/Linux/.test(ua)) return 'Linux computer';
+    return 'Saved device';
+  }
+  function rememberChecked() { var el = $('loginRemember'); return !el || !!el.checked; }
+  function storeDevice(t) {
+    deviceToken = t || '';
+    if (deviceToken) localStorage.setItem(DK, deviceToken);
+    else localStorage.removeItem(DK);
+  }
+  function acceptLogin(r) {
+    token = r.token; me = r.user;
+    localStorage.setItem(TK, token); localStorage.setItem(UK, JSON.stringify(me));
+    if (r.deviceToken) storeDevice(r.deviceToken);
+  }
+  function attachDeviceIfWanted() {
+    if (!wantRemember || !token) return Promise.resolve();
+    return FFApi.call({ action: 'deviceRemember', token: token, deviceLabel: deviceLabel() }).then(function (r) {
+      if (r && r.deviceToken) storeDevice(r.deviceToken);
+    }).catch(function (e) { if (e && e.code !== 'unknown_action') storeDevice(''); });
+  }
+  function resumeWithDevice() {
+    if (!deviceToken) return Promise.resolve(false);
+    return FFApi.call({ action: 'loginDevice', deviceToken: deviceToken }).then(function (r) {
+      acceptLogin(r); wantRemember = true; return true;
+    }).catch(function () { storeDevice(''); return false; });
+  }
+
   var me = null, menuItems = [], categories = [], textRows = [], people = [], lastLoginPassword = '', toastTimer;
   try { me = JSON.parse(localStorage.getItem(UK) || 'null'); } catch (e) { me = null; }
   var TABS = [
@@ -65,9 +103,16 @@
     payload = payload || {};
     if (token) payload.token = token;
     return FFApi.call(payload).catch(function (e) {
+      if (e.code === 'auth' && deviceToken && !payload._retriedDevice) {
+        return resumeWithDevice().then(function (ok) {
+          if (!ok) { dropSession(true); showLogin(e.message); throw e; }
+          payload.token = token; payload._retriedDevice = true;
+          return api(payload);
+        });
+      }
       if (e.code === 'auth' || e.code === 'must_change_password') {
         if (e.code === 'must_change_password') showChange(false);
-        else showLogin(e.message);
+        else { dropSession(true); showLogin(e.message); }
       }
       throw e;
     });
@@ -95,7 +140,7 @@
     };
     $('spOk').onclick = closeSheet;
   }
-  function dropSession() { token = ''; me = null; localStorage.removeItem(TK); localStorage.removeItem(UK); }
+  function dropSession(all) { token = ''; me = null; localStorage.removeItem(TK); localStorage.removeItem(UK); if (all) storeDevice(''); }
   function showLogin(msg) {
     show('appView', false); show('changeView', false); show('loginView', true);
     $('loginMsg').textContent = msg || ''; $('loginMsg').className = 'msg';
@@ -140,8 +185,10 @@
     var btn = $('loginBtn'), pw = $('loginPass').value;
     busy(btn, true); $('loginMsg').textContent = '';
     lastLoginPassword = pw;
-    FFApi.call({ action: 'login', username: $('loginUser').value, password: pw }).then(function (r) {
-      token = r.token; me = r.user; localStorage.setItem(TK, token); localStorage.setItem(UK, JSON.stringify(me));
+    wantRemember = rememberChecked();
+    FFApi.call({ action: 'login', username: $('loginUser').value, password: pw, remember: wantRemember, deviceLabel: deviceLabel() }).then(function (r) {
+      acceptLogin(r);
+      if (!r.deviceToken && !wantRemember) storeDevice('');
       $('loginPass').value = '';
       if (r.mustChangePassword) showChange(!lastLoginPassword); else { lastLoginPassword = ''; showApp(); toast('Welcome, ' + me.displayName); }
     }).catch(function (e) {
@@ -159,13 +206,16 @@
     busy($('cvBtn'), true); $('cvMsg').textContent = '';
     api({ action: 'changePassword', oldPassword: oldPw, newPassword: a }).then(function () {
       lastLoginPassword = ''; ['cvOld', 'cvNew', 'cvNew2'].forEach(function (i) { $(i).value = ''; });
+      storeDevice('');
       return api({ action: 'me' });
     }).then(function (r) {
-      me = r.user; localStorage.setItem(UK, JSON.stringify(me)); showApp(); toast('Password saved. Welcome, ' + me.displayName);
+      me = r.user; localStorage.setItem(UK, JSON.stringify(me));
+      return attachDeviceIfWanted();
+    }).then(function () { showApp(); toast('Password saved. Welcome, ' + me.displayName);
     }).catch(function (e) { $('cvMsg').textContent = e.message; if (e.code === 'bad_password') show('cvOldWrap', true); })
       .then(function () { busy($('cvBtn'), false); });
   };
-  function logout() { var t = token; dropSession(); if (t) FFApi.call({ action: 'logout', token: t }).catch(function () {}); showLogin('You are logged out.'); $('loginMsg').className = 'msg ok'; }
+  function logout() { var t = token, d = deviceToken; dropSession(true); if (t) FFApi.call({ action: 'logout', token: t, deviceToken: d }).catch(function () {}); showLogin('You are logged out.'); $('loginMsg').className = 'msg ok'; }
   $('logoutBtn').onclick = logout; $('cvLogout').onclick = logout;
 
   $('meForm').onsubmit = function (ev) {
@@ -175,6 +225,9 @@
     busy($('meBtn'), true); $('meMsg').textContent = '';
     api({ action: 'changePassword', oldPassword: $('meOld').value, newPassword: a }).then(function () {
       ['meOld', 'meNew', 'meNew2'].forEach(function (i) { $(i).value = ''; });
+      storeDevice('');
+      return attachDeviceIfWanted();
+    }).then(function () {
       $('meMsg').textContent = 'Password updated.'; $('meMsg').className = 'msg ok';
     }).catch(function (e) { $('meMsg').textContent = e.message; $('meMsg').className = 'msg'; }).then(function () { busy($('meBtn'), false); });
   };
@@ -410,7 +463,30 @@
       }).catch(function (e) { $('npMsg').textContent = e.message; busy($('npSave'), false); });
     };
   };
-  function openPerson(u) {
+  function devicesHtml(p) {
+    var list = p.devices || [];
+    if (!list.length) return '<p class="hint">No remembered devices.</p>';
+    return '<p class="hint">Remembered devices</p>' + list.map(function (d) {
+      return '<div class="device"><div><b>' + esc(d.label) + '</b><div class="muted">Last used ' + esc(d.lastUsed || '') +
+        (d.created ? ' · saved ' + esc(d.created) : '') + '</div></div>' +
+        '<button class="btn btn-ghost sm" type="button" data-revoke-device="' + esc(d.id) + '">Revoke</button></div>';
+    }).join('');
+  }
+  function bindDeviceRevokes(p) {
+    document.querySelectorAll('[data-revoke-device]').forEach(function (btn) {
+      btn.onclick = function () {
+        var id = btn.getAttribute('data-revoke-device');
+        var d = (p.devices || []).filter(function (x) { return x.id === id; })[0];
+        confirmSheet('Revoke this device?', 'They will need to type their password the next time they open the admin on that phone.', 'Revoke', true).then(function (ok) {
+          if (!ok) return;
+          api({ action: 'deviceRevoke', username: p.username, deviceId: id }).then(function () {
+            toast('Device revoked' + (d && d.label ? ' (' + d.label + ')' : '')); closeSheet(); loadPeople();
+          }).catch(function (e) { if ($('pMsg')) $('pMsg').textContent = e.message; else toast(e.message, true); });
+        });
+      };
+    });
+  }
+    function openPerson(u) {
     var p = people.filter(function (x) { return x.username === u; })[0]; if (!p) return;
     openSheet('<h2>' + esc(p.displayName) + '</h2>' +
       '<div class="kv"><b>Username</b><span>' + esc(p.username) + '</span><b>Role</b><span>' + (p.role === 'owner' ? 'Owner' : 'Employee') + '</span>' +
@@ -421,8 +497,10 @@
         '<button class="btn btn-ghost" id="pRole" type="button">Make ' + (p.role === 'owner' ? 'an employee' : 'an owner') + '</button>' +
         '<button class="btn btn-ghost" id="pActive" type="button">' + (p.active ? 'Switch off' : 'Switch on') + '</button>' +
         '<button class="btn btn-danger" id="pRemove" type="button">Remove</button>') +
+      devicesHtml(p) +
       '<button class="btn btn-ghost" id="pClose" type="button">Close</button>');
     $('pClose').onclick = closeSheet;
+    bindDeviceRevokes(p);
     var fail = function (e) { if ($('pMsg')) $('pMsg').textContent = e.message; else toast(e.message, true); };
     if ($('pReset')) $('pReset').onclick = function () {
       confirmSheet('Reset ' + p.displayName + '\'s password?', 'They are logged out everywhere and get a new first password (also unlocks a locked account).', 'Reset').then(function (ok) {
@@ -464,11 +542,17 @@
 
   function boot() {
     if (!FFApi.ready()) { showLogin(''); return; }
-    if (!token) { showLogin(''); return; }
-    api({ action: 'me' }).then(function (r) {
-      me = r.user; localStorage.setItem(UK, JSON.stringify(me));
-      if (r.user.mustChangePassword) showChange(false); else showApp();
-    }).catch(function (e) { if (e.code !== 'auth') showLogin(e.message); else showLogin(''); });
+    function afterResume() { if (me && me.mustChangePassword) showChange(false); else showApp(); }
+    if (token) {
+      api({ action: 'me' }).then(function (r) {
+        me = r.user; localStorage.setItem(UK, JSON.stringify(me));
+        afterResume();
+      }).catch(function (e) { if (e.code !== 'auth') showLogin(e.message); });
+    } else if (deviceToken) {
+      resumeWithDevice().then(function (ok) { if (ok) afterResume(); else showLogin(''); });
+    } else {
+      showLogin('');
+    }
   }
   boot();
 })();
