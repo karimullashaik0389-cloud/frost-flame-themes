@@ -1,479 +1,342 @@
-<!doctype html><html lang="en-GB"><head><meta charset="utf-8"/><script>(function(){try{if(/(^|\.)frostandflamee\.com$/i.test(location.hostname)&&/^\/(index\.html)?$/.test(location.pathname)&&!/[?&](preview|group|fresh)=/.test(location.search)){location.replace("/site/"+location.search+location.hash);}}catch(e){}})();</script><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#0B0D10"/><title>Frost & Flame – Stone ice cream & Andhra pulao, Hackney Road E2</title><meta name="description" content="One kitchen. Two temperatures. Stone ice cream mixed to order, Andhra pulao and Indian street food, delivered around Hackney Road, E2. Order on WhatsApp."/><meta property="og:type" content="restaurant"/><meta property="og:site_name" content="Frost & Flame"/><meta property="og:title" content="Frost & Flame – One kitchen. Two temperatures."/><meta property="og:description" content="Stone ice cream mixed to order. Andhra pulao and street food, fired fresh. Delivered around Hackney Road, E2."/><meta property="og:image" content="https://hackney-stone.emergent.host/img/og.jpg"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:card" content="summary_large_image"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/><meta name="apple-mobile-web-app-title" content="Frost & Flame"/><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.emergent.sh https://*.posthog.com https://hackney-stone.emergent.host; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https://raw.githubusercontent.com https://*.emergentagent.com https://*.emergent.host; connect-src 'self' https: wss:; frame-src https://wa.me; base-uri 'self'; form-action 'self' https://wa.me"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<script>
-(function(){
-  /* Detect GitHub Pages project base; empty on local root server. */
-  var BASE = '';
-  try {
-    var m = location.pathname.match(/^(\/frost-flame-themes)(?=\/|$)/);
-    if (m) BASE = m[1];
-  } catch (e) {}
-  window.__FF_BASE__ = BASE;
-  function abs(p){
-    if (!p) return BASE || '/';
-    if (/^https?:\/\//i.test(p)) return p;
-    return (BASE || '') + (p.charAt(0) === '/' ? p : '/' + p);
-  }
-  window.__FF_ABS__ = abs;
-  window.__FF_NAV__ = function (p) {
-    try {
-      if (!p) return;
-      var path = (p.charAt(0) === '/') ? p : ('/' + p);
-      var target = abs(path);
-      var curFull = location.pathname + location.search + location.hash;
-      if (curFull === target) return;
-      // Full navigation is reliable on GH Pages. Soft pushState left blank #root
-      // (infinite spinner) on several routes; SW is pass-through so assign is safe.
-      location.assign(target);
-    } catch (e) {
-      try { location.href = abs(p); } catch (e2) {}
-    }
-  };
-
-
-
-  /* Fix service worker registration: bundle uses /sw.js → project base. */
-if ('serviceWorker' in navigator) {
-    try {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        regs.forEach(function (r) { try { r.update(); } catch (e) {} });
-      });
-    } catch (e) {}
-  }
-  /* One worker, project scope. Never let the bundled listener reload on controllerchange
-     (that froze iPhone Safari and prompted a refresh with no error). */
-  if ('serviceWorker' in navigator) {
-    try {
-      var _swAdd = navigator.serviceWorker.addEventListener.bind(navigator.serviceWorker);
-      navigator.serviceWorker.addEventListener = function (type, fn, opts) {
-        if (type === 'controllerchange') return _swAdd(type, function () {}, opts);
-        return _swAdd(type, fn, opts);
-      };
-    } catch (e) {}
-  }
-  if ('serviceWorker' in navigator) {
-    try {
-      var _reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
-      navigator.serviceWorker.register = function (url, opts) {
-        try {
-          opts = opts || {};
-          if (typeof url === 'string' && /\/sw\.js(\?|$)/.test(url)) url = '/ff-sw.js';
-          if (typeof url === 'string' && url.charAt(0) === '/' && BASE && url.indexOf(BASE) !== 0) url = BASE + url;
-          if (!opts.scope) opts.scope = (BASE || '') + '/';
-        } catch (e) {}
-        return _reg(url, opts);
-      };
-    } catch (e) {}
-  }
-
-  /* Catch in-app <a href="/…"> that skip React Router basename (PWA / deep links). */
-  document.addEventListener('click', function (ev) {
-    if (!BASE) return;
-    if (ev.defaultPrevented) return;
-    if (ev.button !== 0) return;
-    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
-    var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
-    if (!a) return;
-    if (a.target && a.target !== '' && a.target !== '_self') return;
-    var href = a.getAttribute('href');
-    if (!href || href.charAt(0) !== '/') return;
-    if (href.indexOf('//') === 0) return;
-    if (href.indexOf(BASE) === 0) return;
-    // leave pure hash
-    if (href.charAt(0) === '#') return;
-    ev.preventDefault();
-    if (window.__FF_NAV__) window.__FF_NAV__(href);
-    else location.assign(BASE + href);
-  }, true);
-
-  /* Guard location.assign/replace for root-absolute app paths. */
-  try {
-    ['assign', 'replace'].forEach(function (fn) {
-      var orig = Location.prototype[fn];
-      Location.prototype[fn] = function (url) {
-        if (BASE && typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('//') !== 0) {
-          url = BASE + url;
+<!DOCTYPE html>
+<!-- GENERATED from site/index.html by site/make-root-index.py. Edit site/index.html, then re-run the script. -->
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <base href="/site/">
+  <script>(function(){var H=history;["pushState","replaceState"].forEach(function(n){var o=H[n];if(!o)return;H[n]=function(s,t,u){if(typeof u==="string"&&u.charAt(0)==="#")u=location.pathname+location.search+u;return o.call(H,s,t,u);};});document.addEventListener("click",function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;var a=e.target&&e.target.closest&&e.target.closest("a[href^='#']");if(!a||a.target)return;var h=a.getAttribute("href");e.preventDefault();if(h==="#"||h==="#top"&&!document.getElementById("top")){window.scrollTo(0,0);return;}location.hash=h;});})();</script>
+  <script>(function(){try{if(/(^|\.)frostandflamee\.com$/i.test(location.hostname)&&/^\/site\/(index\.html)?$/.test(location.pathname))location.replace("/"+location.search+location.hash);}catch(e){}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Frost &amp; Flame – Stone ice cream &amp; Andhra pulao, Hackney Road E2</title>
+  <meta name="description" content="One kitchen. Two temperatures. A café and dessert parlour at 194 Hackney Road, London E2 7QL — eat-in, collection and delivery. Stone ice cream mixed to order, Andhra pulao and Indian street food. Order on WhatsApp.">
+  <link rel="canonical" href="https://frostandflamee.com/">
+  <meta name="theme-color" content="#07080a">
+  <meta property="og:type" content="restaurant">
+  <meta property="og:site_name" content="Frost &amp; Flame">
+  <meta property="og:title" content="Frost &amp; Flame – One kitchen. Two temperatures.">
+  <meta property="og:description" content="A café and dessert parlour at 194 Hackney Road. Eat-in, collection and delivery. Stone ice cream mixed to order. Andhra pulao and street food, fired fresh.">
+  <meta property="og:url" content="https://frostandflamee.com/">
+  <meta property="og:image" content="https://frostandflamee.com/site/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Frost &amp; Flame – One kitchen. Two temperatures.">
+  <meta name="twitter:description" content="A café and dessert parlour at 194 Hackney Road. Eat-in, collection and delivery. Stone ice cream mixed to order. Andhra pulao and street food, fired fresh.">
+  <meta name="twitter:image" content="https://frostandflamee.com/site/img/og.jpg">
+  <link rel="icon" href="img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" sizes="180x180">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="image" href="img/frost-poster-mobile.webp" type="image/webp" media="(max-width: 767px)">
+  <link rel="preload" as="image" href="img/frost-poster.webp" type="image/webp" media="(min-width: 768px)">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/features.css?v=20261118a">
+  <link rel="stylesheet" href="css/ff-intro.css?v=20261118a">
+  <script>
+    (function () {
+      try {
+        var force = /(?:^|[?&])intro=1(?:&|$)/.test(location.search);
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!force && (reduce || sessionStorage.getItem('ff_intro_seen') === '1')) {
+          document.documentElement.classList.add('ff-intro-skip');
         }
-        return orig.call(this, url);
-      };
-    });
-  } catch (e) {}
-
-  /* Prefix root-absolute asset URLs with GH Pages base (img/logo, dishes, media). */
-  function needsBase(url) {
-    if (!BASE || typeof url !== 'string' || !url) return false;
-    if (url.charAt(0) !== '/') return false;
-    if (url.indexOf(BASE) === 0) return false;
-    if (url.indexOf('//') === 0) return false;
-    // leave pure API to toLocalApi; still safe to prefix /api for img unlikely
-    return true;
-  }
-  function withBase(url) { return needsBase(url) ? (BASE + url) : url; }
-  window.__FF_WITH_BASE__ = withBase;
-
-  function rewriteSrcset(value) {
-    if (typeof value !== 'string' || !value) return value;
-    return value.split(',').map(function (part) {
-      var bits = part.trim().split(/\s+/);
-      if (bits[0]) bits[0] = withBase(bits[0]);
-      return bits.join(' ');
-    }).join(', ');
-  }
-
-  var _setAttr = Element.prototype.setAttribute;
-  Element.prototype.setAttribute = function (name, value) {
-    var n = String(name || '').toLowerCase();
-    if ((n === 'src' || n === 'poster' || n === 'data-src') && typeof value === 'string') value = withBase(value);
-    if (n === 'srcset' || n === 'data-srcset') value = rewriteSrcset(value);
-    return _setAttr.call(this, name, value);
-  };
-
-  function patchSrcProp(Ctor, prop) {
-    try {
-      var desc = Object.getOwnPropertyDescriptor(Ctor.prototype, prop);
-      if (!desc || !desc.set) return;
-      Object.defineProperty(Ctor.prototype, prop, {
-        configurable: true,
-        enumerable: desc.enumerable,
-        get: desc.get ? function () { return desc.get.call(this); } : undefined,
-        set: function (v) { desc.set.call(this, prop === 'srcset' ? rewriteSrcset(v) : withBase(v)); }
-      });
-    } catch (e) {}
-  }
-  patchSrcProp(HTMLImageElement, 'src');
-  if (typeof HTMLSourceElement !== 'undefined') {
-    patchSrcProp(HTMLSourceElement, 'src');
-    patchSrcProp(HTMLSourceElement, 'srcset');
-  }
-  if (typeof HTMLVideoElement !== 'undefined') {
-    patchSrcProp(HTMLVideoElement, 'src');
-    patchSrcProp(HTMLVideoElement, 'poster');
-  }
-  if (typeof HTMLAudioElement !== 'undefined') patchSrcProp(HTMLAudioElement, 'src');
-  if (typeof HTMLImageElement !== 'undefined') patchSrcProp(HTMLImageElement, 'srcset');
-
-  function fixMediaEl(el) {
-    if (!el || el.nodeType !== 1) return;
-    ['src', 'poster', 'data-src'].forEach(function (attr) {
-      if (!el.getAttribute) return;
-      var v = el.getAttribute(attr);
-      if (!v) return;
-      var nv = withBase(v);
-      if (nv !== v) _setAttr.call(el, attr, nv);
-    });
-    var ss = el.getAttribute && el.getAttribute('srcset');
-    if (ss) {
-      var nss = rewriteSrcset(ss);
-      if (nss !== ss) _setAttr.call(el, 'srcset', nss);
+      } catch (e) {}
+    })();
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Frost & Flame",
+    "description": "A café and dessert parlour at 194 Hackney Road. Eat-in, collection and delivery. Stone ice cream mixed to order, Andhra pulao and Indian street food.",
+    "url": "https://frostandflamee.com/",
+    "image": "https://frostandflamee.com/site/img/og.jpg",
+    "telephone": "+447587596490",
+    "servesCuisine": ["Indian", "Ice Cream"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "194 Hackney Road",
+      "addressLocality": "London",
+      "postalCode": "E2 7QL",
+      "addressCountry": "GB"
+    },
+    "hasMenu": "https://frostandflamee.com/#menu",
+    "sameAs": ["https://www.instagram.com/frostandflame.london/"],
+    "areaServed": ["E1", "E1W", "E2", "E8", "E9"],
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "11:00",
+      "closes": "23:00"
     }
   }
-  function scanMedia(root) {
-    try {
-      (root.querySelectorAll ? root.querySelectorAll('img,source,video,audio,image,use') : []).forEach(fixMediaEl);
-      if (root.tagName) fixMediaEl(root);
-    } catch (e) {}
-  }
-  function bootMediaFix() {
-    scanMedia(document);
-    try {
-      var mo = new MutationObserver(function (muts) {
-        muts.forEach(function (m) {
-          if (m.type === 'attributes') fixMediaEl(m.target);
-          m.addedNodes && m.addedNodes.forEach(function (n) {
-            if (n.nodeType === 1) scanMedia(n);
-          });
-        });
-      });
-      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'poster', 'data-src'] });
-    } catch (e) {}
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootMediaFix);
-  else bootMediaFix();
-
-  var LIVE_API = 'https://hackney-stone.emergent.host/api';
-
-  function toLocalApi(url) {
-    if (typeof url !== 'string') return url;
-    if (url.indexOf(LIVE_API) === 0) {
-      // Preview: prefer same-origin static /api (avoids credentialed CORS failures)
-      return abs('/api' + url.slice(LIVE_API.length));
-    }
-    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api/') === 0) {
-      return BASE + url;
-    }
-    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api') !== 0) {
-      // static assets under project base
-      if (url.indexOf('/static/') === 0 || url.indexOf('/vendor/') === 0 || url.indexOf('/img/') === 0 || url.indexOf('/dish/') === 0 || url.indexOf('/scroll/') === 0 || url.indexOf('/audio/') === 0 || url.indexOf('/ff-') === 0 || url.indexOf('/favicon') === 0 || url.indexOf('/apple-touch') === 0 || url.indexOf('/manifest') === 0) {
-        return BASE + url;
+  </script>
+  <script>
+    (function () {
+      var p = location.pathname;
+      if (p && !p.endsWith("/") && !/\.[a-z0-9]+$/i.test(p)) {
+        location.replace(p + "/" + location.search + location.hash);
       }
-    }
-    return url;
-  }
-
-  /* Best-effort pathname strip for older engines; modern Chromium keeps an own non-configurable getter. */
-  if (BASE) {
-    try {
-      var desc = Object.getOwnPropertyDescriptor(Location.prototype, 'pathname');
-      if (desc && desc.get && desc.configurable) {
-        Object.defineProperty(Location.prototype, 'pathname', {
-          configurable: true,
-          enumerable: true,
-          get: function () {
-            var p = desc.get.call(this);
-            return p.indexOf(BASE) === 0 ? (p.slice(BASE.length) || '/') : p;
-          }
-        });
-      }
-    } catch (e) {}
-    var wrapHist = function (fn) {
-      return function (state, title, url) {
-        if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0) {
-          url = BASE + url;
-        }
-        return fn.call(this, state, title, url);
-      };
-    };
-    history.pushState = wrapHist(history.pushState);
-    history.replaceState = wrapHist(history.replaceState);
-  }
-
-  /* Rewrite Emergent absolute API → local static /api on GH Pages; keep relative /api local. */
-  var _fetch = window.fetch;
-  window.fetch = function (input, init) {
-    try {
-      if (typeof input === 'string') {
-        input = toLocalApi(input);
-      } else if (input && typeof input.url === 'string') {
-        var rewritten = toLocalApi(input.url);
-        if (rewritten !== input.url) input = new Request(rewritten, input);
-      }
-    } catch (e) {}
-    return _fetch.call(this, input, init);
-  };
-
-  /* Axios uses XHR, not fetch. Rewrite + soft-mock POST endpoints GH Pages cannot serve. */
-  (function patchXHR() {
-    var XO = XMLHttpRequest.prototype.open;
-    var XS = XMLHttpRequest.prototype.send;
-    var mocks = {
-      '/assist': function () {
-        return JSON.stringify({
-          reply: "I'm resting on this preview — chat needs the live kitchen link. Browse the menu, or try Games and Stories on the right!"
-        });
-      },
-      '/matchmaker': function () {
-        return JSON.stringify({
-          picks: [],
-          note: 'Matchmaker is preview-only here. Open the live site to get real picks.'
-        });
-      },
-      '/waitlist': function () {
-        return JSON.stringify({ ok: false, detail: 'Waitlist is not available on this preview.' });
-      },
-      '/orders': function () {
-        return JSON.stringify({ ok: false, detail: 'Ordering is not available on this preview. Use the live site or WhatsApp.' });
-      },
-      '/auth/logout': function () { return JSON.stringify({ ok: true }); }
-    };
-    XMLHttpRequest.prototype.open = function (method, url) {
-      this.__ff_method = String(method || 'GET').toUpperCase();
-      this.__ff_url = typeof url === 'string' ? url : String(url);
-      var local = toLocalApi(this.__ff_url);
-      this.__ff_local = local;
-      this.__ff_api_path = '';
-      if (typeof local === 'string') {
-        var idx = local.indexOf('/api/');
-        if (idx !== -1) this.__ff_api_path = local.slice(idx + 4); // e.g. /menu
-      }
-      var args = Array.prototype.slice.call(arguments);
-      args[1] = local;
-      return XO.apply(this, args);
-    };
-    XMLHttpRequest.prototype.send = function (body) {
-      var path = this.__ff_api_path || '';
-      var method = this.__ff_method || 'GET';
-      // Soft-mock mutating calls and assist chat on static preview
-      var mockKey = null;
-      if (path.indexOf('/assist') === 0) mockKey = '/assist';
-      else if (path.indexOf('/matchmaker') === 0) mockKey = '/matchmaker';
-      else if (path.indexOf('/waitlist') === 0) mockKey = '/waitlist';
-      else if (path.indexOf('/orders') === 0) mockKey = '/orders';
-      else if (path.indexOf('/auth/logout') === 0) mockKey = '/auth/logout';
-      else if (path.indexOf('/auth/') === 0 && method !== 'GET' && path.indexOf('/auth/me') !== 0) {
-        mockKey = '/waitlist'; // generic friendly fail
-      }
-      if (mockKey && (method !== 'GET' && method !== 'HEAD' || mockKey === '/assist')) {
-        var xhr = this;
-        var payload = mocks[mockKey] ? mocks[mockKey]() : JSON.stringify({ ok: false, detail: 'Not available on preview.' });
-        var status = (mockKey === '/assist' || mockKey === '/auth/logout' || mockKey === '/matchmaker') ? 200 : 200;
-        // Always 200 JSON so UI never spins on preview mocks
-        if (mockKey === '/orders' || mockKey === '/waitlist') {
-          payload = JSON.stringify({ ok: true, id: 'preview', detail: 'Saved on this preview only.' });
-          status = 200;
-        }
-        var rs = 1;
-        try {
-          Object.defineProperty(xhr, 'status', { configurable: true, get: function () { return rs >= 2 ? status : 0; } });
-          Object.defineProperty(xhr, 'statusText', { configurable: true, get: function () { return 'OK'; } });
-          Object.defineProperty(xhr, 'readyState', { configurable: true, get: function () { return rs; } });
-          Object.defineProperty(xhr, 'responseText', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
-          Object.defineProperty(xhr, 'response', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
-          Object.defineProperty(xhr, 'responseURL', { configurable: true, get: function () { return xhr.__ff_local || ''; } });
-          xhr.getAllResponseHeaders = function () { return 'content-type: application/json\r\n'; };
-          xhr.getResponseHeader = function (h) { return String(h).toLowerCase() === 'content-type' ? 'application/json' : null; };
-        } catch (e) {}
-        function tick(next) {
-          rs = next;
-          try { if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange(); } catch (e) {}
-          try { xhr.dispatchEvent(new Event('readystatechange')); } catch (e) {}
-          if (next === 4) {
-            try { if (typeof xhr.onload === 'function') xhr.onload(); } catch (e) {}
-            try { xhr.dispatchEvent(new Event('load')); } catch (e) {}
-            try { xhr.dispatchEvent(new Event('loadend')); } catch (e) {}
-          }
-        }
-        setTimeout(function () { tick(2); setTimeout(function () { tick(3); setTimeout(function () { tick(4); }, 0); }, 0); }, 0);
-        return;
-      }
-      return XS.call(this, body);
-    };
-  })();
-  var ffAssetV = '202611150200';
-  function ffBust(u) {
-    u = String(u || '');
-    if (!u || /[?&]v=/.test(u)) return u;
-    if (!/\.(css|js|webmanifest)(\?|$)/.test(u)) return u;
-    return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ffAssetV;
-  }
-
-  /* Self-updating worker. Same scope as any older /sw.js so phones replace it
-     without a reload loop and without clearing site data. */
-  if ('serviceWorker' in navigator) {
-    try {
-      var __ffSwUrl = abs('/ff-sw.js');
-      navigator.serviceWorker.register(__ffSwUrl, { scope: (BASE ? BASE + '/' : './') }).then(function (reg) {
-        var hadController = !!navigator.serviceWorker.controller;
-        var worker = reg.installing || reg.waiting;
-        if (hadController && worker) {
-          worker.addEventListener('statechange', function () {
-            if (worker.state !== 'activated') return;
-            try {
-              if (sessionStorage.getItem('ff_sw_reloaded') === '1') return;
-              sessionStorage.setItem('ff_sw_reloaded', '1');
-            } catch (e) { return; }
-            location.reload();
-          });
-        }
-        return navigator.serviceWorker.getRegistrations();
-      }).then(function (regs) {
-        regs.forEach(function (r) {
-          var scope = r.scope || '';
-          if (BASE && scope.indexOf(BASE + '/') === -1) {
-            try { r.unregister(); } catch (e) {}
-          }
-        });
-      }).catch(function () {});
-    } catch (e) {}
-    try {
-      var sweep = function () {
-        document.querySelectorAll('[data-sonner-toast]').forEach(function (n) {
-          var t = n.textContent || '';
-          if (t.indexOf('Fresh menu') !== -1) { try { n.remove(); } catch (e) {} }
-        });
-      };
-      setInterval(sweep, 700);
-    } catch (e) {}
-  }
-  function addLink(rel, href, extra) {
-    var l = document.createElement('link');
-    l.rel = rel; l.href = abs(ffBust(href));
-    if (extra) Object.keys(extra).forEach(function (k) { l.setAttribute(k, extra[k]); });
-    document.head.appendChild(l);
-  }
-  function addScript(src, defer) {
-    var s = document.createElement('script');
-    s.src = abs(ffBust(src));
-    if (defer) s.defer = true;
-    document.head.appendChild(s);
-    return s;
-  }
-
-  addLink('icon', '/favicon-32.png', { type: 'image/png', sizes: '32x32' });
-  addLink('apple-touch-icon', '/apple-touch-icon.png', { sizes: '180x180' });
-  addLink('manifest', '/manifest.webmanifest');
-  addLink('preload', '/scroll/frost-poster-mobile.webp', { as: 'image', type: 'image/webp', media: '(max-width: 767px)', fetchpriority: 'high' });
-  addLink('preload', '/scroll/frost-poster.webp', { as: 'image', type: 'image/webp', media: '(min-width: 768px)', fetchpriority: 'high' });
-  addLink('stylesheet', '/vendor/fonts.css');
-  addLink('stylesheet', '/static/css/main.d5d693b9.css');
-  addLink('stylesheet', '/ff-tree.css');
-  addLink('stylesheet', '/ff-play.css');
-  addLink('stylesheet', '/ff-themes.css');
-  addLink('stylesheet', '/ff-chrome.css');
-  addLink('stylesheet', '/ff-menu-polish.css');
-  addLink('stylesheet', '/ff-dish-media.css');
-  addLink('stylesheet', '/ff-menu-ready.css');
-  addLink('stylesheet', '/ff-stage.css');
-
-  window.addEventListener('error', function (e) {
-    e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
-  }, true);
-
-  addScript('/vendor/assets.emergent.sh/scripts/emergent-main.js', false);
-  addScript('/static/js/main.ceed9485.js', true);
-
-  document.addEventListener('DOMContentLoaded', function () {
-    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js','/ff-menu-ready.js','/ff-stage.js'].forEach(function (p) {
-      var s = document.createElement('script');
-      s.src = abs(ffBust(p));
-      s.async = false;
-      document.body.appendChild(s);
-    });
-  });
-})();
-</script>
-<script>
-(function(){
-  try {
-    var force=/(?:^|[?&])intro=1(?:&|$)/.test(location.search);
-    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var path=(location.pathname||'/').replace(/\/index\.html$/,'').replace(/\/+$/,'')||'/';
-    var isHome=(path==='/'||path==='/frost-flame-themes');
-    if(!force&&(reduce||sessionStorage.getItem('ff_intro_seen')==='1'||!isHome))document.documentElement.classList.add('ff-intro-skip');
-  } catch(e){}
-})();
-</script></head><body><link rel="stylesheet" href="site/css/ff-intro.css?v=20261115h"/>
-<div id="ffIntro" class="ff-intro" role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('site/video/intro-poster.webp')">
-  <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" data-poster="/site/video/intro-poster.webp?v=20261115h" poster="site/video/intro-poster.webp?v=20261115h" aria-hidden="true">
-    <source data-src="/site/video/intro.mp4?v=20261115h" type="video/mp4">
-    <source data-src="/site/video/intro.webm?v=20261115h" type="video/webm">
-  </video>
-  <button type="button" class="ff-intro-sound" id="ffIntroSound" aria-label="Mute sound" aria-pressed="false">
+    })();
+  </script>
+</head>
+<body>
+  <div id="ffIntro" class="ff-intro" data-autorun role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame">
+    <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" poster="video/intro-poster.webp?v=20261115h" aria-hidden="true">
+      <source src="video/intro.mp4?v=20261118a" type="video/mp4">
+      <source src="video/intro.webm?v=20261115h" type="video/webm">
+    </video>
+    <button type="button" class="ff-intro-sound" id="ffIntroSound" aria-label="Mute sound" aria-pressed="false">
     <svg class="ff-intro-ic-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg>
     <svg class="ff-intro-ic-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16.2 9.2l4.6 5.6M20.8 9.2l-4.6 5.6"/></svg>
   </button>
-  <button type="button" class="ff-intro-tap" id="ffIntroTap" hidden aria-label="Tap for sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg><span>Tap for sound</span></button>
-  <button type="button" class="ff-intro-skipbtn" id="ffIntroSkip">Skip</button>
-</div>
-<script src="site/js/ff-intro.js?v=20261115h"></script>
-<script>
-(function(){
-  var abs = window.__FF_ABS__ || function(p){ return p; };
-  var el = document.getElementById('ffIntro');
-  if (!el) return;
-  var path = (location.pathname || '/').replace(/\/+$/,'') || '/';
-  var base = (window.__FF_BASE__ || '').replace(/\/+$/,'');
-  var rest = path.slice(base.length) || '/';
-  rest = rest.replace(/\/index\.html$/,'') || '/';
-  var isHome = (rest === '/' || rest === '');
-  if (!isHome) {
-    try { el.hidden = true; document.documentElement.classList.add('ff-intro-skip'); } catch(e){}
-    return;
-  }
-  var v = el.querySelector('video');
-  if (v) {
-    v.poster = abs('/site/video/intro-poster.webp?v=20261115h');
-    el.style.setProperty('--ff-intro-poster', "url('" + abs('/site/video/intro-poster.webp?v=20261115h') + "')");
-  }
-  el.querySelectorAll('source[data-src]').forEach(function(s){ s.src = abs(s.getAttribute('data-src')); });
-  if (window.FFIntro) FFIntro.run();
-})();
-</script><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+    <button type="button" class="ff-intro-tap" id="ffIntroTap" hidden aria-label="Tap for sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg><span>Tap for sound</span></button>
+    <button type="button" class="ff-intro-skipbtn" id="ffIntroSkip">Skip</button>
+  </div>
+  <a class="skip" href="#menu">Skip to menu</a>
+  <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+
+  <header class="header">
+    <a class="logo" href="#top" aria-label="Frost &amp; Flame home">
+      <img src="img/logo-800.webp" srcset="img/logo-800.webp 800w, img/logo.webp 1600w" sizes="180px" alt="Frost &amp; Flame">
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a class="nav-link" href="#menu">Menu</a>
+      <a class="nav-link" href="#matchmaker">Match</a>
+      <a class="nav-link" href="#build">Build</a>
+      <a class="nav-link" href="#story">Our story</a>
+      <div class="mode-toggle" role="group" aria-label="Frost or Flame look">
+        <button type="button" data-mode="frost" data-testid="mode-frost" aria-pressed="true">Frost</button>
+        <button type="button" data-mode="flame" data-testid="mode-flame" aria-pressed="false">Flame</button>
+      </div>
+      <button class="mood-btn" type="button" data-open-mood aria-label="Dining mood" title="Dining mood">
+        <svg class="mood-icon" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+          <circle cx="6.2" cy="8.2" r="3.1" fill="currentColor" opacity="0.35"/>
+          <circle cx="11" cy="6.4" r="3.15" fill="#9ad8f0"/>
+          <circle cx="11.4" cy="11.6" r="3.15" fill="#ff7a3d"/>
+        </svg>
+        <span class="mood-label">Mood</span>
+      </button>
+      <button class="btn btn-ghost cart-btn" type="button" data-open-cart aria-label="Order">
+        Order <span class="cart-count" data-cart-count>0</span>
+      </button>
+      <a class="btn btn-solid" data-wa-direct href="https://wa.me/447587596490">Order on WhatsApp</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-label="Introduction">
+      <div class="hero-media">
+        <picture>
+          <source media="(max-width: 767px)" srcset="img/frost-poster-mobile.webp">
+          <img src="img/frost-poster.webp" alt="" width="1280" height="726">
+        </picture>
+        <video id="hero-video" muted loop playsinline preload="metadata" poster="img/frost-poster.webp" aria-hidden="true">
+          <source src="video/frost-loop.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="hero-dim" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow" data-launch>Opening 26 November 2026<br>Hackney Road E2</p>
+        <h1 class="wordmark" aria-label="Frost &amp; Flame"><span class="frost" aria-hidden="true"><span style="--i:0">F</span><span style="--i:1">R</span><span style="--i:2">O</span><span style="--i:3">S</span><span style="--i:4">T</span></span><span class="line2" aria-hidden="true"><span class="amp" style="--i:5">&amp;</span><span class="flame"><span style="--i:6">F</span><span style="--i:7">L</span><span style="--i:8">A</span><span style="--i:9">M</span><span style="--i:10">E</span></span></span></h1>
+        <p class="hero-tag">One kitchen. Two temperatures.</p>
+        <p class="hero-lead">Stone ice cream mixed to order. Andhra pulao and street food, fired fresh. A café and dessert parlour on Hackney Road — eat-in, collection and delivery.</p>
+        <div class="hero-actions">
+          <a class="btn btn-frost" data-wa-direct href="https://wa.me/447587596490">Order on WhatsApp</a>
+          <a class="btn btn-ghost" href="#menu">See the menu</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-frost" id="signatures" aria-labelledby="sig-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Signatures</p>
+          <h2 id="sig-title">Made to be craved</h2>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider" id="signature-slider"></div>
+      </div>
+    </section>
+
+
+    <section class="section section-frost" id="matchmaker" aria-labelledby="mm-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Flavour Matchmaker</p>
+          <h2 id="mm-title">Don't know what you want? Tell us what you fancy.</h2>
+        </div>
+      </div>
+      <form id="mm-form" class="feature-card reveal" style="max-width:40rem;margin:0 auto"></form>
+      <div id="mm-results" class="mm-results" data-testid="mm-results" style="max-width:40rem;margin:0 auto"></div>
+      <p class="note reveal" style="max-width:40rem;margin:1rem auto 0" data-testid="mm-disclaimer">Suggestions use our allergen tags. If you have an allergy, check the allergen list and message us before ordering.</p>
+    </section>
+    <section class="section menu" id="menu" data-tone="frost" aria-labelledby="menu-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">The menu</p>
+          <h2 id="menu-title">Frost, flame, and everything between</h2>
+        </div>
+      </div>
+      <div class="tabs-wrap">
+        <div class="tabs" id="menu-tabs" role="tablist" aria-label="Menu categories"></div>
+      </div>
+      <div class="menu-grid" id="menu-grid"></div>
+    </section>
+
+
+    <section class="section section-frost" id="build" aria-labelledby="build-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Create Your Own Stone</p>
+          <h2 id="build-title">Build your stone</h2>
+        </div>
+      </div>
+      <div id="builder-root" class="reveal"></div>
+    </section>
+
+    <section class="section section-dark" id="dial" aria-labelledby="dial-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Ice-to-Fire</p>
+          <h2 id="dial-title">Turn the heat up, or down</h2>
+        </div>
+      </div>
+      <p class="reveal" style="max-width:36rem;margin:0 auto 1.2rem;color:var(--muted)">Every dish has a temperature from Arctic to Inferno. Slide to see what sits at each step.</p>
+      <div id="dial-root" class="reveal" data-level="4"></div>
+    </section>
+
+    <section class="section section-flame" id="play" aria-labelledby="play-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Play</p>
+          <h2 id="play-title">Mix one of each, or play a little</h2>
+        </div>
+      </div>
+      <div id="play-root" class="reveal" style="max-width:40rem;margin:0 auto"></div>
+    </section>
+
+    <section class="section section-dark" id="plans" aria-labelledby="plans-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Meal plans</p>
+          <h2 id="plans-title">Weekly &amp; monthly meal plans</h2>
+        </div>
+      </div>
+      <div id="plans-root" class="reveal" style="max-width:44rem;margin:0 auto"></div>
+    </section>
+
+    <section class="section section-dark" id="story" aria-labelledby="story-title" data-editable="story">
+      <div class="story-inner reveal">
+        <p class="kicker">Our story</p>
+        <h2 id="story-title">Andhra to Hackney</h2>
+        <div id="story-text">
+          <p>Frost &amp; Flame is a café and dessert parlour at 194 Hackney Road, London E2 7QL.</p>
+          <p>Stone ice cream is mixed to order on a frozen slab. Andhra pulao, chaats, curry bowls and drinks are made fresh.</p>
+          <p>One kitchen. Two temperatures.</p>
+        </div>
+        <p class="edit-hint">This story is a short factual placeholder and can be replaced with the founders’ own words before launch.</p>
+      </div>
+    </section>
+
+    <section class="section section-flame" id="visit" aria-labelledby="visit-title">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">Find us</p>
+          <h2 id="visit-title">Eat-in, collection and delivery</h2>
+        </div>
+      </div>
+      <div class="visit-grid reveal">
+        <div class="visit-card">
+          <h3>Hours</h3>
+          <p>11am–11pm, seven days a week.</p>
+          <p>Messages sent outside opening hours are answered when we next open.</p>
+        </div>
+        <div class="visit-card">
+          <h3>Eat-in</h3>
+          <address>194 Hackney Road<br>London E2 7QL</address>
+          <p>A café and dessert parlour with about 20 seats.</p>
+          <a class="map-link" href="https://maps.google.com/?q=194+Hackney+Road+London+E2+7QL" rel="noopener noreferrer" target="_blank">Open in Google Maps</a>
+          <p><a class="ig-link" href="https://www.instagram.com/frostandflame.london/" rel="noopener noreferrer" target="_blank">Instagram @frostandflame.london</a></p>
+        </div>
+        <div class="visit-card">
+          <h3>Collection</h3>
+          <p>Collect from the same address on Hackney Road.</p>
+        </div>
+        <div class="visit-card">
+          <h3>Delivery</h3>
+          <p>We deliver to these postcode areas around Hackney Road:</p>
+          <div class="areas" id="delivery-areas">
+            <span class="area">E1</span><span class="area">E1W</span><span class="area">E2</span><span class="area">E8</span><span class="area">E9</span>
+          </div>
+          <form class="pc-row" id="postcode-form">
+            <input name="postcode" type="text" autocomplete="postal-code" aria-label="Postcode" placeholder="e.g. E2 7QL">
+            <button class="btn btn-ghost" type="submit">Check</button>
+          </form>
+          <p class="pc-msg" id="postcode-msg" role="status"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>© <span id="year">2026</span> Tark Limited · 194 Hackney Road, London E2 7QL</p>
+      <p><a class="ig-link" href="https://www.instagram.com/frostandflame.london/" rel="noopener noreferrer" target="_blank">Instagram @frostandflame.london</a> · <a href="#matchmaker">Matchmaker</a> · <a href="#build">Build</a> · <a href="#play">Play</a> · <a href="#plans">Plans</a> · <a data-wa-direct href="https://wa.me/447587596490">WhatsApp</a></p>
+    </div>
+  </footer>
+
+  <div class="order-bar is-empty" data-order-bar>
+    <button class="btn btn-ghost btn-cart" type="button" data-open-cart>
+      View order <span class="cart-count" data-cart-count>0</span>
+    </button>
+    <a class="btn btn-frost" data-wa-direct href="https://wa.me/447587596490">Order on WhatsApp</a>
+  </div>
+
+  <dialog class="dish-sheet" id="dish-sheet" aria-labelledby="dish-sheet-title" data-testid="dish-sheet"></dialog>
+
+  <dialog class="drawer" id="cart-drawer" aria-labelledby="cart-title">
+    <div class="sheet-head">
+      <h2 id="cart-title">Your order</h2>
+      <button class="icon-close" type="button" data-close-cart aria-label="Close">&times;</button>
+    </div>
+    <div class="sheet-body" id="cart-body"></div>
+  </dialog>
+
+  <dialog class="dialog" id="item-dialog" aria-labelledby="item-dialog-title"></dialog>
+
+
+  <button class="chat-fab" type="button" data-testid="frosty-open-btn" aria-label="Ask Frosty">Fr</button>
+  <div class="chat-panel" id="chat-panel" hidden role="dialog" aria-labelledby="chat-name">
+    <div class="sheet-head">
+      <h2 id="chat-name">Frosty</h2>
+      <button class="icon-close" type="button" data-close-chat aria-label="Close chat">&times;</button>
+    </div>
+    <p class="note" id="chat-disclaimer" style="margin:0;padding:0.4rem 1rem 0"></p>
+    <div class="chat-log" id="chat-log"></div>
+    <p class="note" id="chat-typing" hidden style="padding:0 1rem">typing…</p>
+    <div class="chat-hints" id="chat-hints"></div>
+    <form class="chat-form" id="chat-form">
+      <input id="chat-input" data-testid="chat-input" maxlength="300" autocomplete="off" placeholder="Tell us what you fancy">
+      <button class="btn btn-frost" type="submit" data-testid="chat-send">Send</button>
+    </form>
+  </div>
+
+  <dialog class="mood-sheet" id="mood-sheet" aria-labelledby="mood-title">
+    <div class="sheet-head">
+      <h2 id="mood-title">Dining mood</h2>
+      <button class="icon-close" type="button" data-close-mood aria-label="Close">&times;</button>
+    </div>
+    <div class="mood-grid" id="mood-grid"></div>
+  </dialog>
+
+  <script src="js/ff-intro.js?v=20261115h" defer></script>
+  <script src="js/ff-config.js" defer></script>
+  <script src="js/ff-live.js" defer></script>
+  <script src="js/app.js?v=20261118a" defer></script>
+  <script src="js/effects.js" defer></script>
+  <script src="js/features.js?v=20261115i" defer></script>
+</body>
+</html>

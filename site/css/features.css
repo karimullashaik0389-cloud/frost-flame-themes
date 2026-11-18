@@ -105,6 +105,11 @@ html[data-mode="flame"] .chat-fab { background: var(--flame); color: #1a0803; }
 @media (min-width: 960px) {
   .chat-fab { bottom: 1.5rem; }
 }
+/* Phones: sit the bubble in the gap between the hero buttons and the order bar
+   so it no longer overlaps "See the menu" (390–430px wide). */
+@media (max-width: 479px) {
+  .chat-fab { bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px)); }
+}
 .chat-panel {
   position: fixed; z-index: 50;
   left: 0.75rem; right: 0.75rem;

@@ -1,0 +1,479 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#0B0D10"/><title>Frost & Flame – Stone ice cream & Andhra pulao, Hackney Road E2</title><meta name="description" content="One kitchen. Two temperatures. Stone ice cream mixed to order, Andhra pulao and Indian street food, delivered around Hackney Road, E2. Order on WhatsApp."/><meta property="og:type" content="restaurant"/><meta property="og:site_name" content="Frost & Flame"/><meta property="og:title" content="Frost & Flame – One kitchen. Two temperatures."/><meta property="og:description" content="Stone ice cream mixed to order. Andhra pulao and street food, fired fresh. Delivered around Hackney Road, E2."/><meta property="og:image" content="https://hackney-stone.emergent.host/img/og.jpg"/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta name="twitter:card" content="summary_large_image"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/><meta name="apple-mobile-web-app-title" content="Frost & Flame"/><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.emergent.sh https://*.posthog.com https://hackney-stone.emergent.host; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https://raw.githubusercontent.com https://*.emergentagent.com https://*.emergent.host; connect-src 'self' https: wss:; frame-src https://wa.me; base-uri 'self'; form-action 'self' https://wa.me"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<script>
+(function(){
+  /* Detect GitHub Pages project base; empty on local root server. */
+  var BASE = '';
+  try {
+    var m = location.pathname.match(/^(\/frost-flame-themes)(?=\/|$)/);
+    if (m) BASE = m[1];
+  } catch (e) {}
+  window.__FF_BASE__ = BASE;
+  function abs(p){
+    if (!p) return BASE || '/';
+    if (/^https?:\/\//i.test(p)) return p;
+    return (BASE || '') + (p.charAt(0) === '/' ? p : '/' + p);
+  }
+  window.__FF_ABS__ = abs;
+  window.__FF_NAV__ = function (p) {
+    try {
+      if (!p) return;
+      var path = (p.charAt(0) === '/') ? p : ('/' + p);
+      var target = abs(path);
+      var curFull = location.pathname + location.search + location.hash;
+      if (curFull === target) return;
+      // Full navigation is reliable on GH Pages. Soft pushState left blank #root
+      // (infinite spinner) on several routes; SW is pass-through so assign is safe.
+      location.assign(target);
+    } catch (e) {
+      try { location.href = abs(p); } catch (e2) {}
+    }
+  };
+
+
+
+  /* Fix service worker registration: bundle uses /sw.js → project base. */
+if ('serviceWorker' in navigator) {
+    try {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { try { r.update(); } catch (e) {} });
+      });
+    } catch (e) {}
+  }
+  /* One worker, project scope. Never let the bundled listener reload on controllerchange
+     (that froze iPhone Safari and prompted a refresh with no error). */
+  if ('serviceWorker' in navigator) {
+    try {
+      var _swAdd = navigator.serviceWorker.addEventListener.bind(navigator.serviceWorker);
+      navigator.serviceWorker.addEventListener = function (type, fn, opts) {
+        if (type === 'controllerchange') return _swAdd(type, function () {}, opts);
+        return _swAdd(type, fn, opts);
+      };
+    } catch (e) {}
+  }
+  if ('serviceWorker' in navigator) {
+    try {
+      var _reg = navigator.serviceWorker.register.bind(navigator.serviceWorker);
+      navigator.serviceWorker.register = function (url, opts) {
+        try {
+          opts = opts || {};
+          if (typeof url === 'string' && /\/sw\.js(\?|$)/.test(url)) url = '/ff-sw.js';
+          if (typeof url === 'string' && url.charAt(0) === '/' && BASE && url.indexOf(BASE) !== 0) url = BASE + url;
+          if (!opts.scope) opts.scope = (BASE || '') + '/';
+        } catch (e) {}
+        return _reg(url, opts);
+      };
+    } catch (e) {}
+  }
+
+  /* Catch in-app <a href="/…"> that skip React Router basename (PWA / deep links). */
+  document.addEventListener('click', function (ev) {
+    if (!BASE) return;
+    if (ev.defaultPrevented) return;
+    if (ev.button !== 0) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+    var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
+    if (!a) return;
+    if (a.target && a.target !== '' && a.target !== '_self') return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) !== '/') return;
+    if (href.indexOf('//') === 0) return;
+    if (href.indexOf(BASE) === 0) return;
+    // leave pure hash
+    if (href.charAt(0) === '#') return;
+    ev.preventDefault();
+    if (window.__FF_NAV__) window.__FF_NAV__(href);
+    else location.assign(BASE + href);
+  }, true);
+
+  /* Guard location.assign/replace for root-absolute app paths. */
+  try {
+    ['assign', 'replace'].forEach(function (fn) {
+      var orig = Location.prototype[fn];
+      Location.prototype[fn] = function (url) {
+        if (BASE && typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('//') !== 0) {
+          url = BASE + url;
+        }
+        return orig.call(this, url);
+      };
+    });
+  } catch (e) {}
+
+  /* Prefix root-absolute asset URLs with GH Pages base (img/logo, dishes, media). */
+  function needsBase(url) {
+    if (!BASE || typeof url !== 'string' || !url) return false;
+    if (url.charAt(0) !== '/') return false;
+    if (url.indexOf(BASE) === 0) return false;
+    if (url.indexOf('//') === 0) return false;
+    // leave pure API to toLocalApi; still safe to prefix /api for img unlikely
+    return true;
+  }
+  function withBase(url) { return needsBase(url) ? (BASE + url) : url; }
+  window.__FF_WITH_BASE__ = withBase;
+
+  function rewriteSrcset(value) {
+    if (typeof value !== 'string' || !value) return value;
+    return value.split(',').map(function (part) {
+      var bits = part.trim().split(/\s+/);
+      if (bits[0]) bits[0] = withBase(bits[0]);
+      return bits.join(' ');
+    }).join(', ');
+  }
+
+  var _setAttr = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) {
+    var n = String(name || '').toLowerCase();
+    if ((n === 'src' || n === 'poster' || n === 'data-src') && typeof value === 'string') value = withBase(value);
+    if (n === 'srcset' || n === 'data-srcset') value = rewriteSrcset(value);
+    return _setAttr.call(this, name, value);
+  };
+
+  function patchSrcProp(Ctor, prop) {
+    try {
+      var desc = Object.getOwnPropertyDescriptor(Ctor.prototype, prop);
+      if (!desc || !desc.set) return;
+      Object.defineProperty(Ctor.prototype, prop, {
+        configurable: true,
+        enumerable: desc.enumerable,
+        get: desc.get ? function () { return desc.get.call(this); } : undefined,
+        set: function (v) { desc.set.call(this, prop === 'srcset' ? rewriteSrcset(v) : withBase(v)); }
+      });
+    } catch (e) {}
+  }
+  patchSrcProp(HTMLImageElement, 'src');
+  if (typeof HTMLSourceElement !== 'undefined') {
+    patchSrcProp(HTMLSourceElement, 'src');
+    patchSrcProp(HTMLSourceElement, 'srcset');
+  }
+  if (typeof HTMLVideoElement !== 'undefined') {
+    patchSrcProp(HTMLVideoElement, 'src');
+    patchSrcProp(HTMLVideoElement, 'poster');
+  }
+  if (typeof HTMLAudioElement !== 'undefined') patchSrcProp(HTMLAudioElement, 'src');
+  if (typeof HTMLImageElement !== 'undefined') patchSrcProp(HTMLImageElement, 'srcset');
+
+  function fixMediaEl(el) {
+    if (!el || el.nodeType !== 1) return;
+    ['src', 'poster', 'data-src'].forEach(function (attr) {
+      if (!el.getAttribute) return;
+      var v = el.getAttribute(attr);
+      if (!v) return;
+      var nv = withBase(v);
+      if (nv !== v) _setAttr.call(el, attr, nv);
+    });
+    var ss = el.getAttribute && el.getAttribute('srcset');
+    if (ss) {
+      var nss = rewriteSrcset(ss);
+      if (nss !== ss) _setAttr.call(el, 'srcset', nss);
+    }
+  }
+  function scanMedia(root) {
+    try {
+      (root.querySelectorAll ? root.querySelectorAll('img,source,video,audio,image,use') : []).forEach(fixMediaEl);
+      if (root.tagName) fixMediaEl(root);
+    } catch (e) {}
+  }
+  function bootMediaFix() {
+    scanMedia(document);
+    try {
+      var mo = new MutationObserver(function (muts) {
+        muts.forEach(function (m) {
+          if (m.type === 'attributes') fixMediaEl(m.target);
+          m.addedNodes && m.addedNodes.forEach(function (n) {
+            if (n.nodeType === 1) scanMedia(n);
+          });
+        });
+      });
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'srcset', 'poster', 'data-src'] });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootMediaFix);
+  else bootMediaFix();
+
+  var LIVE_API = 'https://hackney-stone.emergent.host/api';
+
+  function toLocalApi(url) {
+    if (typeof url !== 'string') return url;
+    if (url.indexOf(LIVE_API) === 0) {
+      // Preview: prefer same-origin static /api (avoids credentialed CORS failures)
+      return abs('/api' + url.slice(LIVE_API.length));
+    }
+    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api/') === 0) {
+      return BASE + url;
+    }
+    if (BASE && url.charAt(0) === '/' && url.indexOf(BASE) !== 0 && url.indexOf('/api') !== 0) {
+      // static assets under project base
+      if (url.indexOf('/static/') === 0 || url.indexOf('/vendor/') === 0 || url.indexOf('/img/') === 0 || url.indexOf('/dish/') === 0 || url.indexOf('/scroll/') === 0 || url.indexOf('/audio/') === 0 || url.indexOf('/ff-') === 0 || url.indexOf('/favicon') === 0 || url.indexOf('/apple-touch') === 0 || url.indexOf('/manifest') === 0) {
+        return BASE + url;
+      }
+    }
+    return url;
+  }
+
+  /* Best-effort pathname strip for older engines; modern Chromium keeps an own non-configurable getter. */
+  if (BASE) {
+    try {
+      var desc = Object.getOwnPropertyDescriptor(Location.prototype, 'pathname');
+      if (desc && desc.get && desc.configurable) {
+        Object.defineProperty(Location.prototype, 'pathname', {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            var p = desc.get.call(this);
+            return p.indexOf(BASE) === 0 ? (p.slice(BASE.length) || '/') : p;
+          }
+        });
+      }
+    } catch (e) {}
+    var wrapHist = function (fn) {
+      return function (state, title, url) {
+        if (typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(BASE) !== 0) {
+          url = BASE + url;
+        }
+        return fn.call(this, state, title, url);
+      };
+    };
+    history.pushState = wrapHist(history.pushState);
+    history.replaceState = wrapHist(history.replaceState);
+  }
+
+  /* Rewrite Emergent absolute API → local static /api on GH Pages; keep relative /api local. */
+  var _fetch = window.fetch;
+  window.fetch = function (input, init) {
+    try {
+      if (typeof input === 'string') {
+        input = toLocalApi(input);
+      } else if (input && typeof input.url === 'string') {
+        var rewritten = toLocalApi(input.url);
+        if (rewritten !== input.url) input = new Request(rewritten, input);
+      }
+    } catch (e) {}
+    return _fetch.call(this, input, init);
+  };
+
+  /* Axios uses XHR, not fetch. Rewrite + soft-mock POST endpoints GH Pages cannot serve. */
+  (function patchXHR() {
+    var XO = XMLHttpRequest.prototype.open;
+    var XS = XMLHttpRequest.prototype.send;
+    var mocks = {
+      '/assist': function () {
+        return JSON.stringify({
+          reply: "I'm resting on this preview — chat needs the live kitchen link. Browse the menu, or try Games and Stories on the right!"
+        });
+      },
+      '/matchmaker': function () {
+        return JSON.stringify({
+          picks: [],
+          note: 'Matchmaker is preview-only here. Open the live site to get real picks.'
+        });
+      },
+      '/waitlist': function () {
+        return JSON.stringify({ ok: false, detail: 'Waitlist is not available on this preview.' });
+      },
+      '/orders': function () {
+        return JSON.stringify({ ok: false, detail: 'Ordering is not available on this preview. Use the live site or WhatsApp.' });
+      },
+      '/auth/logout': function () { return JSON.stringify({ ok: true }); }
+    };
+    XMLHttpRequest.prototype.open = function (method, url) {
+      this.__ff_method = String(method || 'GET').toUpperCase();
+      this.__ff_url = typeof url === 'string' ? url : String(url);
+      var local = toLocalApi(this.__ff_url);
+      this.__ff_local = local;
+      this.__ff_api_path = '';
+      if (typeof local === 'string') {
+        var idx = local.indexOf('/api/');
+        if (idx !== -1) this.__ff_api_path = local.slice(idx + 4); // e.g. /menu
+      }
+      var args = Array.prototype.slice.call(arguments);
+      args[1] = local;
+      return XO.apply(this, args);
+    };
+    XMLHttpRequest.prototype.send = function (body) {
+      var path = this.__ff_api_path || '';
+      var method = this.__ff_method || 'GET';
+      // Soft-mock mutating calls and assist chat on static preview
+      var mockKey = null;
+      if (path.indexOf('/assist') === 0) mockKey = '/assist';
+      else if (path.indexOf('/matchmaker') === 0) mockKey = '/matchmaker';
+      else if (path.indexOf('/waitlist') === 0) mockKey = '/waitlist';
+      else if (path.indexOf('/orders') === 0) mockKey = '/orders';
+      else if (path.indexOf('/auth/logout') === 0) mockKey = '/auth/logout';
+      else if (path.indexOf('/auth/') === 0 && method !== 'GET' && path.indexOf('/auth/me') !== 0) {
+        mockKey = '/waitlist'; // generic friendly fail
+      }
+      if (mockKey && (method !== 'GET' && method !== 'HEAD' || mockKey === '/assist')) {
+        var xhr = this;
+        var payload = mocks[mockKey] ? mocks[mockKey]() : JSON.stringify({ ok: false, detail: 'Not available on preview.' });
+        var status = (mockKey === '/assist' || mockKey === '/auth/logout' || mockKey === '/matchmaker') ? 200 : 200;
+        // Always 200 JSON so UI never spins on preview mocks
+        if (mockKey === '/orders' || mockKey === '/waitlist') {
+          payload = JSON.stringify({ ok: true, id: 'preview', detail: 'Saved on this preview only.' });
+          status = 200;
+        }
+        var rs = 1;
+        try {
+          Object.defineProperty(xhr, 'status', { configurable: true, get: function () { return rs >= 2 ? status : 0; } });
+          Object.defineProperty(xhr, 'statusText', { configurable: true, get: function () { return 'OK'; } });
+          Object.defineProperty(xhr, 'readyState', { configurable: true, get: function () { return rs; } });
+          Object.defineProperty(xhr, 'responseText', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
+          Object.defineProperty(xhr, 'response', { configurable: true, get: function () { return rs >= 4 ? payload : ''; } });
+          Object.defineProperty(xhr, 'responseURL', { configurable: true, get: function () { return xhr.__ff_local || ''; } });
+          xhr.getAllResponseHeaders = function () { return 'content-type: application/json\r\n'; };
+          xhr.getResponseHeader = function (h) { return String(h).toLowerCase() === 'content-type' ? 'application/json' : null; };
+        } catch (e) {}
+        function tick(next) {
+          rs = next;
+          try { if (typeof xhr.onreadystatechange === 'function') xhr.onreadystatechange(); } catch (e) {}
+          try { xhr.dispatchEvent(new Event('readystatechange')); } catch (e) {}
+          if (next === 4) {
+            try { if (typeof xhr.onload === 'function') xhr.onload(); } catch (e) {}
+            try { xhr.dispatchEvent(new Event('load')); } catch (e) {}
+            try { xhr.dispatchEvent(new Event('loadend')); } catch (e) {}
+          }
+        }
+        setTimeout(function () { tick(2); setTimeout(function () { tick(3); setTimeout(function () { tick(4); }, 0); }, 0); }, 0);
+        return;
+      }
+      return XS.call(this, body);
+    };
+  })();
+  var ffAssetV = '202611150200';
+  function ffBust(u) {
+    u = String(u || '');
+    if (!u || /[?&]v=/.test(u)) return u;
+    if (!/\.(css|js|webmanifest)(\?|$)/.test(u)) return u;
+    return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ffAssetV;
+  }
+
+  /* Self-updating worker. Same scope as any older /sw.js so phones replace it
+     without a reload loop and without clearing site data. */
+  if ('serviceWorker' in navigator) {
+    try {
+      var __ffSwUrl = abs('/ff-sw.js');
+      navigator.serviceWorker.register(__ffSwUrl, { scope: (BASE ? BASE + '/' : './') }).then(function (reg) {
+        var hadController = !!navigator.serviceWorker.controller;
+        var worker = reg.installing || reg.waiting;
+        if (hadController && worker) {
+          worker.addEventListener('statechange', function () {
+            if (worker.state !== 'activated') return;
+            try {
+              if (sessionStorage.getItem('ff_sw_reloaded') === '1') return;
+              sessionStorage.setItem('ff_sw_reloaded', '1');
+            } catch (e) { return; }
+            location.reload();
+          });
+        }
+        return navigator.serviceWorker.getRegistrations();
+      }).then(function (regs) {
+        regs.forEach(function (r) {
+          var scope = r.scope || '';
+          if (BASE && scope.indexOf(BASE + '/') === -1) {
+            try { r.unregister(); } catch (e) {}
+          }
+        });
+      }).catch(function () {});
+    } catch (e) {}
+    try {
+      var sweep = function () {
+        document.querySelectorAll('[data-sonner-toast]').forEach(function (n) {
+          var t = n.textContent || '';
+          if (t.indexOf('Fresh menu') !== -1) { try { n.remove(); } catch (e) {} }
+        });
+      };
+      setInterval(sweep, 700);
+    } catch (e) {}
+  }
+  function addLink(rel, href, extra) {
+    var l = document.createElement('link');
+    l.rel = rel; l.href = abs(ffBust(href));
+    if (extra) Object.keys(extra).forEach(function (k) { l.setAttribute(k, extra[k]); });
+    document.head.appendChild(l);
+  }
+  function addScript(src, defer) {
+    var s = document.createElement('script');
+    s.src = abs(ffBust(src));
+    if (defer) s.defer = true;
+    document.head.appendChild(s);
+    return s;
+  }
+
+  addLink('icon', '/favicon-32.png', { type: 'image/png', sizes: '32x32' });
+  addLink('apple-touch-icon', '/apple-touch-icon.png', { sizes: '180x180' });
+  addLink('manifest', '/manifest.webmanifest');
+  addLink('preload', '/scroll/frost-poster-mobile.webp', { as: 'image', type: 'image/webp', media: '(max-width: 767px)', fetchpriority: 'high' });
+  addLink('preload', '/scroll/frost-poster.webp', { as: 'image', type: 'image/webp', media: '(min-width: 768px)', fetchpriority: 'high' });
+  addLink('stylesheet', '/vendor/fonts.css');
+  addLink('stylesheet', '/static/css/main.d5d693b9.css');
+  addLink('stylesheet', '/ff-tree.css');
+  addLink('stylesheet', '/ff-play.css');
+  addLink('stylesheet', '/ff-themes.css');
+  addLink('stylesheet', '/ff-chrome.css');
+  addLink('stylesheet', '/ff-menu-polish.css');
+  addLink('stylesheet', '/ff-dish-media.css');
+  addLink('stylesheet', '/ff-menu-ready.css');
+  addLink('stylesheet', '/ff-stage.css');
+
+  window.addEventListener('error', function (e) {
+    e.error instanceof DOMException && 'DataCloneError' === e.error.name && e.message && e.message.includes('PerformanceServerTiming') && (e.stopImmediatePropagation(), e.preventDefault());
+  }, true);
+
+  addScript('/vendor/assets.emergent.sh/scripts/emergent-main.js', false);
+  addScript('/static/js/main.ceed9485.js', true);
+
+  document.addEventListener('DOMContentLoaded', function () {
+    ['/ff-tree.js','/ff-float-menu.js','/ff-play-data.js','/ff-books-data.js','/ff-extras.js','/ff-play.js','/ff-themes.js','/ff-frosty.js','/ff-dish-media.js','/ff-chrome.js','/ff-ux-fix.js','/ff-menu-ready.js','/ff-stage.js'].forEach(function (p) {
+      var s = document.createElement('script');
+      s.src = abs(ffBust(p));
+      s.async = false;
+      document.body.appendChild(s);
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  try {
+    var force=/(?:^|[?&])intro=1(?:&|$)/.test(location.search);
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var path=(location.pathname||'/').replace(/\/index\.html$/,'').replace(/\/+$/,'')||'/';
+    var isHome=(path==='/'||path==='/frost-flame-themes');
+    if(!force&&(reduce||sessionStorage.getItem('ff_intro_seen')==='1'||!isHome))document.documentElement.classList.add('ff-intro-skip');
+  } catch(e){}
+})();
+</script></head><body><link rel="stylesheet" href="site/css/ff-intro.css?v=20261115h"/>
+<div id="ffIntro" class="ff-intro" role="dialog" aria-modal="true" aria-label="Welcome to Frost &amp; Flame" style="--ff-intro-poster:url('site/video/intro-poster.webp')">
+  <video id="ffIntroVideo" playsinline webkit-playsinline preload="auto" data-poster="/site/video/intro-poster.webp?v=20261115h" poster="site/video/intro-poster.webp?v=20261115h" aria-hidden="true">
+    <source data-src="/site/video/intro.mp4?v=20261115h" type="video/mp4">
+    <source data-src="/site/video/intro.webm?v=20261115h" type="video/webm">
+  </video>
+  <button type="button" class="ff-intro-sound" id="ffIntroSound" aria-label="Mute sound" aria-pressed="false">
+    <svg class="ff-intro-ic-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg>
+    <svg class="ff-intro-ic-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16.2 9.2l4.6 5.6M20.8 9.2l-4.6 5.6"/></svg>
+  </button>
+  <button type="button" class="ff-intro-tap" id="ffIntroTap" hidden aria-label="Tap for sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.5V5.5L7.2 9.5H4z"/><path d="M16 8.5c1.2 1.1 1.9 2.5 1.9 3.5s-.7 2.4-1.9 3.5"/><path d="M18.7 6.2C20.7 8 21.8 10.1 21.8 12s-1.1 4-3.1 5.8"/></svg><span>Tap for sound</span></button>
+  <button type="button" class="ff-intro-skipbtn" id="ffIntroSkip">Skip</button>
+</div>
+<script src="site/js/ff-intro.js?v=20261115h"></script>
+<script>
+(function(){
+  var abs = window.__FF_ABS__ || function(p){ return p; };
+  var el = document.getElementById('ffIntro');
+  if (!el) return;
+  var path = (location.pathname || '/').replace(/\/+$/,'') || '/';
+  var base = (window.__FF_BASE__ || '').replace(/\/+$/,'');
+  var rest = path.slice(base.length) || '/';
+  rest = rest.replace(/\/index\.html$/,'') || '/';
+  var isHome = (rest === '/' || rest === '');
+  if (!isHome) {
+    try { el.hidden = true; document.documentElement.classList.add('ff-intro-skip'); } catch(e){}
+    return;
+  }
+  var v = el.querySelector('video');
+  if (v) {
+    v.poster = abs('/site/video/intro-poster.webp?v=20261115h');
+    el.style.setProperty('--ff-intro-poster', "url('" + abs('/site/video/intro-poster.webp?v=20261115h') + "')");
+  }
+  el.querySelectorAll('source[data-src]').forEach(function(s){ s.src = abs(s.getAttribute('data-src')); });
+  if (window.FFIntro) FFIntro.run();
+})();
+</script><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>

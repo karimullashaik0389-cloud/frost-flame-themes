@@ -268,8 +268,12 @@
       )
       .join("");
     const selected = root.querySelector('.tab[aria-selected="true"]');
-    if (selected && selected.scrollIntoView) {
-      selected.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    if (selected) {
+      /* Centre the chosen tab inside the strip only; scrollIntoView also scrolled
+         the whole page down to the menu on first load. */
+      const rr = root.getBoundingClientRect(), sr = selected.getBoundingClientRect();
+      const left = Math.max(0, root.scrollLeft + (sr.left - rr.left) - (rr.width - sr.width) / 2);
+      if (root.scrollTo) root.scrollTo({ left, behavior: "smooth" }); else root.scrollLeft = left;
     }
   };
 

@@ -2,7 +2,7 @@
 
 This is the professional static website for Frost & Flame. It lives in the `site/` folder so the theme previews at the repo root stay untouched.
 
-**Live URL:** https://frostandflamee.com/site/
+**Live URL:** https://frostandflamee.com/ (the files stay in this `site/` folder; the repo-root `index.html` is generated from `site/index.html` by `python3 site/make-root-index.py` — re-run it after every edit to `site/index.html`. Old `/site/` links redirect to `/`.)
 
 Menu items, prices, allergens, hours, the WhatsApp number and delivery areas come from the live menu data. Do not invent dishes or prices here.
 

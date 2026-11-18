@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /site/admin/
+Disallow: /preview.html
+
+Sitemap: https://frostandflamee.com/sitemap.xml

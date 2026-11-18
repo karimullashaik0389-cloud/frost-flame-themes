@@ -27,6 +27,6 @@ PORT=45116 node server.mjs
 
 ## GitHub Pages
 
-https://frostandflamee.com/ (website opens at /site/; this preview: https://frostandflamee.com/?preview=1)
+The live website is at https://frostandflamee.com/ (files in `site/`). This themes preview home is kept at https://frostandflamee.com/preview.html; its inner pages still load through `404.html`.
 
 Live Emergent site and `/workspace/emergent_site_copy/` are never modified by this project.
