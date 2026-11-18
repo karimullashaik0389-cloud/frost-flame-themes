@@ -27,6 +27,6 @@ PORT=45116 node server.mjs
 
 ## GitHub Pages
 
-https://karimullashaik0389-cloud.github.io/frost-flame-themes/
+https://frostandflamee.com/ (website opens at /site/; this preview: https://frostandflamee.com/?preview=1)
 
 Live Emergent site and `/workspace/emergent_site_copy/` are never modified by this project.

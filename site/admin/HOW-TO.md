@@ -2,7 +2,7 @@
 
 This page is only for you and your team. It is not linked from the public website.
 
-Open: https://karimullashaik0389-cloud.github.io/frost-flame-themes/site/admin/
+Open: https://frostandflamee.com/site/admin/
 
 ## Log in
 

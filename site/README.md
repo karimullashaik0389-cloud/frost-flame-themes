@@ -2,7 +2,7 @@
 
 This is the professional static website for Frost & Flame. It lives in the `site/` folder so the theme previews at the repo root stay untouched.
 
-**Live URL:** https://karimullashaik0389-cloud.github.io/frost-flame-themes/site/
+**Live URL:** https://frostandflamee.com/site/
 
 Menu items, prices, allergens, hours, the WhatsApp number and delivery areas come from the live menu data. Do not invent dishes or prices here.
 
